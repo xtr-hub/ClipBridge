@@ -1,7 +1,7 @@
 # CMakeList.txt: ClipBridge 的 CMake 项目，在此处包括源代码并定义
 # 项目特定的逻辑。
 #
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.15)
 
 # 设置 vcpkg 工具链（如果存在） - 必须在 project() 之前设置
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/share/vcpkg-cmake/vcpkg.cmake")
@@ -16,12 +16,7 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("ClipBridge")
-
-# 添加本地 vcpkg include 目录
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/include")
-  include_directories("${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/include")
-endif()
+project ("ClipBridge" CXX)
 
 # 添加源文件
 set(SOURCES
@@ -64,30 +59,20 @@ add_executable (ClipBridge WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 # 包含头文件目录
 target_include_directories(ClipBridge PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/core"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/platform"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/platform/windows"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources"
 )
 
-# 尝试查找 nlohmann-json，如果找不到就使用头文件-only 方式
-find_package(nlohmann_json QUIET)
-if(nlohmann_json_FOUND)
-  target_link_libraries(ClipBridge PRIVATE nlohmann_json::nlohmann_json)
-else()
-  message(STATUS "nlohmann_json not found, using header-only mode")
-endif()
+# 查找并链接 nlohmann_json
+find_package(nlohmann_json CONFIG REQUIRED)
+target_link_libraries(ClipBridge PRIVATE nlohmann_json::nlohmann_json)
 
 # 链接 GDI+ 库
 target_link_libraries(ClipBridge PRIVATE gdiplus)
 
-# 设置 Windows 子系统
+# 设置 Windows 子系统和 C++ 标准
 if(MSVC)
   target_compile_definitions(ClipBridge PRIVATE _UNICODE UNICODE)
-endif()
-
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET ClipBridge PROPERTY CXX_STANDARD 20)
+  target_compile_features(ClipBridge PRIVATE cxx_std_20)
 endif()
 
 # 复制 config.json 到输出目录
