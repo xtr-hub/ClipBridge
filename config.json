@@ -1,0 +1,21 @@
+{
+	"hotkeys": [
+		{
+			"action": "clipboard_image_path",
+			"key": "ctrl+Alt+I"
+		}
+	],
+	"behavior": {
+		"auto_paste": true,
+		"auto_submit": false
+	},
+	"system": "windows",
+	"output": {
+		"mode": "path",
+		"format": "请查看这张剪贴版图片分析内容\n{path}",
+		"path": {
+			"mode": "custom_path",
+			"dir": "C:\\Users\\37863\\Desktop\\临时图片"
+		}
+	}
+}

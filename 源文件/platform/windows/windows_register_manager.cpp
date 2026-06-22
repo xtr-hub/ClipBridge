@@ -1,0 +1,101 @@
+#include "windows_register_manager.hpp"
+#include "hotkey_keys.hpp"
+#include <windows.h>
+#include <cctype>
+#include <string>
+
+namespace
+{
+    std::string to_lower(std::string value)
+    {
+        for (char& ch : value)
+        {
+            ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+        }
+        return value;
+    }
+}
+
+WindowsRegisterManager::~WindowsRegisterManager()
+{
+    unregister_all();
+}
+
+void WindowsRegisterManager::register_hotkey(const AppConfig::HotKeyBinding& binding)
+{
+    UINT fs_modifiers = MOD_NOREPEAT;
+    UINT vk = 0;
+
+    if (binding.action.empty())
+    {
+        throw std::invalid_argument("Hotkey action cannot be empty");
+    }
+    if (binding.keys.empty())
+    {
+        return;
+    }
+
+    for (std::string key : binding.keys)
+    {
+        key = to_lower(key);
+        if (keys_map.find(key) == keys_map.end())
+        {
+            if (!vk)
+            {
+                if (key.size() > 1)
+                {
+                    throw std::invalid_argument("Unknown hotkey: " + key);
+                }
+                vk = static_cast<UINT>(std::toupper(static_cast<unsigned char>(key[0])));
+            }
+            else
+            {
+                throw std::invalid_argument("Hotkey can only contain one primary key");
+            }
+            continue;
+        }
+        fs_modifiers = fs_modifiers | keys_map.at(key);
+    }
+
+    if (!vk)
+    {
+        throw std::invalid_argument("Hotkey missing primary key");
+    }
+
+    int id = next_id++;
+    if (!RegisterHotKey(NULL, id, fs_modifiers, vk))
+    {
+        throw std::runtime_error("Failed to register hotkey");
+    }
+
+    register_keys.push_back(id);
+    actions_by_id[id] = binding.action;
+}
+
+void WindowsRegisterManager::register_hotkeys(const std::vector<AppConfig::HotKeyBinding>& bindings)
+{
+    for (const AppConfig::HotKeyBinding& binding : bindings)
+    {
+        register_hotkey(binding);
+    }
+}
+
+void WindowsRegisterManager::unregister_all()
+{
+    for (int key_id : register_keys)
+    {
+        UnregisterHotKey(NULL, key_id);
+    }
+    register_keys.clear();
+    actions_by_id.clear();
+}
+
+std::string WindowsRegisterManager::action_for_id(int id) const
+{
+    auto it = actions_by_id.find(id);
+    if (it == actions_by_id.end())
+    {
+        return "";
+    }
+    return it->second;
+}

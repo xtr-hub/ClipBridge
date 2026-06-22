@@ -1,0 +1,55 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+Debug/
+Release/
+x64/
+Win32/
+ARM64/
+[Bb]in/
+[Oo]bj/
+out/
+build/
+
+# Project-local build outputs
+ClipVision/Debug/
+ClipVision/Release/
+ClipVision/x64/
+ClipVision/Win32/
+ClipVision/ARM64/
+
+# vcpkg manifest install tree
+vcpkg_installed/
+
+# Logs and intermediate files
+*.log
+*.tlog
+*.lastbuildstate
+*.ipch
+*.iobj
+*.ipdb
+*.pdb
+*.ilk
+*.obj
+*.pch
+*.idb
+*.exp
+*.lib
+*.dll
+*.exe
+
+# Visual Studio databases
+*.VC.db
+*.VC.opendb
+*.db-shm
+*.db-wal
+*.sqlite
+*.vsidx
+
+# Runtime temp files
+*.tmp
