@@ -8,6 +8,8 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/share/vcpkg-c
   set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/share/vcpkg-cmake/vcpkg.cmake")
 elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/scripts/buildsystems/vcpkg.cmake")
   set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/scripts/buildsystems/vcpkg.cmake")
+elseif(EXISTS "D:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake")
+  set(CMAKE_TOOLCHAIN_FILE "D:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake")
 endif()
 
 # 如果支持，请为 MSVC 编译器启用热重载。

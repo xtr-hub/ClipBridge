@@ -53,3 +53,13 @@ vcpkg_installed/
 
 # Runtime temp files
 *.tmp
+
+# Resource compiler temporary files
+resources/RCa*
+resources/RCa*
+
+# CMake generated CppProperties in build dir is already ignored via build/
+# Root CppProperties.json is kept for IDE intellisense
+
+# Downloaded dependencies (if any)
+include/nlohmann/
