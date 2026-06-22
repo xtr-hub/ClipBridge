@@ -25,37 +25,37 @@ endif()
 
 # 添加源文件
 set(SOURCES
-    "源文件/ClipBridge.cpp"
-    "源文件/core/action_manager.cpp"
-    "源文件/core/config_manager.cpp"
-    "源文件/core/hotkey_keys.cpp"
-    "源文件/platform/windows/windows_clipboard_manager.cpp"
-    "源文件/platform/windows/windows_register_manager.cpp"
-    "源文件/platform/windows/windows_path_processer.cpp"
-    "源文件/platform/platform_factory.cpp"
+    "src/ClipBridge.cpp"
+    "src/core/action_manager.cpp"
+    "src/core/config_manager.cpp"
+    "src/core/hotkey_keys.cpp"
+    "src/platform/windows/windows_clipboard_manager.cpp"
+    "src/platform/windows/windows_register_manager.cpp"
+    "src/platform/windows/windows_path_processer.cpp"
+    "src/platform/platform_factory.cpp"
 )
 
 # 添加头文件
 set(HEADERS
-    "头文件/ClipBridge.h"
-    "头文件/framework.h"
-    "头文件/targetver.h"
-    "头文件/Resource.h"
-    "头文件/core/app_config.hpp"
-    "头文件/core/action_manager.hpp"
-    "头文件/core/config_manager.hpp"
-    "头文件/core/hotkey_keys.hpp"
-    "头文件/platform/clipboard_manager.hpp"
-    "头文件/platform/register_manager.hpp"
-    "头文件/platform/path_processer.hpp"
-    "头文件/platform/windows/windows_clipboard_manager.hpp"
-    "头文件/platform/windows/windows_register_manager.hpp"
-    "头文件/platform/windows/windows_path_processer.hpp"
+    "include/ClipBridge.h"
+    "include/framework.h"
+    "include/targetver.h"
+    "include/Resource.h"
+    "include/core/app_config.hpp"
+    "include/core/action_manager.hpp"
+    "include/core/config_manager.hpp"
+    "include/core/hotkey_keys.hpp"
+    "include/platform/clipboard_manager.hpp"
+    "include/platform/register_manager.hpp"
+    "include/platform/path_processer.hpp"
+    "include/platform/windows/windows_clipboard_manager.hpp"
+    "include/platform/windows/windows_register_manager.hpp"
+    "include/platform/windows/windows_path_processer.hpp"
 )
 
 # 添加资源文件
 set(RESOURCES
-    "资源文件/ClipBridge.rc"
+    "resources/ClipBridge.rc"
 )
 
 # 将源代码添加到此项目的可执行文件。
@@ -63,11 +63,11 @@ add_executable (ClipBridge WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 
 # 包含头文件目录
 target_include_directories(ClipBridge PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/头文件"
-    "${CMAKE_CURRENT_SOURCE_DIR}/头文件/core"
-    "${CMAKE_CURRENT_SOURCE_DIR}/头文件/platform"
-    "${CMAKE_CURRENT_SOURCE_DIR}/头文件/platform/windows"
-    "${CMAKE_CURRENT_SOURCE_DIR}/资源文件"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/core"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/platform"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/platform/windows"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources"
 )
 
 # 尝试查找 nlohmann-json，如果找不到就使用头文件-only 方式
