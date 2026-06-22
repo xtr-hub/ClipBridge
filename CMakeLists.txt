@@ -3,6 +3,13 @@
 #
 cmake_minimum_required (VERSION 3.10)
 
+# 设置 vcpkg 工具链（如果存在） - 必须在 project() 之前设置
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/share/vcpkg-cmake/vcpkg.cmake")
+  set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/share/vcpkg-cmake/vcpkg.cmake")
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/scripts/buildsystems/vcpkg.cmake")
+  set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/scripts/buildsystems/vcpkg.cmake")
+endif()
+
 # 如果支持，请为 MSVC 编译器启用热重载。
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -10,13 +17,6 @@ if (POLICY CMP0141)
 endif()
 
 project ("ClipBridge")
-
-# 设置 vcpkg 工具链（如果存在）
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/share/vcpkg-cmake/vcpkg.cmake")
-  set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/share/vcpkg-cmake/vcpkg.cmake")
-elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/scripts/buildsystems/vcpkg.cmake")
-  set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/scripts/buildsystems/vcpkg.cmake")
-endif()
 
 # 添加本地 vcpkg include 目录
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-windows/include")
