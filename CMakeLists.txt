@@ -59,6 +59,9 @@ add_executable (ClipBridge WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 # 包含头文件目录
 target_include_directories(ClipBridge PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/core"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/platform"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/platform/windows"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources"
 )
 
