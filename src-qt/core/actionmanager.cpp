@@ -1,0 +1,97 @@
+#include "actionmanager.h"
+#include "clipboardhelper.h"
+#include <QDateTime>
+#include <QDir>
+#include <QDebug>
+
+namespace ClipBridge {
+
+ActionManager::ActionManager(const AppConfig &config)
+    : m_config(config)
+{
+    m_handlers["clipboard_image_path"] = [this]() { clipboardImagePath(); };
+    m_handlers["strip_newlines"] = [this]() { stripNewlines(); };
+}
+
+void ActionManager::run(const QString &action)
+{
+    if (m_handlers.contains(action)) {
+        m_handlers[action]();
+    } else {
+        qWarning() << "Unknown action:" << action;
+    }
+}
+
+void ActionManager::clipboardImagePath()
+{
+    if (!ClipboardHelper::hasImage()) {
+        qDebug() << "No image in clipboard";
+        return;
+    }
+
+    QImage image = ClipboardHelper::getImage();
+    if (image.isNull()) {
+        qDebug() << "Failed to get image from clipboard";
+        return;
+    }
+
+    QString saveDir = getImageSaveDir();
+    QString filename = generateImageFilename();
+    QString fullPath = QDir(saveDir).filePath(filename);
+
+    if (!ClipboardHelper::saveImageToPng(image, fullPath)) {
+        qDebug() << "Failed to save image to:" << fullPath;
+        return;
+    }
+
+    QString outputText = m_config.output.format;
+    outputText.replace("{path}", fullPath);
+    ClipboardHelper::setText(outputText);
+
+    if (m_config.behavior.autoPaste) {
+        ClipboardHelper::simulatePaste();
+    }
+
+    qDebug() << "Image saved to:" << fullPath;
+}
+
+void ActionManager::stripNewlines()
+{
+    QString text = ClipboardHelper::getText();
+    if (text.isEmpty()) {
+        qDebug() << "No text in clipboard";
+        return;
+    }
+
+    // 移除所有换行符
+    QString result = text;
+    result.remove('\n');
+    result.remove('\r');
+
+    ClipboardHelper::setText(result);
+
+    if (m_config.behavior.autoPaste) {
+        ClipboardHelper::simulatePaste();
+    }
+
+    qDebug() << "Strip newlines done";
+}
+
+QString ActionManager::getImageSaveDir() const
+{
+    if (m_config.output.mode == "custom_path" && !m_config.output.dir.isEmpty()) {
+        return m_config.output.dir;
+    }
+
+    // 默认使用桌面路径
+    QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    return QDir(desktopPath).filePath("ClipBridge Images");
+}
+
+QString ActionManager::generateImageFilename() const
+{
+    QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss_zzz");
+    return QString("clipboard_%1.png").arg(timestamp);
+}
+
+} // namespace ClipBridge
