@@ -17,10 +17,10 @@ public:
 	void register_hotkeys(const std::vector<AppConfig::HotKeyBinding>& bindings) override;
 	void unregister_all() override;
 
-	std::string action_for_id(int id) const override;
+	std::vector<std::string> action_for_id(int id) const override;
 
 private:
 	int next_id = 1;
 	std::vector<int> register_keys;
-	std::unordered_map<int, std::string> actions_by_id;
+	std::unordered_map<int, std::vector<std::string>> actions_by_id;
 };

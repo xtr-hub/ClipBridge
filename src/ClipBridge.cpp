@@ -9,6 +9,7 @@
 #include "register_manager.hpp"
 #include "windows_register_manager.hpp"
 #include <memory>
+#include <string>
 
 #define MAX_LOADSTRING 100
 
@@ -63,7 +64,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         if (msg.message == WM_HOTKEY && win_register_manager)
         {
-            action_manager.run(win_register_manager->action_for_id(msg.wParam));// 跑起来
+            for(std::string action : win_register_manager->action_for_id(msg.wParam))
+                    action_manager.run(action);// 跑起来
         }
 
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))

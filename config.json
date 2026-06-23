@@ -6,7 +6,7 @@
 		},
 		{
 			"action": "strip_newlines",
-			"key": "ctrl+Alt+J"
+			"key": "ctrl+Alt+I"
 		}
 	],
 	"behavior": {

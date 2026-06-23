@@ -15,7 +15,7 @@ public:
     virtual void unregister_all() = 0;
 
     // Windows 消息循环需要
-    virtual std::string action_for_id(int id) const = 0;
+    virtual std::vector<std::string> action_for_id(int id) const = 0;
 
     // 工厂方法
     static std::unique_ptr<RegisterManager> create();

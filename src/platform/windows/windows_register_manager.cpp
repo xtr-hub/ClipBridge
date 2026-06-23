@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <cctype>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace
 {
@@ -23,6 +25,8 @@ WindowsRegisterManager::~WindowsRegisterManager()
 
 void WindowsRegisterManager::register_hotkey(const AppConfig::HotKeyBinding& binding)
 {
+    static std::unordered_map<std::string, int> keys_str;
+
     UINT fs_modifiers = MOD_NOREPEAT;
     UINT vk = 0;
 
@@ -35,9 +39,11 @@ void WindowsRegisterManager::register_hotkey(const AppConfig::HotKeyBinding& bin
         return;
     }
 
+    std::string key_str = "";
     for (std::string key : binding.keys)
     {
         key = to_lower(key);
+        key_str += key;
         if (keys_map.find(key) == keys_map.end()) // 绑定普通键
         {
             if (!vk)
@@ -57,6 +63,12 @@ void WindowsRegisterManager::register_hotkey(const AppConfig::HotKeyBinding& bin
         fs_modifiers = fs_modifiers | keys_map.at(key); // 绑定修饰键
     }
 
+    if(keys_str.find(key_str) != keys_str.end())
+    {
+        actions_by_id[keys_str[key_str]].push_back(binding.action); // 如果这个键已经被注册过了就不在注册
+        return;
+    }
+
     if (!vk)
     {
         throw std::invalid_argument("Hotkey missing primary key");
@@ -68,8 +80,9 @@ void WindowsRegisterManager::register_hotkey(const AppConfig::HotKeyBinding& bin
         throw std::runtime_error("Failed to register hotkey");
     }
 
+    keys_str[key_str] = id;
     register_keys.push_back(id);
-    actions_by_id[id] = binding.action;
+    actions_by_id[id].push_back(binding.action);
 }
 
 void WindowsRegisterManager::register_hotkeys(const std::vector<AppConfig::HotKeyBinding>& bindings)
@@ -90,12 +103,12 @@ void WindowsRegisterManager::unregister_all()
     actions_by_id.clear();
 }
 
-std::string WindowsRegisterManager::action_for_id(int id) const
+std::vector<std::string> WindowsRegisterManager::action_for_id(int id) const
 {
     auto it = actions_by_id.find(id);
     if (it == actions_by_id.end())
     {
-        return "";
+        return {};
     }
     return it->second;
 }
