@@ -11,17 +11,28 @@
 #include <string>
 
 #define MAX_LOADSTRING 100
+#define WM_TRAYICON (WM_USER + 1)
 
 // 全局变量:
 HINSTANCE hInst;                                // 当前实例
 WCHAR szTitle[MAX_LOADSTRING];                  // 标题栏文本
 WCHAR szWindowClass[MAX_LOADSTRING];            // 主窗口类名
+HWND hMainWnd;                                 // 主窗口句柄
+NOTIFYICONDATAW nid;                            // 托盘图标数据
+ConfigManager* g_config_manager;               // 配置管理器指针
+AppConfig* g_config;                         // 配置指针
+RegisterManager* g_register_manager;             // 热键管理器指针
 
 // 此代码模块中包含的函数的前向声明:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    SettingsDlgProc(HWND, UINT, WPARAM, LPARAM);
+void                AddTrayIcon(HWND hWnd);
+void                RemoveTrayIcon();
+void                ShowTrayMenu(HWND hWnd);
+void                ShowSettingsDialog(HWND hWnd);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -41,6 +52,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // 事件管理器
     ActionManager action_manager(config);
+
+    // 设置全局指针
+    g_config_manager = &config_manager;
+    g_config = &config;
+    g_register_manager = &register_manager;
 
     // 初始化全局字符串
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -73,6 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
+    RemoveTrayIcon();
     register_manager.unregister_all();
     return (int)msg.wParam;
 }
@@ -117,20 +134,73 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // 将实例句柄存储在全局变量中
+    hInst = hInstance; // 将实例句柄存储在全局变量中
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    hMainWnd = hWnd;
 
-   return TRUE;
+    // 添加托盘图标
+    AddTrayIcon(hWnd);
+
+    // 隐藏主窗口
+    ShowWindow(hWnd, SW_HIDE);
+    UpdateWindow(hWnd);
+
+    return TRUE;
+}
+
+// 添加托盘图标
+void AddTrayIcon(HWND hWnd)
+{
+    ZeroMemory(&nid, sizeof(NOTIFYICONDATAW));
+    nid.cbSize = sizeof(NOTIFYICONDATAW);
+    nid.hWnd = hWnd;
+    nid.uID = IDI_TRAY;
+    nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+    nid.uCallbackMessage = WM_TRAYICON;
+    nid.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_TRAY));
+    if (!nid.hIcon)
+    {
+        nid.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_CLIPBRIDGE));
+    }
+    wcscpy_s(nid.szTip, L"ClipBridge");
+    Shell_NotifyIconW(NIM_ADD, &nid);
+}
+
+// 移除托盘图标
+void RemoveTrayIcon()
+{
+    Shell_NotifyIconW(NIM_DELETE, &nid);
+}
+
+// 显示托盘右键菜单
+void ShowTrayMenu(HWND hWnd)
+{
+    POINT pt;
+    GetCursorPos(&pt);
+
+    HMENU hMenu = CreatePopupMenu();
+    AppendMenuW(hMenu, MF_STRING, IDM_SETTINGS, L"设置(&S)");
+    AppendMenuW(hMenu, MF_STRING, IDM_ABOUT, L"关于(&A)");
+    AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(hMenu, MF_STRING, IDM_EXIT, L"退出(&X)");
+
+    SetForegroundWindow(hWnd);
+    TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, nullptr);
+    DestroyMenu(hMenu);
+}
+
+// 显示设置对话框
+void ShowSettingsDialog(HWND hWnd)
+{
+    DialogBox(hInst, MAKEINTRESOURCE(IDD_SETTINGSDIALOG), hWnd, SettingsDlgProc);
 }
 
 //
@@ -140,7 +210,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 //  WM_COMMAND  - 处理应用程序菜单
 //  WM_PAINT    - 绘制主窗口
- WM_DESTROY  - 发送退出消息并返回
+//  WM_DESTROY  - 发送退出消息并返回
 //
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -156,6 +226,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
+            case IDM_SETTINGS:
+                ShowSettingsDialog(hWnd);
+                break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
@@ -164,11 +237,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+    case WM_TRAYICON:
+        {
+            if (LOWORD(lParam) == WM_RBUTTONUP || LOWORD(lParam) == WM_CONTEXTMENU)
+            {
+                ShowTrayMenu(hWnd);
+            }
+            else if (LOWORD(lParam) == WM_LBUTTONDBLCLK)
+            {
+                ShowSettingsDialog(hWnd);
+            }
+        }
+        break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             BeginPaint(hWnd, &ps);
-            // TODO: 在此处添加任何绘图代码...
             EndPaint(hWnd, &ps);
         }
         break;
@@ -197,6 +281,59 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
             return (INT_PTR)TRUE;
         }
         break;
+    }
+    return (INT_PTR)FALSE;
+}
+
+// "设置"框的消息处理程序。
+INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        {
+            if (g_config)
+            {
+                SetDlgItemTextW(hDlg, IDC_FORMAT_EDIT, std::wstring(g_config->output.format.begin(), g_config->output.format.end()).c_str());
+                SetDlgItemTextW(hDlg, IDC_PATH_EDIT, std::wstring(g_config->output.path.dir.begin(), g_config->output.path.dir.end()).c_str());
+                CheckDlgButton(hDlg, IDC_AUTOPASTE_CHECK, g_config->behavior.auto_paste ? BST_CHECKED : BST_UNCHECKED);
+                CheckDlgButton(hDlg, IDC_AUTOSUBMIT_CHECK, g_config->behavior.auto_submit ? BST_CHECKED : BST_UNCHECKED);
+            }
+            return (INT_PTR)TRUE;
+        }
+        break;
+    case WM_COMMAND:
+        {
+            int wmId = LOWORD(wParam);
+            if (wmId == IDC_SAVE_BUTTON)
+            {
+                if (g_config && g_config_manager)
+                {
+                    WCHAR buf[1024];
+                    GetDlgItemTextW(hDlg, IDC_FORMAT_EDIT, buf, 1024);
+                    g_config->output.format = CW2A(buf);
+
+                    GetDlgItemTextW(hDlg, IDC_PATH_EDIT, buf, 1024);
+                    g_config->output.path.dir = CW2A(buf);
+
+                    g_config->behavior.auto_paste = (IsDlgButtonChecked(hDlg, IDC_AUTOPASTE_CHECK) == BST_CHECKED);
+                    g_config->behavior.auto_submit = (IsDlgButtonChecked(hDlg, IDC_AUTOSUBMIT_CHECK) == BST_CHECKED);
+
+                    g_config_manager->save(*g_config);
+
+                    MessageBoxW(hDlg, L"设置已保存", L"提示", MB_OK | MB_ICONINFORMATION);
+                }
+                EndDialog(hDlg, IDOK);
+                return (INT_PTR)TRUE;
+            }
+            else if (wmId == IDC_CANCEL_BUTTON)
+            {
+                EndDialog(hDlg, IDCANCEL);
+                return (INT_PTR)TRUE;
+            }
+            break;
+        }
     }
     return (INT_PTR)FALSE;
 }
