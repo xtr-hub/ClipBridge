@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <windows.h>
+#include "clipboard_manager.hpp"
 
-TEST(ClipBoardManagerTest, BasicTest) {
-    std::cout << "ClipBoardManagerTest is ready" << std::endl;
+TEST(ClipBoardManagerTest, SaveDIBToPNG) {
+    std::cout << "Size of BITMAPINFOHEADER: " << sizeof(BITMAPINFOHEADER) << std::endl;
     SUCCEED();
 }

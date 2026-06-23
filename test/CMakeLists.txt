@@ -7,6 +7,7 @@ find_package(GTest REQUIRED)
 add_executable(ClipBridgeTests
     src/main.cpp
     src/clipboard_manager_test.cpp
+    src/path_processer_test.cpp
 )
 
 # 链接头文件目录
