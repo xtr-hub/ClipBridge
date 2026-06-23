@@ -7,9 +7,11 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 
 const std::unordered_map<std::string, ActionManager::Handler> ActionManager::handlers = {
     {"clipboard_image_path", &ActionManager::clipboard_image_path},
+    {"strip_newlines", &ActionManager::strip_newlines}
 };
 
 void ActionManager::run(const std::string& action)
@@ -86,5 +88,26 @@ void ActionManager::clipboard_image_path()
             clipboard->simulate_paste();
         }
     }
+}
 
+void ActionManager::strip_newlines()
+{
+    auto clipboard = ClipboardManager::create();
+    std::string clipboard_text;
+    try{
+        clipboard_text = clipboard->get_text();
+    } catch(std::exception e){
+        throw std::runtime_error(e.what());
+    }
+    if(clipboard_text.empty()) return;
+    clipboard_text.erase(std::remove(clipboard_text.begin(), clipboard_text.end(), '\n'), clipboard_text.end());
+    clipboard_text.erase(std::remove(clipboard_text.begin(), clipboard_text.end(), '\r'), clipboard_text.end());
+    try{
+        clipboard->set_text(clipboard_text);
+    } catch(std::exception e){
+        throw std::runtime_error(e.what());
+    }
+    if(config.behavior.auto_paste){
+        clipboard->simulate_paste();
+    }
 }

@@ -38,7 +38,7 @@ void WindowsRegisterManager::register_hotkey(const AppConfig::HotKeyBinding& bin
     for (std::string key : binding.keys)
     {
         key = to_lower(key);
-        if (keys_map.find(key) == keys_map.end())
+        if (keys_map.find(key) == keys_map.end()) // 绑定普通键
         {
             if (!vk)
             {
@@ -54,7 +54,7 @@ void WindowsRegisterManager::register_hotkey(const AppConfig::HotKeyBinding& bin
             }
             continue;
         }
-        fs_modifiers = fs_modifiers | keys_map.at(key);
+        fs_modifiers = fs_modifiers | keys_map.at(key); // 绑定修饰键
     }
 
     if (!vk)

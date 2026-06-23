@@ -20,4 +20,6 @@ private:
 	static const std::unordered_map<std::string, Handler> handlers;
 
 	void clipboard_image_path();
+
+	void strip_newlines();
 };

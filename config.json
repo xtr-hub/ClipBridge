@@ -3,6 +3,10 @@
 		{
 			"action": "clipboard_image_path",
 			"key": "ctrl+Alt+I"
+		},
+		{
+			"action": "strip_newlines",
+			"key": "ctrl+Alt+J"
 		}
 	],
 	"behavior": {
