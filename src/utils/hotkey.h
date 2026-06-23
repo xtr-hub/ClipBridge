@@ -4,8 +4,15 @@
 #include <QKeySequence>
 #include <QAbstractNativeEventFilter>
 
+namespace ClipBridge {
+
 /**
- * @brief 全局热键支持（Windows 专用）
+ * @brief 全局热键支持
+ *
+ * 平台支持:
+ * - Windows: 已实现 (RegisterHotKey)
+ * - Linux: TODO (XGrabKey)
+ * - macOS: TODO (AddGlobalMonitorForEventsMatchingMask)
  */
 class Hotkey : public QObject, public QAbstractNativeEventFilter
 {
@@ -34,3 +41,5 @@ private:
 
     static int m_nextId;
 };
+
+} // namespace ClipBridge

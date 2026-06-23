@@ -7,6 +7,10 @@
 
 #ifdef Q_OS_WIN
 #include <windows.h>
+#elif defined(Q_OS_LINUX)
+// TODO: Linux/X11 实现
+#elif defined(Q_OS_MAC)
+// TODO: macOS 实现
 #endif
 
 namespace ClipBridge {
@@ -59,6 +63,10 @@ void ClipboardHelper::simulatePaste()
     keybd_event('V', 0, 0, 0);
     keybd_event('V', 0, KEYEVENTF_KEYUP, 0);
     keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
+#elif defined(Q_OS_LINUX)
+    // TODO: Linux/X11 实现 - XTestFakeKeyEvent
+#elif defined(Q_OS_MAC)
+    // TODO: macOS 实现 - CGEventPost
 #endif
 }
 

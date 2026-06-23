@@ -4,7 +4,13 @@
 
 #ifdef Q_OS_WIN
 #include <windows.h>
+#elif defined(Q_OS_LINUX)
+// TODO: Linux/X11 实现 - XGrabKey
+#elif defined(Q_OS_MAC)
+// TODO: macOS 实现 - AddGlobalMonitorForEventsMatchingMask
 #endif
+
+namespace ClipBridge {
 
 int Hotkey::m_nextId = 1;
 
@@ -64,6 +70,12 @@ bool Hotkey::registerHotkey()
     }
 
     m_registered = RegisterHotKey(nullptr, m_hotkeyId, fsModifiers, key) != FALSE;
+#elif defined(Q_OS_LINUX)
+    // TODO: Linux/X11 实现
+    m_registered = false;
+#elif defined(Q_OS_MAC)
+    // TODO: macOS 实现
+    m_registered = false;
 #else
     m_registered = false;
 #endif
@@ -79,6 +91,10 @@ void Hotkey::unregisterHotkey()
 
 #ifdef Q_OS_WIN
     UnregisterHotKey(nullptr, m_hotkeyId);
+#elif defined(Q_OS_LINUX)
+    // TODO: Linux/X11 实现
+#elif defined(Q_OS_MAC)
+    // TODO: macOS 实现
 #endif
 
     m_registered = false;
@@ -95,7 +111,13 @@ bool Hotkey::nativeEventFilter(const QByteArray &eventType, void *message, qintp
         emit activated();
         return true;
     }
+#elif defined(Q_OS_LINUX)
+    // TODO: Linux/X11 实现
+#elif defined(Q_OS_MAC)
+    // TODO: macOS 实现
 #endif
 
     return false;
 }
+
+} // namespace ClipBridge

@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
             qDebug() << "Registered hotkey:" << binding.keySequence.toString()
                      << "for action:" << binding.action;
 
-            QObject::connect(hotkey, &QHotkey::activated, [&manager, binding]() {
+            QObject::connect(hotkey, &Hotkey::activated, [&manager, binding]() {
                 qDebug() << "Hotkey triggered, running action:" << binding.action;
                 manager.run(binding.action);
             });
