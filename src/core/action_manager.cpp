@@ -63,29 +63,25 @@ void ActionManager::clipboard_image_path()
         << ".png";
 
     std::string full_path = path_proc->join_paths(output_dir, filename.str());
+    
+    bool success = false;
+    try {
+        success = clipboard->save_image_to_png(full_path);
+    } catch (std::exception e){
+        throw std::runtime_error(e.what());
+    }
 
-    if (!clipboard->save_image_to_png(full_path)) {
+    if (!success) {
         throw std::runtime_error("Failed to save clipboard image");
     }
 
-    std::string clipboard_content;
-    switch (config.output.mode) {
-        case AppConfig::Output::Mode::path:
-            clipboard_content = full_path;
-            break;
-        case AppConfig::Output::Mode::description:
-            clipboard_content = config.output.format;
-            break;
-        case AppConfig::Output::Mode::both:
-            clipboard_content = config.output.format;
-            size_t pos = clipboard_content.find("{path}");
-            if (pos != std::string::npos) {
-                clipboard_content.replace(pos, 6, full_path);
-            }
-            break;
+    std::string clipboard_content = config.output.format;
+    size_t pos = clipboard_content.find("{path}");
+    if (pos != std::string::npos) {
+        clipboard_content.replace(pos, 6, full_path);
     }
-
     if (!clipboard_content.empty()) {
         clipboard->set_text(clipboard_content);
     }
+    
 }

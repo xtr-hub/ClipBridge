@@ -157,12 +157,6 @@ namespace
 
         const json& output = j.at("output");
 
-        std::string mode = read(output, "mode", AppConfig::Output::to_string(config.output.mode));
-        if (auto parsed_mode = AppConfig::Output::mode_from_string(mode))
-        {
-            config.output.mode = *parsed_mode;
-        }
-
         config.output.format = read(output, "format", config.output.format);
 
         load_output_path(output, config);
@@ -272,7 +266,6 @@ void ConfigManager::save(const AppConfig& config)
     write(path, "dir", config.output.path.dir);
 
     json output;
-    write(output, "mode", AppConfig::Output::to_string(config.output.mode));
     write(output, "format", config.output.format);
     output["path"] = path;
     j["output"] = output;

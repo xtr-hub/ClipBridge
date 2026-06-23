@@ -79,37 +79,7 @@ struct AppConfig
             Mode mode = Mode::workspace;
             std::string dir;
         };
-
-        enum class Mode
-        {
-            path,
-            description,
-            both
-        };
-
-        static std::string to_string(Mode mode)
-        {
-            switch (mode)
-            {
-            case Mode::path:
-                return "path";
-            case Mode::description:
-                return "description";
-            case Mode::both:
-                return "both";
-            }
-            return "path";
-        }
-
-        static std::optional<Mode> mode_from_string(const std::string& value)
-        {
-            if (value == "path") return Mode::path;
-            if (value == "description") return Mode::description;
-            if (value == "both") return Mode::both;
-            return std::nullopt;
-        }
-
-        Mode mode = Mode::path;
+        
         std::string format = "{path}";
         Path path;
     };

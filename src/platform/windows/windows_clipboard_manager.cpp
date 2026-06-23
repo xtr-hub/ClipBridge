@@ -212,9 +212,68 @@ static int get_encoder_clsid(const WCHAR* format, CLSID* p_clsid)
     return -1;
 }
 
-void WindowsClipboardManager::save_dib_to_png(void* dib_data, size_t dib_size, const std::wstring& file_path)
+// 将 BITMAPV5HEADER 转换为 BITMAPINFO，并返回位数据位置
+static const void* convert_dibv5_to_dib(const void* dibv5_data, std::vector<BYTE>& converted_dib)
 {
-    if (dib_data == nullptr || dib_size < sizeof(BITMAPINFOHEADER))
+    const BITMAPV5HEADER* v5_header = static_cast<const BITMAPV5HEADER*>(dibv5_data);
+
+    // 计算调色板大小
+    int palette_size = 0;
+    if (v5_header->bV5BitCount <= 8) {
+        palette_size = (1 << v5_header->bV5BitCount) * sizeof(RGBQUAD);
+    }
+
+    // 创建 BITMAPINFO 结构
+    size_t info_size = sizeof(BITMAPINFOHEADER) + palette_size;
+    converted_dib.resize(info_size);
+
+    BITMAPINFO* dst_info = reinterpret_cast<BITMAPINFO*>(converted_dib.data());
+    BITMAPINFOHEADER* dst_header = &dst_info->bmiHeader;
+
+    // 复制 BITMAPINFOHEADER 兼容的字段
+    dst_header->biSize          = sizeof(BITMAPINFOHEADER);
+    dst_header->biWidth         = v5_header->bV5Width;
+    dst_header->biHeight        = v5_header->bV5Height;
+    dst_header->biPlanes        = v5_header->bV5Planes;
+    dst_header->biBitCount      = v5_header->bV5BitCount;
+    dst_header->biCompression   = v5_header->bV5Compression;
+    dst_header->biSizeImage     = v5_header->bV5SizeImage;
+    dst_header->biXPelsPerMeter = v5_header->bV5XPelsPerMeter;
+    dst_header->biYPelsPerMeter = v5_header->bV5YPelsPerMeter;
+    dst_header->biClrUsed       = v5_header->bV5ClrUsed;
+    dst_header->biClrImportant  = v5_header->bV5ClrImportant;
+
+    // 复制调色板（如果存在）
+    if (palette_size > 0) {
+        const BYTE* src_palette = reinterpret_cast<const BYTE*>(dibv5_data) + sizeof(BITMAPV5HEADER);
+        BYTE* dst_palette = reinterpret_cast<BYTE*>(converted_dib.data()) + sizeof(BITMAPINFOHEADER);
+        memcpy(dst_palette, src_palette, palette_size);
+    }
+
+    // 计算位数据位置
+    if (v5_header->bV5BitCount <= 8) {
+        int palette_entries = 1 << v5_header->bV5BitCount;
+        return reinterpret_cast<const BYTE*>(dibv5_data) + sizeof(BITMAPV5HEADER) + palette_entries * sizeof(RGBQUAD);
+    } else {
+        return reinterpret_cast<const BYTE*>(dibv5_data) + sizeof(BITMAPV5HEADER);
+    }
+}
+
+// 从标准 DIB (BITMAPINFO) 获取位数据位置
+static const void* get_dib_bits(const BITMAPINFO* dib_info)
+{
+    const BITMAPINFOHEADER* header = &dib_info->bmiHeader;
+    if (header->biBitCount <= 8) {
+        int palette_entries = 1 << header->biBitCount;
+        return reinterpret_cast<const BYTE*>(dib_info) + header->biSize + palette_entries * sizeof(RGBQUAD);
+    } else {
+        return reinterpret_cast<const BYTE*>(dib_info) + header->biSize;
+    }
+}
+
+void WindowsClipboardManager::save_dib_to_png(void* dib_handle, size_t dib_size, const std::wstring& file_path)
+{
+    if (dib_handle == nullptr || dib_size < sizeof(BITMAPINFOHEADER))
         throw std::invalid_argument("Invalid DIB data");
 
     if (file_path.empty())
@@ -222,21 +281,38 @@ void WindowsClipboardManager::save_dib_to_png(void* dib_data, size_t dib_size, c
 
     ensure_gdiplus_initialized();
 
-    BITMAPINFO* dib_info = static_cast<BITMAPINFO*>(dib_data);// 转为BITMAPINFO
-    BITMAPINFOHEADER* header = &dib_info->bmiHeader;
+    // 锁定 GlobalAlloc 返回的句柄以获取实际指针
+    void* dib_data = GlobalLock(dib_handle);
+    if (dib_data == nullptr)
+        throw std::runtime_error("Failed to lock DIB data");
 
-    if (header->biSize != sizeof(BITMAPINFOHEADER)) // sizeof(BITMAPINFOHEADER) : 40
-        throw std::invalid_argument("Unsupported DIB format");
+    // 创建一个 RAII 对象来确保解锁
+    struct DIBLock {
+        void* handle;
+        DIBLock(void* h) : handle(h) {}
+        ~DIBLock() { if (handle) GlobalUnlock(handle); }
+    } dib_lock(dib_handle);
 
+    // 先检查 header 大小来判断 DIB 格式
+    DWORD header_size = *static_cast<DWORD*>(dib_data);
+
+    BITMAPINFO* dib_info_ptr = nullptr;
     const void* bits = nullptr;
-    if (header->biBitCount <= 8) {
-        int palette_entries = 1 << header->biBitCount;
-        bits = reinterpret_cast<const BYTE*>(dib_info) + header->biSize + palette_entries * sizeof(RGBQUAD);
+    std::vector<BYTE> converted_dib;
+
+    if (header_size == sizeof(BITMAPV5HEADER)) {
+        // CF_DIBV5 格式 - 转换为 BITMAPINFO 格式
+        bits = convert_dibv5_to_dib(dib_data, converted_dib);
+        dib_info_ptr = reinterpret_cast<BITMAPINFO*>(converted_dib.data());
+    } else if (header_size == sizeof(BITMAPINFOHEADER)) {
+        // CF_DIB 格式 - 直接使用
+        dib_info_ptr = static_cast<BITMAPINFO*>(dib_data);
+        bits = get_dib_bits(dib_info_ptr);
     } else {
-        bits = reinterpret_cast<const BYTE*>(dib_info) + header->biSize;
+        throw std::invalid_argument("Unsupported DIB format");
     }
 
-    Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromBITMAPINFO(dib_info, const_cast<void*>(bits));
+    Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromBITMAPINFO(dib_info_ptr, const_cast<void*>(bits));
 
     if (bitmap == nullptr || bitmap->GetLastStatus() != Gdiplus::Ok) {
         delete bitmap;
@@ -267,8 +343,8 @@ bool WindowsClipboardManager::save_image_to_png(const std::string& file_path)
         save_dib_to_png(dib_data, dib_size, wpath);
         free_dib(dib_data);
         return true;
-    } catch (...) {
+    } catch (std::exception e) {
         free_dib(dib_data);
-        return false;
+        throw std::runtime_error(e.what());
     }
 }
