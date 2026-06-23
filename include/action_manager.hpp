@@ -10,16 +10,16 @@ class ActionManager
 {
 public:
 	explicit ActionManager(const AppConfig& config) : config(config) {}
-	void run(const std::string& action);
+	void run(const std::string& action, const AppConfig::Behavior& behavior);
 
 private:
-	using Handler = void (ActionManager::*)();
+	using Handler = void (ActionManager::*)(const AppConfig::Behavior&);
 
 	const AppConfig& config;
 
 	static const std::unordered_map<std::string, Handler> handlers;
 
-	void clipboard_image_path();
+	void clipboard_image_path(const AppConfig::Behavior& behavior);
 
-	void strip_newlines();
+	void strip_newlines(const AppConfig::Behavior& behavior);
 };

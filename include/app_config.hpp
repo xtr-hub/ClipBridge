@@ -45,6 +45,7 @@ struct AppConfig
     {
         std::string action = "clipboard_image_path";
         std::vector<std::string> keys = { "ctrl", "alt", "i" };
+        Behavior behavior;
     };
 
     struct Output
@@ -79,13 +80,13 @@ struct AppConfig
             Mode mode = Mode::workspace;
             std::string dir;
         };
-        
+
         std::string format = "{path}";
         Path path;
     };
 
     std::vector<HotKeyBinding> hotkeys = { HotKeyBinding{} };
-    Behavior behavior;
+    Behavior default_behavior;
     System system = System::windows;
     Output output;
 };

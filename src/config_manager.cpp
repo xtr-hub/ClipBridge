@@ -93,6 +93,17 @@ namespace
                 std::string key = read(item, "key", get_keys(binding.keys));
                 binding.keys = split_string(key, '+');
 
+                if (item.contains("behavior"))
+                {
+                    const json& behavior = item.at("behavior");
+                    binding.behavior.auto_paste = read(behavior, "auto_paste", binding.behavior.auto_paste);
+                    binding.behavior.auto_submit = read(behavior, "auto_submit", binding.behavior.auto_submit);
+                }
+                else
+                {
+                    binding.behavior = config.default_behavior;
+                }
+
                 if (!binding.action.empty() && !binding.keys.empty())
                 {
                     hotkeys.push_back(binding);
@@ -115,19 +126,24 @@ namespace
         AppConfig::HotKeyBinding binding;
         std::string key = read(hotkey, "key", get_keys(binding.keys));
         binding.keys = split_string(key, '+');
+        binding.behavior = config.default_behavior;
         config.hotkeys = { binding };
     }
 
     void load_behavior(const json& j, AppConfig& config)
     {
-        if (!j.contains("behavior"))
+        if (j.contains("default_behavior"))
         {
-            return;
+            const json& behavior = j.at("default_behavior");
+            config.default_behavior.auto_paste = read(behavior, "auto_paste", config.default_behavior.auto_paste);
+            config.default_behavior.auto_submit = read(behavior, "auto_submit", config.default_behavior.auto_submit);
         }
-
-        const json& behavior = j.at("behavior");
-        config.behavior.auto_paste = read(behavior, "auto_paste", config.behavior.auto_paste);
-        config.behavior.auto_submit = read(behavior, "auto_submit", config.behavior.auto_submit);
+        else if (j.contains("behavior"))
+        {
+            const json& behavior = j.at("behavior");
+            config.default_behavior.auto_paste = read(behavior, "auto_paste", config.default_behavior.auto_paste);
+            config.default_behavior.auto_submit = read(behavior, "auto_submit", config.default_behavior.auto_submit);
+        }
     }
 
     void load_output_path(const json& output, AppConfig& config)
@@ -232,8 +248,8 @@ AppConfig ConfigManager::load()
     json j;
     file >> j;
 
-    load_hotkeys(j, config);
     load_behavior(j, config);
+    load_hotkeys(j, config);
     load_system(j, config);
     load_output(j, config);
 
@@ -250,14 +266,20 @@ void ConfigManager::save(const AppConfig& config)
         json hotkey;
         write(hotkey, "action", binding.action);
         write(hotkey, "key", get_keys(binding.keys));
+
+        json behavior;
+        write(behavior, "auto_paste", binding.behavior.auto_paste);
+        write(behavior, "auto_submit", binding.behavior.auto_submit);
+        hotkey["behavior"] = behavior;
+
         hotkeys.push_back(hotkey);
     }
     j["hotkeys"] = hotkeys;
 
-    json behavior;
-    write(behavior, "auto_paste", config.behavior.auto_paste);
-    write(behavior, "auto_submit", config.behavior.auto_submit);
-    j["behavior"] = behavior;
+    json default_behavior;
+    write(default_behavior, "auto_paste", config.default_behavior.auto_paste);
+    write(default_behavior, "auto_submit", config.default_behavior.auto_submit);
+    j["default_behavior"] = default_behavior;
 
     write(j, "system", AppConfig::to_string(config.system));
 

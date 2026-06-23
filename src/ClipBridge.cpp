@@ -78,8 +78,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         if (msg.message == WM_HOTKEY)
         {
+            AppConfig::Behavior behavior = register_manager.behavior_for_id(msg.wParam);
             for(std::string action : register_manager.action_for_id(msg.wParam))
-                    action_manager.run(action);// 跑起来
+                    action_manager.run(action, behavior);// 跑起来
         }
 
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -297,8 +298,8 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
             {
                 SetDlgItemTextW(hDlg, IDC_FORMAT_EDIT, std::wstring(g_config->output.format.begin(), g_config->output.format.end()).c_str());
                 SetDlgItemTextW(hDlg, IDC_PATH_EDIT, std::wstring(g_config->output.path.dir.begin(), g_config->output.path.dir.end()).c_str());
-                CheckDlgButton(hDlg, IDC_AUTOPASTE_CHECK, g_config->behavior.auto_paste ? BST_CHECKED : BST_UNCHECKED);
-                CheckDlgButton(hDlg, IDC_AUTOSUBMIT_CHECK, g_config->behavior.auto_submit ? BST_CHECKED : BST_UNCHECKED);
+                CheckDlgButton(hDlg, IDC_AUTOPASTE_CHECK, g_config->default_behavior.auto_paste ? BST_CHECKED : BST_UNCHECKED);
+                CheckDlgButton(hDlg, IDC_AUTOSUBMIT_CHECK, g_config->default_behavior.auto_submit ? BST_CHECKED : BST_UNCHECKED);
             }
             return (INT_PTR)TRUE;
         }
@@ -317,8 +318,8 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
                     GetDlgItemTextW(hDlg, IDC_PATH_EDIT, buf, 1024);
                     g_config->output.path.dir = CW2A(buf);
 
-                    g_config->behavior.auto_paste = (IsDlgButtonChecked(hDlg, IDC_AUTOPASTE_CHECK) == BST_CHECKED);
-                    g_config->behavior.auto_submit = (IsDlgButtonChecked(hDlg, IDC_AUTOSUBMIT_CHECK) == BST_CHECKED);
+                    g_config->default_behavior.auto_paste = (IsDlgButtonChecked(hDlg, IDC_AUTOPASTE_CHECK) == BST_CHECKED);
+                    g_config->default_behavior.auto_submit = (IsDlgButtonChecked(hDlg, IDC_AUTOSUBMIT_CHECK) == BST_CHECKED);
 
                     g_config_manager->save(*g_config);
 

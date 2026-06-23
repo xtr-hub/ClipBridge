@@ -14,16 +14,16 @@ const std::unordered_map<std::string, ActionManager::Handler> ActionManager::han
     {"strip_newlines", &ActionManager::strip_newlines}
 };
 
-void ActionManager::run(const std::string& action)
+void ActionManager::run(const std::string& action, const AppConfig::Behavior& behavior)
 {
     auto it = handlers.find(action);
     if (it == handlers.end()) {
         throw std::invalid_argument("Unknown action: " + action);
     }
-    (this->*(it->second))();
+    (this->*(it->second))(behavior);
 }
 
-void ActionManager::clipboard_image_path()
+void ActionManager::clipboard_image_path(const AppConfig::Behavior& behavior)
 {
     ClipboardManager clipboard;
     if (!clipboard.has_image()) {
@@ -84,13 +84,13 @@ void ActionManager::clipboard_image_path()
     }
     if (!clipboard_content.empty()) {
         clipboard.set_text(clipboard_content);
-        if(config.behavior.auto_paste){
+        if(behavior.auto_paste){
             clipboard.simulate_paste();
         }
     }
 }
 
-void ActionManager::strip_newlines()
+void ActionManager::strip_newlines(const AppConfig::Behavior& behavior)
 {
     ClipboardManager clipboard;
     std::string clipboard_text;
@@ -107,7 +107,7 @@ void ActionManager::strip_newlines()
     } catch(std::exception e){
         throw std::runtime_error(e.what());
     }
-    if(config.behavior.auto_paste){
+    if(behavior.auto_paste){
         clipboard.simulate_paste();
     }
 }

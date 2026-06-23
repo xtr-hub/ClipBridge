@@ -2,14 +2,22 @@
 	"hotkeys": [
 		{
 			"action": "clipboard_image_path",
-			"key": "ctrl+Alt+I"
+			"key": "ctrl+Alt+I",
+			"behavior": {
+				"auto_paste": true,
+				"auto_submit": false
+			}
 		},
 		{
 			"action": "strip_newlines",
-			"key": "ctrl+Alt+I"
+			"key": "ctrl+Alt+I",
+			"behavior": {
+				"auto_paste": true,
+				"auto_submit": false
+			}
 		}
 	],
-	"behavior": {
+	"default_behavior": {
 		"auto_paste": true,
 		"auto_submit": false
 	},

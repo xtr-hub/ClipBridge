@@ -13,7 +13,7 @@ namespace
         for (char& ch : value)
         {
             ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
-        }
+        }7
         return value;
     }
 }
@@ -63,7 +63,7 @@ void RegisterManager::register_hotkey(const AppConfig::HotKeyBinding& binding)
         fs_modifiers = fs_modifiers | keys_map.at(key); // 绑定修饰键
     }
 
-    if(keys_str.find(key_str) != keys_str.end())
+    if (keys_str.find(key_str) != keys_str.end())
     {
         actions_by_id[keys_str[key_str]].push_back(binding.action); // 如果这个键已经被注册过了就不在注册
         return;
@@ -83,6 +83,7 @@ void RegisterManager::register_hotkey(const AppConfig::HotKeyBinding& binding)
     keys_str[key_str] = id;
     register_keys.push_back(id);
     actions_by_id[id].push_back(binding.action);
+    behaviors_by_id[id] = binding.behavior;
 }
 
 void RegisterManager::register_hotkeys(const std::vector<AppConfig::HotKeyBinding>& bindings)
@@ -101,6 +102,7 @@ void RegisterManager::unregister_all()
     }
     register_keys.clear();
     actions_by_id.clear();
+    behaviors_by_id.clear();
 }
 
 std::vector<std::string> RegisterManager::action_for_id(int id) const
@@ -109,6 +111,16 @@ std::vector<std::string> RegisterManager::action_for_id(int id) const
     if (it == actions_by_id.end())
     {
         return {};
+    }
+    return it->second;
+}
+
+AppConfig::Behavior RegisterManager::behavior_for_id(int id) const
+{
+    auto it = behaviors_by_id.find(id);
+    if (it == behaviors_by_id.end())
+    {
+        return AppConfig::Behavior{};
     }
     return it->second;
 }
