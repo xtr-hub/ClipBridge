@@ -271,6 +271,35 @@ static const void* get_dib_bits(const BITMAPINFO* dib_info)
     }
 }
 
+void WindowsClipboardManager::simulate_paste()
+{
+    // 一定要确保这两个键此时没有被按下，否则会发生冲突就会吞键
+    while(GetAsyncKeyState(VK_CONTROL) & 0x8000) Sleep(10);
+    while(GetAsyncKeyState('V') & 0x8000) Sleep(10);
+
+    INPUT inputs[4] = {};
+
+    // 按下 Ctrl
+    inputs[0].type = INPUT_KEYBOARD;
+    inputs[0].ki.wVk = VK_CONTROL;
+
+    // 按下 V
+    inputs[1].type = INPUT_KEYBOARD;
+    inputs[1].ki.wVk = 'V';
+
+    // 松开 V
+    inputs[2].type = INPUT_KEYBOARD;
+    inputs[2].ki.wVk = 'V';
+    inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
+
+    // 松开 Ctrl
+    inputs[3].type = INPUT_KEYBOARD;
+    inputs[3].ki.wVk = VK_CONTROL;
+    inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
+
+    SendInput(4, inputs, sizeof(INPUT));
+}
+
 void WindowsClipboardManager::save_dib_to_png(void* dib_handle, size_t dib_size, const std::wstring& file_path)
 {
     if (dib_handle == nullptr || dib_size < sizeof(BITMAPINFOHEADER))

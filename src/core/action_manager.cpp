@@ -82,6 +82,9 @@ void ActionManager::clipboard_image_path()
     }
     if (!clipboard_content.empty()) {
         clipboard->set_text(clipboard_content);
+        if(config.behavior.auto_paste){
+            clipboard->simulate_paste();
+        }
     }
-    
+
 }

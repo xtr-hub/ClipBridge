@@ -19,6 +19,7 @@ public:
     bool has_image() override;
     std::vector<std::string> get_available_image_formats() override;
     bool save_image_to_png(const std::string& file_path) override;
+    void simulate_paste() override;
 
 private:
     static bool gdiplus_initialized;

@@ -17,6 +17,9 @@ public:
     virtual std::vector<std::string> get_available_image_formats() = 0;
     virtual bool save_image_to_png(const std::string& file_path) = 0;
 
+    // 模拟粘贴
+    virtual void simulate_paste() = 0;
+
     // 工厂方法
     static std::unique_ptr<ClipboardManager> create();
 };
