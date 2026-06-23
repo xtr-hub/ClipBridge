@@ -222,10 +222,10 @@ void WindowsClipboardManager::save_dib_to_png(void* dib_data, size_t dib_size, c
 
     ensure_gdiplus_initialized();
 
-    BITMAPINFO* dib_info = static_cast<BITMAPINFO*>(dib_data);
+    BITMAPINFO* dib_info = static_cast<BITMAPINFO*>(dib_data);// 转为BITMAPINFO
     BITMAPINFOHEADER* header = &dib_info->bmiHeader;
 
-    if (header->biSize != sizeof(BITMAPINFOHEADER))
+    if (header->biSize != sizeof(BITMAPINFOHEADER)) // sizeof(BITMAPINFOHEADER) : 40
         throw std::invalid_argument("Unsupported DIB format");
 
     const void* bits = nullptr;

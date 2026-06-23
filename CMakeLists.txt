@@ -55,11 +55,20 @@ set(RESOURCES
     "resources/ClipBridge.rc"
 )
 
-# 将源代码添加到此项目的可执行文件。
-add_executable (ClipBridge WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
+# 创建核心库（不含 WinMain，供测试使用）
+add_library(ClipBridgeCore STATIC
+    ${SOURCES}
+    ${HEADERS}
+)
 
-# 包含头文件目录
-target_include_directories(ClipBridge PRIVATE
+# 将源代码添加到此项目的可执行文件（包含 WinMain）
+add_executable (ClipBridge WIN32
+    "src/ClipBridge.cpp"
+    ${RESOURCES}
+)
+
+# 包含头文件目录（核心库）
+target_include_directories(ClipBridgeCore PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/core"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/platform"
@@ -67,24 +76,35 @@ target_include_directories(ClipBridge PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/resources"
 )
 
+# 包含头文件目录（主程序）
+target_include_directories(ClipBridge PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+)
+
 # 尝试查找 nlohmann_json，如果找不到就使用头文件-only 方式
 find_package(nlohmann_json QUIET)
 if(nlohmann_json_FOUND)
-  target_link_libraries(ClipBridge PRIVATE nlohmann_json::nlohmann_json)
+  target_link_libraries(ClipBridgeCore PUBLIC nlohmann_json::nlohmann_json)
 else()
   message(STATUS "nlohmann_json not found, using header-only mode")
 endif()
 
 # 链接 GDI+ 库
-target_link_libraries(ClipBridge PRIVATE gdiplus)
+target_link_libraries(ClipBridgeCore PUBLIC gdiplus)
+
+# 主程序链接核心库
+target_link_libraries(ClipBridge PRIVATE ClipBridgeCore)
 
 # 设置 Windows 子系统
 if(MSVC)
   target_compile_definitions(ClipBridge PRIVATE _UNICODE UNICODE)
+  target_compile_definitions(ClipBridgeCore PRIVATE _UNICODE UNICODE)
 endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET ClipBridge PROPERTY CXX_STANDARD 20)
+  set_property(TARGET ClipBridgeCore PROPERTY CXX_STANDARD 20)
 endif()
 
 # 复制 config.json 到输出目录
@@ -93,3 +113,7 @@ add_custom_command(TARGET ClipBridge POST_BUILD
     "${CMAKE_CURRENT_SOURCE_DIR}/config.json"
     $<TARGET_FILE_DIR:ClipBridge>/config.json
 )
+
+# 添加测试
+# enable_testing()
+add_subdirectory(test)
