@@ -10,20 +10,20 @@ namespace ClipBridge {
 ActionManager::ActionManager(const AppConfig &config)
     : m_config(config)
 {
-    m_handlers["clipboard_image_path"] = [this]() { clipboardImagePath(); };
-    m_handlers["strip_newlines"] = [this]() { stripNewlines(); };
+    m_handlers["clipboard_image_path"] = [this](const AppConfig::Behavior &behavior) { clipboardImagePath(behavior); };
+    m_handlers["strip_newlines"] = [this](const AppConfig::Behavior &behavior) { stripNewlines(behavior); };
 }
 
-void ActionManager::run(const QString &action)
+void ActionManager::run(const QString &action, const AppConfig::Behavior &behavior)
 {
     if (m_handlers.contains(action)) {
-        m_handlers[action]();
+        m_handlers[action](behavior);
     } else {
         qWarning() << "Unknown action:" << action;
     }
 }
 
-void ActionManager::clipboardImagePath()
+void ActionManager::clipboardImagePath(const AppConfig::Behavior &behavior)
 {
     if (!ClipboardHelper::hasImage()) {
         qDebug() << "No image in clipboard";
@@ -49,14 +49,14 @@ void ActionManager::clipboardImagePath()
     outputText.replace("{path}", fullPath);
     ClipboardHelper::setText(outputText);
 
-    if (m_config.behavior.autoPaste) {
+    if (behavior.autoPaste) {
         ClipboardHelper::simulatePaste();
     }
 
     qDebug() << "Image saved to:" << fullPath;
 }
 
-void ActionManager::stripNewlines()
+void ActionManager::stripNewlines(const AppConfig::Behavior &behavior)
 {
     QString text = ClipboardHelper::getText();
     if (text.isEmpty()) {
@@ -70,7 +70,7 @@ void ActionManager::stripNewlines()
 
     ClipboardHelper::setText(result);
 
-    if (m_config.behavior.autoPaste) {
+    if (behavior.autoPaste) {
         ClipboardHelper::simulatePaste();
     }
 

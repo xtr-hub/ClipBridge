@@ -11,7 +11,7 @@ SettingsDialog::SettingsDialog(const AppConfig &config, QWidget *parent)
     : QDialog(parent), m_config(config)
 {
     setWindowTitle("ClipBridge 设置");
-    setMinimumSize(500, 400);
+    setMinimumSize(550, 450);
 
     setupUI();
     loadConfigToUI();
@@ -52,15 +52,15 @@ void SettingsDialog::setupUI()
 
     mainLayout->addWidget(outputGroup);
 
-    QGroupBox *behaviorGroup = new QGroupBox("行为设置", this);
-    QVBoxLayout *behaviorLayout = new QVBoxLayout(behaviorGroup);
+    QGroupBox *defaultBehaviorGroup = new QGroupBox("默认行为配置（用于新添加的热键）", this);
+    QVBoxLayout *defaultBehaviorLayout = new QVBoxLayout(defaultBehaviorGroup);
 
-    m_autoPasteCheck = new QCheckBox("自动粘贴", this);
-    m_autoSubmitCheck = new QCheckBox("自动提交", this);
-    behaviorLayout->addWidget(m_autoPasteCheck);
-    behaviorLayout->addWidget(m_autoSubmitCheck);
+    m_defaultAutoPasteCheck = new QCheckBox("自动粘贴", this);
+    m_defaultAutoSubmitCheck = new QCheckBox("自动提交", this);
+    defaultBehaviorLayout->addWidget(m_defaultAutoPasteCheck);
+    defaultBehaviorLayout->addWidget(m_defaultAutoSubmitCheck);
 
-    mainLayout->addWidget(behaviorGroup);
+    mainLayout->addWidget(defaultBehaviorGroup);
 
     QHBoxLayout *bottomLayout = new QHBoxLayout();
     QPushButton *saveBtn = new QPushButton("保存", this);
@@ -83,14 +83,30 @@ void SettingsDialog::loadConfigToUI()
 {
     m_hotkeyList->clear();
     for (const auto &binding : m_config.hotkeys) {
-        QString itemText = QString("%1 - %2").arg(binding.action).arg(binding.keySequence.toString());
+        QString behaviorInfo;
+        if (binding.behavior.autoPaste) {
+            behaviorInfo += "自动粘贴";
+        }
+        if (binding.behavior.autoSubmit) {
+            if (!behaviorInfo.isEmpty()) {
+                behaviorInfo += ", ";
+            }
+            behaviorInfo += "自动提交";
+        }
+        if (behaviorInfo.isEmpty()) {
+            behaviorInfo = "无";
+        }
+        QString itemText = QString("%1 - %2 [%3]")
+            .arg(binding.action)
+            .arg(binding.keySequence.toString())
+            .arg(behaviorInfo);
         m_hotkeyList->addItem(itemText);
     }
 
     m_formatEdit->setText(m_config.output.format);
     m_customPathEdit->setText(m_config.output.dir);
-    m_autoPasteCheck->setChecked(m_config.behavior.autoPaste);
-    m_autoSubmitCheck->setChecked(m_config.behavior.autoSubmit);
+    m_defaultAutoPasteCheck->setChecked(m_config.defaultBehavior.autoPaste);
+    m_defaultAutoSubmitCheck->setChecked(m_config.defaultBehavior.autoSubmit);
 }
 
 void SettingsDialog::addHotkey()
@@ -112,8 +128,8 @@ void SettingsDialog::saveConfig()
 {
     m_config.output.format = m_formatEdit->text();
     m_config.output.dir = m_customPathEdit->text();
-    m_config.behavior.autoPaste = m_autoPasteCheck->isChecked();
-    m_config.behavior.autoSubmit = m_autoSubmitCheck->isChecked();
+    m_config.defaultBehavior.autoPaste = m_defaultAutoPasteCheck->isChecked();
+    m_config.defaultBehavior.autoSubmit = m_defaultAutoSubmitCheck->isChecked();
 
     m_config.save(QFileInfo(QCoreApplication::applicationDirPath()).filePath("config.json"));
 

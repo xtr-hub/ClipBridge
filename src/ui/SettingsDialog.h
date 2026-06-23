@@ -45,8 +45,8 @@ private:
     QListWidget *m_hotkeyList;
     QLineEdit *m_formatEdit;
     QLineEdit *m_customPathEdit;
-    QCheckBox *m_autoPasteCheck;
-    QCheckBox *m_autoSubmitCheck;
+    QCheckBox *m_defaultAutoPasteCheck;
+    QCheckBox *m_defaultAutoSubmitCheck;
 };
 
 } // namespace ClipBridge

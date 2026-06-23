@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file appconfig.h
+ * @file AppConfig.h
  * @brief 应用程序配置管理
  * @author Your Name
  * @date 2026
@@ -19,12 +19,22 @@ namespace ClipBridge {
 struct AppConfig
 {
     /**
+     * @brief 行为配置
+     */
+    struct Behavior
+    {
+        bool autoPaste = true;   ///< 是否自动粘贴
+        bool autoSubmit = false; ///< 是否自动提交
+    };
+
+    /**
      * @brief 热键绑定结构
      */
     struct HotKeyBinding
     {
         QString action;             ///< 动作名称
         QKeySequence keySequence;   ///< 按键序列
+        Behavior behavior;          ///< 该热键的行为配置
     };
 
     /**
@@ -37,17 +47,8 @@ struct AppConfig
         QString dir;                ///< 自定义目录
     };
 
-    /**
-     * @brief 行为配置
-     */
-    struct Behavior
-    {
-        bool autoPaste = true;      ///< 是否自动粘贴
-        bool autoSubmit = false;    ///< 是否自动提交
-    };
-
     QVector<HotKeyBinding> hotkeys;  ///< 热键列表
-    Behavior behavior;               ///< 行为配置
+    Behavior defaultBehavior;        ///< 默认行为配置（用于新添加的热键）
     Output output;                   ///< 输出配置
 
     /**

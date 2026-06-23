@@ -1,4 +1,4 @@
-#include "appconfig.h"
+#include "AppConfig.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -14,14 +14,15 @@ AppConfig AppConfig::load(const QString &path)
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        // 如果配置文件不存在，使用默认配置
         config.hotkeys.append({
             "clipboard_image_path",
-            QKeySequence("Ctrl+Alt+I")
+            QKeySequence("Ctrl+Alt+I"),
+            {true, false}
         });
         config.hotkeys.append({
             "strip_newlines",
-            QKeySequence("Ctrl+Alt+J")
+            QKeySequence("Ctrl+Alt+J"),
+            {true, false}
         });
         return config;
     }
@@ -33,7 +34,16 @@ AppConfig AppConfig::load(const QString &path)
 
     QJsonObject root = doc.object();
 
-    // 读取热键
+    if (root.contains("default_behavior")) {
+        QJsonObject behavior = root["default_behavior"].toObject();
+        config.defaultBehavior.autoPaste = behavior["auto_paste"].toBool(true);
+        config.defaultBehavior.autoSubmit = behavior["auto_submit"].toBool(false);
+    } else if (root.contains("behavior")) {
+        QJsonObject behavior = root["behavior"].toObject();
+        config.defaultBehavior.autoPaste = behavior["auto_paste"].toBool(true);
+        config.defaultBehavior.autoSubmit = behavior["auto_submit"].toBool(false);
+    }
+
     if (root.contains("hotkeys")) {
         QJsonArray hotkeysArray = root["hotkeys"].toArray();
         for (const QJsonValue &val : hotkeysArray) {
@@ -44,18 +54,18 @@ AppConfig AppConfig::load(const QString &path)
             QString keyStr = obj["key"].toString();
             binding.keySequence = QKeySequence(keyStr);
 
+            if (obj.contains("behavior")) {
+                QJsonObject behavior = obj["behavior"].toObject();
+                binding.behavior.autoPaste = behavior["auto_paste"].toBool(config.defaultBehavior.autoPaste);
+                binding.behavior.autoSubmit = behavior["auto_submit"].toBool(config.defaultBehavior.autoSubmit);
+            } else {
+                binding.behavior = config.defaultBehavior;
+            }
+
             config.hotkeys.append(binding);
         }
     }
 
-    // 读取 behavior
-    if (root.contains("behavior")) {
-        QJsonObject behavior = root["behavior"].toObject();
-        config.behavior.autoPaste = behavior["auto_paste"].toBool(true);
-        config.behavior.autoSubmit = behavior["auto_submit"].toBool(false);
-    }
-
-    // 读取 output
     if (root.contains("output")) {
         QJsonObject output = root["output"].toObject();
         config.output.format = output["format"].toString("{path}");
@@ -74,23 +84,26 @@ void AppConfig::save(const QString &path) const
 {
     QJsonObject root;
 
-    // 保存热键
     QJsonArray hotkeysArray;
     for (const auto &binding : hotkeys) {
         QJsonObject obj;
         obj["action"] = binding.action;
         obj["key"] = binding.keySequence.toString(QKeySequence::PortableText);
+
+        QJsonObject behaviorObj;
+        behaviorObj["auto_paste"] = binding.behavior.autoPaste;
+        behaviorObj["auto_submit"] = binding.behavior.autoSubmit;
+        obj["behavior"] = behaviorObj;
+
         hotkeysArray.append(obj);
     }
     root["hotkeys"] = hotkeysArray;
 
-    // 保存 behavior
-    QJsonObject behaviorObj;
-    behaviorObj["auto_paste"] = behavior.autoPaste;
-    behaviorObj["auto_submit"] = behavior.autoSubmit;
-    root["behavior"] = behaviorObj;
+    QJsonObject defaultBehaviorObj;
+    defaultBehaviorObj["auto_paste"] = defaultBehavior.autoPaste;
+    defaultBehaviorObj["auto_submit"] = defaultBehavior.autoSubmit;
+    root["default_behavior"] = defaultBehaviorObj;
 
-    // 保存 output
     QJsonObject outputObj;
     outputObj["format"] = output.format;
 

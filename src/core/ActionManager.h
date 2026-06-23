@@ -29,22 +29,25 @@ public:
     /**
      * @brief 执行动作
      * @param action 动作名称
+     * @param behavior 行为配置
      */
-    void run(const QString &action);
+    void run(const QString &action, const AppConfig::Behavior &behavior);
 
 private:
     AppConfig m_config;
-    QHash<QString, std::function<void()>> m_handlers;
+    QHash<QString, std::function<void(const AppConfig::Behavior &)>> m_handlers;
 
     /**
      * @brief 将剪贴板图片保存为文件路径
+     * @param behavior 行为配置
      */
-    void clipboardImagePath();
+    void clipboardImagePath(const AppConfig::Behavior &behavior);
 
     /**
      * @brief 去除剪贴板文本中的换行符
+     * @param behavior 行为配置
      */
-    void stripNewlines();
+    void stripNewlines(const AppConfig::Behavior &behavior);
 
     /**
      * @brief 获取图片保存目录
