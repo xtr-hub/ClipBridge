@@ -11,6 +11,8 @@
 #include <QMenu>
 #include <QAction>
 
+#include "core/appconfig.h"
+
 namespace ClipBridge {
 
 /**
@@ -23,9 +25,10 @@ class TrayIcon : public QSystemTrayIcon
 public:
     /**
      * @brief 构造函数
+     * @param config 应用配置
      * @param parent 父对象
      */
-    explicit TrayIcon(QObject *parent = nullptr);
+    explicit TrayIcon(const AppConfig &config, QObject *parent = nullptr);
 
 signals:
     /**
@@ -39,8 +42,15 @@ private slots:
      */
     void showAbout();
 
+    /**
+     * @brief 显示设置对话框
+     */
+    void showSettings();
+
 private:
+    AppConfig m_config;
     QMenu *m_menu;
+    QAction *m_settingsAction;
     QAction *m_aboutAction;
     QAction *m_quitAction;
 };

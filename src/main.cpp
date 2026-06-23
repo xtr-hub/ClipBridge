@@ -20,20 +20,16 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    // 设置应用信息
     QApplication::setApplicationName("ClipBridge");
     QApplication::setApplicationVersion("2.0");
     QApplication::setOrganizationName("ClipBridge");
 
-    // 加载配置
     QString configPath = QFileInfo(QCoreApplication::applicationDirPath())
                              .filePath("config.json");
     AppConfig config = AppConfig::load(configPath);
 
-    // 创建动作管理器
     ActionManager manager(config);
 
-    // 注册热键
     QList<Hotkey *> hotkeys;
     for (const auto &binding : config.hotkeys) {
         Hotkey *hotkey = new Hotkey(binding.keySequence, true);
@@ -54,8 +50,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    // 创建托盘图标
-    TrayIcon trayIcon;
+    TrayIcon trayIcon(config);
     trayIcon.show();
 
     QObject::connect(&trayIcon, &TrayIcon::quitRequested, &app, &QApplication::quit);
