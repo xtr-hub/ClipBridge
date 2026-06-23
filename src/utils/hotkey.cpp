@@ -10,7 +10,6 @@
 #include <QX11Info>
 #elif defined(Q_OS_MAC)
 #include <ApplicationServices/ApplicationServices.h>
-#include <QProcess>
 #endif
 
 namespace ClipBridge {
@@ -25,6 +24,11 @@ Hotkey::Hotkey(const QKeySequence &keySequence, bool autoRegister, QObject *pare
 #ifdef Q_OS_LINUX
     , m_x11Keycode(0)
     , m_x11Modifiers(0)
+#elif defined(Q_OS_MAC)
+    , m_eventTap(nullptr)
+    , m_runLoopSource(nullptr)
+    , m_keycode(0)
+    , m_flags(0)
 #endif
 {
     qApp->installNativeEventFilter(this);
@@ -39,6 +43,24 @@ Hotkey::~Hotkey()
     unregisterHotkey();
     qApp->removeNativeEventFilter(this);
 }
+
+#ifdef Q_OS_MAC
+void Hotkey::macKeyEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
+{
+    Q_UNUSED(proxy);
+
+    if (type == kCGEventKeyDown && refcon) {
+        Hotkey *hotkey = static_cast<Hotkey*>(refcon);
+
+        CGKeyCode keycode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
+        CGEventFlags flags = CGEventGetFlags(event) & (kCGEventFlagMaskControl | kCGEventFlagMaskShift | kCGEventFlagMaskAlternate | kCGEventFlagMaskCommand);
+
+        if (keycode == hotkey->m_keycode && flags == hotkey->m_flags) {
+            QMetaObject::invokeMethod(hotkey, "activated", Qt::QueuedConnection);
+        }
+    }
+}
+#endif
 
 bool Hotkey::registerHotkey()
 {
@@ -115,7 +137,6 @@ bool Hotkey::registerHotkey()
         }
     }
 
-    // 转换为 X11 keysym
     int keysym = 0;
     if (key >= Qt::Key_A && key <= Qt::Key_Z) {
         keysym = XK_a + (key - Qt::Key_A);
@@ -157,8 +178,84 @@ bool Hotkey::registerHotkey()
 
     m_registered = true;
 #elif defined(Q_OS_MAC)
-    qDebug() << "Hotkey: macOS requires accessibility permissions, implementation is limited";
-    m_registered = false;
+    if (m_keySequence.isEmpty()) {
+        return false;
+    }
+
+    // 检查辅助功能权限 (纯 C 方式)
+    bool hasPermission = AXIsProcessTrusted();
+    if (!hasPermission) {
+        qWarning() << "Hotkey: Accessibility permissions required!";
+        qWarning() << "Please enable in: System Settings > Privacy & Security > Accessibility";
+        // 弹出提示
+        CFDictionaryRef options = CFDictionaryCreate(
+            kCFAllocatorDefault,
+            (const void**)&kAXTrustedCheckOptionPrompt,
+            (const void**)&kCFBooleanTrue,
+            1,
+            nullptr,
+            nullptr);
+        AXIsProcessTrustedWithOptions(options);
+        CFRelease(options);
+        return false;
+    }
+
+    QString str = m_keySequence.toString(QKeySequence::PortableText);
+    QStringList parts = str.split('+');
+
+    // 键码映射
+    QHash<QString, CGKeyCode> keyMap = {
+        {"a", 0x00}, {"b", 0x0B}, {"c", 0x08}, {"d", 0x02}, {"e", 0x0E},
+        {"f", 0x03}, {"g", 0x05}, {"h", 0x04}, {"i", 0x22}, {"j", 0x26},
+        {"k", 0x28}, {"l", 0x25}, {"m", 0x2E}, {"n", 0x2D}, {"o", 0x1F},
+        {"p", 0x23}, {"q", 0x0C}, {"r", 0x0F}, {"s", 0x01}, {"t", 0x11},
+        {"u", 0x20}, {"v", 0x09}, {"w", 0x0D}, {"x", 0x07}, {"y", 0x10},
+        {"z", 0x06},
+        {"0", 0x1D}, {"1", 0x12}, {"2", 0x13}, {"3", 0x14}, {"4", 0x15},
+        {"5", 0x17}, {"6", 0x16}, {"7", 0x1A}, {"8", 0x1C}, {"9", 0x19},
+        {"f1", 0x7A}, {"f2", 0x78}, {"f3", 0x63}, {"f4", 0x76}, {"f5", 0x60},
+        {"f6", 0x61}, {"f7", 0x62}, {"f8", 0x64}, {"f9", 0x65}, {"f10", 0x6D},
+        {"f11", 0x67}, {"f12", 0x6F}
+    };
+
+    m_flags = 0;
+    m_keycode = 0xFF;
+
+    for (const QString &part : parts) {
+        QString p = part.trimmed().toLower();
+        if (p == "ctrl" || p == "control") {
+            m_flags |= kCGEventFlagMaskControl;
+        } else if (p == "alt" || p == "option") {
+            m_flags |= kCGEventFlagMaskAlternate;
+        } else if (p == "shift") {
+            m_flags |= kCGEventFlagMaskShift;
+        } else if (p == "cmd" || p == "command" || p == "meta") {
+            m_flags |= kCGEventFlagMaskCommand;
+        } else if (keyMap.contains(p)) {
+            m_keycode = keyMap[p];
+        }
+    }
+
+    if (m_keycode == 0xFF) {
+        qWarning() << "Hotkey: Unsupported key" << m_keySequence.toString();
+        return false;
+    }
+
+    // 创建事件 tap (纯 C 方式)
+    m_eventTap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionListenOnly,
+        CGEventMaskBit(kCGEventKeyDown),
+        &Hotkey::macKeyEventCallback, this);
+
+    if (!m_eventTap) {
+        qWarning() << "Hotkey: Failed to create event tap";
+        return false;
+    }
+
+    m_runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, (CFMachPortRef)m_eventTap, 0);
+    CFRunLoopAddSource(CFRunLoopGetCurrent(), (CFRunLoopSourceRef)m_runLoopSource, kCFRunLoopCommonModes);
+    CGEventTapEnable((CFMachPortRef)m_eventTap, true);
+
+    m_registered = true;
 #else
     m_registered = false;
 #endif
@@ -190,6 +287,16 @@ void Hotkey::unregisterHotkey()
         }
     }
 #elif defined(Q_OS_MAC)
+    if (m_eventTap) {
+        CGEventTapEnable((CFMachPortRef)m_eventTap, false);
+        if (m_runLoopSource) {
+            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), (CFRunLoopSourceRef)m_runLoopSource, kCFRunLoopCommonModes);
+            CFRelease((CFRunLoopSourceRef)m_runLoopSource);
+            m_runLoopSource = nullptr;
+        }
+        CFRelease((CFMachPortRef)m_eventTap);
+        m_eventTap = nullptr;
+    }
 #endif
 
     m_registered = false;

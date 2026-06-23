@@ -12,7 +12,7 @@ namespace ClipBridge {
  * 平台支持:
  * - Windows: ✅ 完整实现
  * - Linux (X11): ✅ 完整实现
- * - macOS: ⚠️ 需要辅助功能权限
+ * - macOS: ✅ 完整实现 (需要辅助功能权限)
  */
 class Hotkey : public QObject, public QAbstractNativeEventFilter
 {
@@ -49,6 +49,11 @@ private:
     quint32 m_x11Modifiers;
 #elif defined(Q_OS_MAC)
     // macOS 专用
+    void *m_eventTap;
+    void *m_runLoopSource;
+    CGKeyCode m_keycode;
+    CGEventFlags m_flags;
+    static void macKeyEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon);
 #endif
 };
 
