@@ -1,4 +1,4 @@
-#include "clipboardhelper.h"
+#include "ClipboardHelper.h"
 #include <QApplication>
 #include <QClipboard>
 #include <QMimeData>
@@ -61,13 +61,11 @@ void ClipboardHelper::setText(const QString &text)
 void ClipboardHelper::simulatePaste()
 {
 #ifdef Q_OS_WIN
-    // 模拟 Ctrl+V
     keybd_event(VK_CONTROL, 0, 0, 0);
     keybd_event('V', 0, 0, 0);
     keybd_event('V', 0, KEYEVENTF_KEYUP, 0);
     keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
 #elif defined(Q_OS_LINUX)
-    // 模拟 Ctrl+V
     Display *dpy = XOpenDisplay(nullptr);
     if (dpy) {
         XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_Control_L), True, 0);
@@ -78,7 +76,6 @@ void ClipboardHelper::simulatePaste()
         XCloseDisplay(dpy);
     }
 #elif defined(Q_OS_MAC)
-    // 模拟 Cmd+V
     CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
     if (source) {
         CGEventRef cmdDown = CGEventCreateKeyboardEvent(source, kVK_Command, true);
@@ -86,10 +83,10 @@ void ClipboardHelper::simulatePaste()
         CGEventRef vUp = CGEventCreateKeyboardEvent(source, kVK_ANSI_V, false);
         CGEventRef cmdUp = CGEventCreateKeyboardEvent(source, kVK_Command, false);
 
-        CGEventPost(kCGHIDEventTap, cmdDown);
-        CGEventPost(kCGHIDEventTap, vDown);
-        CGEventPost(kCGHIDEventTap, vUp);
-        CGEventPost(kCGHIDEventTap, cmdUp);
+        CGEventPost(kCGEventTap, cmdDown);
+        CGEventPost(kCGEventTap, vDown);
+        CGEventPost(kCGEventTap, vUp);
+        CGEventPost(kCGEventTap, cmdUp);
 
         CFRelease(cmdDown);
         CFRelease(vDown);

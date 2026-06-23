@@ -11,21 +11,21 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 set(SOURCES
     src/main.cpp
-    src/core/actionmanager.cpp
-    src/core/appconfig.cpp
-    src/ui/trayicon.cpp
-    src/ui/settingsdialog.cpp
-    src/utils/clipboardhelper.cpp
-    src/utils/hotkey.cpp
+    src/core/ActionManager.cpp
+    src/core/AppConfig.cpp
+    src/ui/TrayIcon.cpp
+    src/ui/SettingsDialog.cpp
+    src/utils/ClipboardHelper.cpp
+    src/utils/Hotkey.cpp
 )
 
 set(HEADERS
-    src/core/actionmanager.h
-    src/core/appconfig.h
-    src/ui/trayicon.h
-    src/ui/settingsdialog.h
-    src/utils/clipboardhelper.h
-    src/utils/hotkey.h
+    src/core/ActionManager.h
+    src/core/AppConfig.h
+    src/ui/TrayIcon.h
+    src/ui/SettingsDialog.h
+    src/utils/ClipboardHelper.h
+    src/utils/Hotkey.h
 )
 
 add_executable(ClipBridge
@@ -66,5 +66,5 @@ target_include_directories(ClipBridge PRIVATE
 add_custom_command(TARGET ClipBridge POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${CMAKE_CURRENT_SOURCE_DIR}/config.json"
-    $<TARGET_FILE_DIR:ClipBridge>/config.json
+    $<TARGET_FILE_DIR>/config.json
 )

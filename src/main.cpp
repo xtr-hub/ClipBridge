@@ -9,10 +9,10 @@
 #include <QFileInfo>
 #include <QDebug>
 
-#include "core/appconfig.h"
-#include "core/actionmanager.h"
-#include "ui/trayicon.h"
-#include "utils/hotkey.h"
+#include "core/AppConfig.h"
+#include "core/ActionManager.h"
+#include "ui/TrayIcon.h"
+#include "utils/Hotkey.h"
 
 using namespace ClipBridge;
 
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     QApplication::setOrganizationName("ClipBridge");
 
     QString configPath = QFileInfo(QCoreApplication::applicationDirPath())
-                             .filePath("config.json");
+                           .filePath("config.json");
     AppConfig config = AppConfig::load(configPath);
 
     ActionManager manager(config);
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(&trayIcon, &TrayIcon::quitRequested, &app, &QApplication::quit);
 
-    qDebug() << "ClipBridge started successfully";
+    qDebug() << "ClipBridge started successfully!";
 
     return app.exec();
 }

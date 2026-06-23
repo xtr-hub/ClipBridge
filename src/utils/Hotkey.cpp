@@ -1,4 +1,4 @@
-#include "hotkey.h"
+#include "Hotkey.h"
 #include <QGuiApplication>
 #include <QDebug>
 
@@ -182,12 +182,11 @@ bool Hotkey::registerHotkey()
         return false;
     }
 
-    // 检查辅助功能权限 (纯 C 方式)
     bool hasPermission = AXIsProcessTrusted();
     if (!hasPermission) {
         qWarning() << "Hotkey: Accessibility permissions required!";
         qWarning() << "Please enable in: System Settings > Privacy & Security > Accessibility";
-        // 弹出提示
+
         CFDictionaryRef options = CFDictionaryCreate(
             kCFAllocatorDefault,
             (const void**)&kAXTrustedCheckOptionPrompt,
@@ -203,7 +202,6 @@ bool Hotkey::registerHotkey()
     QString str = m_keySequence.toString(QKeySequence::PortableText);
     QStringList parts = str.split('+');
 
-    // 键码映射
     QHash<QString, CGKeyCode> keyMap = {
         {"a", 0x00}, {"b", 0x0B}, {"c", 0x08}, {"d", 0x02}, {"e", 0x0E},
         {"f", 0x03}, {"g", 0x05}, {"h", 0x04}, {"i", 0x22}, {"j", 0x26},
@@ -241,8 +239,7 @@ bool Hotkey::registerHotkey()
         return false;
     }
 
-    // 创建事件 tap (纯 C 方式)
-    m_eventTap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionListenOnly,
+    m_eventTap = CGEventTapCreate(kCGEventTap, kCGHeadInsertEventTap, kCGEventTapOptionListenOnly,
         CGEventMaskBit(kCGEventKeyDown),
         &Hotkey::macKeyEventCallback, this);
 

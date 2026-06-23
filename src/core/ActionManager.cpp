@@ -1,7 +1,8 @@
-#include "actionmanager.h"
-#include "clipboardhelper.h"
+#include "ActionManager.h"
+#include "ClipboardHelper.h"
 #include <QDateTime>
 #include <QDir>
+#include <QStandardPaths>
 #include <QDebug>
 
 namespace ClipBridge {
@@ -63,7 +64,6 @@ void ActionManager::stripNewlines()
         return;
     }
 
-    // 移除所有换行符
     QString result = text;
     result.remove('\n');
     result.remove('\r');
@@ -74,7 +74,7 @@ void ActionManager::stripNewlines()
         ClipboardHelper::simulatePaste();
     }
 
-    qDebug() << "Strip newlines done";
+    qDebug() << "Strip newlines done!";
 }
 
 QString ActionManager::getImageSaveDir() const
@@ -83,7 +83,6 @@ QString ActionManager::getImageSaveDir() const
         return m_config.output.dir;
     }
 
-    // 默认使用桌面路径
     QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
     return QDir(desktopPath).filePath("ClipBridge Images");
 }
@@ -91,7 +90,7 @@ QString ActionManager::getImageSaveDir() const
 QString ActionManager::generateImageFilename() const
 {
     QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss_zzz");
-    return QString("clipboard_%1.png").arg(timestamp);
+    return QString("clip_%1.png").arg(timestamp);
 }
 
 } // namespace ClipBridge

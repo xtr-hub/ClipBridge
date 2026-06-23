@@ -1,5 +1,5 @@
-#include "trayicon.h"
-#include "settingsdialog.h"
+#include "TrayIcon.h"
+#include "SettingsDialog.h"
 #include <QApplication>
 #include <QMessageBox>
 

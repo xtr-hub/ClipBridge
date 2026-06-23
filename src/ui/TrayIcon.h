@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file trayicon.h
+ * @file TrayIcon.h
  * @brief 系统托盘图标
  * @author Your Name
  * @date 2026
@@ -11,7 +11,7 @@
 #include <QMenu>
 #include <QAction>
 
-#include "core/appconfig.h"
+#include "core/AppConfig.h"
 
 namespace ClipBridge {
 

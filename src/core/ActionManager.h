@@ -1,13 +1,13 @@
 #pragma once
 
 /**
- * @file actionmanager.h
+ * @file ActionManager.h
  * @brief 动作管理器
  * @author Your Name
  * @date 2026
  */
 
-#include "appconfig.h"
+#include "AppConfig.h"
 #include <QString>
 #include <QHash>
 #include <functional>

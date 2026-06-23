@@ -1,6 +1,8 @@
-#include "settingsdialog.h"
+#include "SettingsDialog.h"
 #include <QMessageBox>
 #include <QDir>
+#include <QFileInfo>
+#include <QCoreApplication>
 #include <QStandardPaths>
 
 namespace ClipBridge {

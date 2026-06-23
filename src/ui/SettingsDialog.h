@@ -1,5 +1,12 @@
 #pragma once
 
+/**
+ * @file SettingsDialog.h
+ * @brief 设置对话框
+ * @author Your Name
+ * @date 2026
+ */
+
 #include <QDialog>
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -10,7 +17,7 @@
 #include <QGroupBox>
 #include <QListWidget>
 
-#include "core/appconfig.h"
+#include "core/AppConfig.h"
 
 namespace ClipBridge {
 
