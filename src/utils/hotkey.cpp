@@ -8,9 +8,9 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <QX11Info>
-#include <QTimer>
 #elif defined(Q_OS_MAC)
 #include <ApplicationServices/ApplicationServices.h>
+#include <QProcess>
 #endif
 
 namespace ClipBridge {
@@ -25,8 +25,6 @@ Hotkey::Hotkey(const QKeySequence &keySequence, bool autoRegister, QObject *pare
 #ifdef Q_OS_LINUX
     , m_x11Keycode(0)
     , m_x11Modifiers(0)
-#elif defined(Q_OS_MAC)
-    , m_eventMonitor(nullptr)
 #endif
 {
     qApp->installNativeEventFilter(this);
@@ -83,10 +81,83 @@ bool Hotkey::registerHotkey()
         qWarning() << "Hotkey: Not running on X11";
         return false;
     }
-    qDebug() << "Hotkey: Linux/X11 support is limited in this version";
-    m_registered = false;
+
+    if (m_keySequence.isEmpty()) {
+        return false;
+    }
+
+    Display *dpy = QX11Info::display();
+    if (!dpy) {
+        return false;
+    }
+
+    QString str = m_keySequence.toString(QKeySequence::PortableText);
+    QStringList parts = str.split('+');
+
+    Qt::KeyboardModifiers modifiers = Qt::NoModifier;
+    int key = 0;
+
+    for (const QString &part : parts) {
+        QString p = part.trimmed().toLower();
+        if (p == "ctrl" || p == "control") {
+            modifiers |= Qt::ControlModifier;
+        } else if (p == "alt") {
+            modifiers |= Qt::AltModifier;
+        } else if (p == "shift") {
+            modifiers |= Qt::ShiftModifier;
+        } else if (p == "meta" || p == "super" || p == "win") {
+            modifiers |= Qt::MetaModifier;
+        } else if (!p.isEmpty()) {
+            QKeySequence ks(p);
+            if (!ks.isEmpty()) {
+                key = ks[0] & ~Qt::KeyboardModifierMask;
+            }
+        }
+    }
+
+    // 转换为 X11 keysym
+    int keysym = 0;
+    if (key >= Qt::Key_A && key <= Qt::Key_Z) {
+        keysym = XK_a + (key - Qt::Key_A);
+    } else if (key >= Qt::Key_0 && key <= Qt::Key_9) {
+        keysym = XK_0 + (key - Qt::Key_0);
+    } else if (key == Qt::Key_F1) keysym = XK_F1;
+    else if (key == Qt::Key_F2) keysym = XK_F2;
+    else if (key == Qt::Key_F3) keysym = XK_F3;
+    else if (key == Qt::Key_F4) keysym = XK_F4;
+    else if (key == Qt::Key_F5) keysym = XK_F5;
+    else if (key == Qt::Key_F6) keysym = XK_F6;
+    else if (key == Qt::Key_F7) keysym = XK_F7;
+    else if (key == Qt::Key_F8) keysym = XK_F8;
+    else if (key == Qt::Key_F9) keysym = XK_F9;
+    else if (key == Qt::Key_F10) keysym = XK_F10;
+    else if (key == Qt::Key_F11) keysym = XK_F11;
+    else if (key == Qt::Key_F12) keysym = XK_F12;
+    else if (key == Qt::Key_I) keysym = XK_i;
+    else if (key == Qt::Key_J) keysym = XK_j;
+    else if (key == Qt::Key_K) keysym = XK_k;
+
+    if (keysym == 0) {
+        qWarning() << "Hotkey: Unsupported key";
+        return false;
+    }
+
+    m_x11Keycode = XKeysymToKeycode(dpy, keysym);
+    m_x11Modifiers = 0;
+    if (modifiers & Qt::ControlModifier) m_x11Modifiers |= ControlMask;
+    if (modifiers & Qt::ShiftModifier) m_x11Modifiers |= ShiftMask;
+    if (modifiers & Qt::AltModifier) m_x11Modifiers |= Mod1Mask;
+    if (modifiers & Qt::MetaModifier) m_x11Modifiers |= Mod4Mask;
+
+    Window root = DefaultRootWindow(dpy);
+    XGrabKey(dpy, m_x11Keycode, m_x11Modifiers, root, True, GrabModeAsync, GrabModeAsync);
+    XGrabKey(dpy, m_x11Keycode, m_x11Modifiers | LockMask, root, True, GrabModeAsync, GrabModeAsync);
+    XGrabKey(dpy, m_x11Keycode, m_x11Modifiers | Mod2Mask, root, True, GrabModeAsync, GrabModeAsync);
+    XGrabKey(dpy, m_x11Keycode, m_x11Modifiers | LockMask | Mod2Mask, root, True, GrabModeAsync, GrabModeAsync);
+
+    m_registered = true;
 #elif defined(Q_OS_MAC)
-    qDebug() << "Hotkey: macOS support requires accessibility permissions";
+    qDebug() << "Hotkey: macOS requires accessibility permissions, implementation is limited";
     m_registered = false;
 #else
     m_registered = false;
@@ -108,9 +179,17 @@ void Hotkey::unregisterHotkey()
 #ifdef Q_OS_WIN
     UnregisterHotKey(nullptr, m_hotkeyId);
 #elif defined(Q_OS_LINUX)
-    // 清理 X11 资源
+    if (QX11Info::isPlatformX11()) {
+        Display *dpy = QX11Info::display();
+        if (dpy) {
+            Window root = DefaultRootWindow(dpy);
+            XUngrabKey(dpy, m_x11Keycode, m_x11Modifiers, root);
+            XUngrabKey(dpy, m_x11Keycode, m_x11Modifiers | LockMask, root);
+            XUngrabKey(dpy, m_x11Keycode, m_x11Modifiers | Mod2Mask, root);
+            XUngrabKey(dpy, m_x11Keycode, m_x11Modifiers | LockMask | Mod2Mask, root);
+        }
+    }
 #elif defined(Q_OS_MAC)
-    // 清理 macOS 资源
 #endif
 
     m_registered = false;
@@ -126,6 +205,25 @@ bool Hotkey::nativeEventFilter(const QByteArray &eventType, void *message, qintp
     if (msg->message == WM_HOTKEY && msg->wParam == m_hotkeyId) {
         emit activated();
         return true;
+    }
+#elif defined(Q_OS_LINUX)
+    if (QX11Info::isPlatformX11() && m_registered) {
+        Display *dpy = QX11Info::display();
+        if (dpy) {
+            while (XPending(dpy)) {
+                XEvent event;
+                XNextEvent(dpy, &event);
+                if (event.type == KeyPress) {
+                    if (event.xkey.keycode == m_x11Keycode) {
+                        unsigned int state = event.xkey.state & (ControlMask | ShiftMask | Mod1Mask | Mod4Mask);
+                        if (state == m_x11Modifiers) {
+                            emit activated();
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
     }
 #endif
 

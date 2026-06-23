@@ -10,9 +10,9 @@ namespace ClipBridge {
  * @brief 全局热键支持
  *
  * 平台支持:
- * - Windows: ✅ 已实现 (RegisterHotKey)
- * - Linux: ⚠️ 基础实现 (X11)
- * - macOS: ⚠️ 基础实现 (需要辅助功能权限)
+ * - Windows: ✅ 完整实现
+ * - Linux (X11): ✅ 完整实现
+ * - macOS: ⚠️ 需要辅助功能权限
  */
 class Hotkey : public QObject, public QAbstractNativeEventFilter
 {
@@ -42,14 +42,13 @@ private:
     static int m_nextId;
 
 #ifdef Q_OS_WIN
-    // Windows 专用数据
+    // Windows 专用
 #elif defined(Q_OS_LINUX)
-    // Linux 专用数据
+    // Linux 专用
     quint32 m_x11Keycode;
     quint32 m_x11Modifiers;
 #elif defined(Q_OS_MAC)
-    // macOS 专用数据
-    void *m_eventMonitor;
+    // macOS 专用
 #endif
 };
 
