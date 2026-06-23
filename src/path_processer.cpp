@@ -1,4 +1,4 @@
-#include "windows_path_processer.hpp"
+#include "path_processer.hpp"
 #include <windows.h>
 #include <shlobj.h>
 #include <stdexcept>
@@ -14,7 +14,7 @@ static std::wstring utf8_to_utf16(const std::string& str)
     return result;
 }
 
-std::string WindowsPathProcesser::get_workspace_path()
+std::string PathProcesser::get_workspace_path()
 {
     wchar_t docs_path[MAX_PATH] = {0};
     if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_MYDOCUMENTS, NULL, 0, docs_path))) {
@@ -29,7 +29,7 @@ std::string WindowsPathProcesser::get_workspace_path()
     return "ClipBridge";
 }
 
-std::string WindowsPathProcesser::default_path(const std::string& dir_name)
+std::string PathProcesser::default_path(const std::string& dir_name)
 {
     wchar_t temp_path[MAX_PATH] = { 0 };
     DWORD result = GetTempPathW(MAX_PATH, temp_path);
@@ -46,7 +46,7 @@ std::string WindowsPathProcesser::default_path(const std::string& dir_name)
     return utf8_str;
 }
 
-std::string WindowsPathProcesser::normalize_path(const std::string& path)
+std::string PathProcesser::normalize_path(const std::string& path)
 {
     std::string result = path;
     for (char& ch : result) {
@@ -56,7 +56,7 @@ std::string WindowsPathProcesser::normalize_path(const std::string& path)
     return result;
 }
 
-std::string WindowsPathProcesser::join_paths(const std::string& base, const std::string& relative)
+std::string PathProcesser::join_paths(const std::string& base, const std::string& relative)
 {
     if (base.empty())
         return relative;
@@ -68,7 +68,7 @@ std::string WindowsPathProcesser::join_paths(const std::string& base, const std:
     return result;
 }
 
-bool WindowsPathProcesser::ensure_directory_exists(const std::string& path)
+bool PathProcesser::ensure_directory_exists(const std::string& path)
 {
     std::wstring wpath = utf8_to_utf16(path);
 
@@ -110,7 +110,7 @@ bool WindowsPathProcesser::ensure_directory_exists(const std::string& path)
     return true;
 }
 
-std::string WindowsPathProcesser::get_config_directory()
+std::string PathProcesser::get_config_directory()
 {
     wchar_t appdata_path[MAX_PATH] = {0};
     if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, 0, appdata_path))) {

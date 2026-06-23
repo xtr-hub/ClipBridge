@@ -23,13 +23,12 @@ project ("ClipBridge")
 # 添加源文件
 set(SOURCES
     "src/ClipBridge.cpp"
-    "src/core/action_manager.cpp"
-    "src/core/config_manager.cpp"
-    "src/core/hotkey_keys.cpp"
-    "src/platform/windows/windows_clipboard_manager.cpp"
-    "src/platform/windows/windows_register_manager.cpp"
-    "src/platform/windows/windows_path_processer.cpp"
-    "src/platform/platform_factory.cpp"
+    "src/action_manager.cpp"
+    "src/config_manager.cpp"
+    "src/hotkey_keys.cpp"
+    "src/clipboard_manager.cpp"
+    "src/register_manager.cpp"
+    "src/path_processer.cpp"
 )
 
 # 添加头文件
@@ -38,16 +37,13 @@ set(HEADERS
     "include/framework.h"
     "include/targetver.h"
     "include/Resource.h"
-    "include/core/app_config.hpp"
-    "include/core/action_manager.hpp"
-    "include/core/config_manager.hpp"
-    "include/core/hotkey_keys.hpp"
-    "include/platform/clipboard_manager.hpp"
-    "include/platform/register_manager.hpp"
-    "include/platform/path_processer.hpp"
-    "include/platform/windows/windows_clipboard_manager.hpp"
-    "include/platform/windows/windows_register_manager.hpp"
-    "include/platform/windows/windows_path_processer.hpp"
+    "include/app_config.hpp"
+    "include/action_manager.hpp"
+    "include/config_manager.hpp"
+    "include/hotkey_keys.hpp"
+    "include/clipboard_manager.hpp"
+    "include/register_manager.hpp"
+    "include/path_processer.hpp"
 )
 
 # 添加资源文件
@@ -70,9 +66,6 @@ add_executable (ClipBridge WIN32
 # 包含头文件目录（核心库）
 target_include_directories(ClipBridgeCore PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/core"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/platform"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/platform/windows"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources"
 )
 

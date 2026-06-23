@@ -1,4 +1,4 @@
-#include "windows_clipboard_manager.hpp"
+#include "clipboard_manager.hpp"
 #include <windows.h>
 #include <gdiplus.h>
 #include <vector>
@@ -8,9 +8,9 @@
 #pragma comment(lib, "gdiplus.lib")
 
 // 静态成员初始化
-bool WindowsClipboardManager::gdiplus_initialized = false;
-ULONG_PTR WindowsClipboardManager::gdiplus_token = 0;
-int WindowsClipboardManager::instance_count = 0;
+bool ClipboardManager::gdiplus_initialized = false;
+ULONG_PTR ClipboardManager::gdiplus_token = 0;
+int ClipboardManager::instance_count = 0;
 
 // UTF-16 转 UTF-8
 static std::string utf16_to_utf8(const std::wstring& wstr)
@@ -34,21 +34,21 @@ static std::wstring utf8_to_utf16(const std::string& str)
     return result;
 }
 
-WindowsClipboardManager::WindowsClipboardManager()
+ClipboardManager::ClipboardManager()
 {
     if (instance_count++ == 0) {
         ensure_gdiplus_initialized();
     }
 }
 
-WindowsClipboardManager::~WindowsClipboardManager()
+ClipboardManager::~ClipboardManager()
 {
     if (--instance_count == 0) {
         shutdown_gdiplus();
     }
 }
 
-void WindowsClipboardManager::ensure_gdiplus_initialized()
+void ClipboardManager::ensure_gdiplus_initialized()
 {
     if (gdiplus_initialized) return;
 
@@ -62,7 +62,7 @@ void WindowsClipboardManager::ensure_gdiplus_initialized()
     gdiplus_initialized = true;
 }
 
-void WindowsClipboardManager::shutdown_gdiplus()
+void ClipboardManager::shutdown_gdiplus()
 {
     if (gdiplus_initialized) {
         Gdiplus::GdiplusShutdown(gdiplus_token);
@@ -70,7 +70,7 @@ void WindowsClipboardManager::shutdown_gdiplus()
     }
 }
 
-std::wstring WindowsClipboardManager::get_text_wide()
+std::wstring ClipboardManager::get_text_wide()
 {
     if (!OpenClipboard(nullptr))
         throw std::runtime_error("Failed to open clipboard");
@@ -91,12 +91,12 @@ std::wstring WindowsClipboardManager::get_text_wide()
     return result;
 }
 
-std::string WindowsClipboardManager::get_text()
+std::string ClipboardManager::get_text()
 {
     return utf16_to_utf8(get_text_wide());
 }
 
-void WindowsClipboardManager::set_text(const std::string& text)
+void ClipboardManager::set_text(const std::string& text)
 {
     if (!OpenClipboard(nullptr))
         throw std::runtime_error("Failed to open clipboard");
@@ -119,7 +119,7 @@ void WindowsClipboardManager::set_text(const std::string& text)
     CloseClipboard();
 }
 
-std::vector<UINT> WindowsClipboardManager::get_available_image_formats_win32()
+std::vector<UINT> ClipboardManager::get_available_image_formats_win32()
 {
     if (!OpenClipboard(nullptr))
         throw std::runtime_error("Failed to open clipboard");
@@ -136,12 +136,12 @@ std::vector<UINT> WindowsClipboardManager::get_available_image_formats_win32()
     return formats;
 }
 
-bool WindowsClipboardManager::has_image()
+bool ClipboardManager::has_image()
 {
     return !get_available_image_formats_win32().empty();
 }
 
-std::vector<std::string> WindowsClipboardManager::get_available_image_formats()
+std::vector<std::string> ClipboardManager::get_available_image_formats()
 {
     auto win32_formats = get_available_image_formats_win32();
     if (win32_formats.empty())
@@ -149,7 +149,7 @@ std::vector<std::string> WindowsClipboardManager::get_available_image_formats()
     return {"png"};
 }
 
-std::pair<void*, size_t> WindowsClipboardManager::get_dib()
+std::pair<void*, size_t> ClipboardManager::get_dib()
 {
     if (!OpenClipboard(nullptr))
         throw std::runtime_error("Failed to open clipboard");
@@ -188,7 +188,7 @@ std::pair<void*, size_t> WindowsClipboardManager::get_dib()
     return { copied_ptr, original_size };
 }
 
-void WindowsClipboardManager::free_dib(void* dib_data)
+void ClipboardManager::free_dib(void* dib_data)
 {
     if (dib_data != nullptr)
         GlobalFree(dib_data);
@@ -271,7 +271,7 @@ static const void* get_dib_bits(const BITMAPINFO* dib_info)
     }
 }
 
-void WindowsClipboardManager::simulate_paste()
+void ClipboardManager::simulate_paste()
 {
     // 一定要确保这两个键此时没有被按下，否则会发生冲突就会吞键
     while(GetAsyncKeyState(VK_CONTROL) & 0x8000) Sleep(10);
@@ -300,7 +300,7 @@ void WindowsClipboardManager::simulate_paste()
     SendInput(4, inputs, sizeof(INPUT));
 }
 
-void WindowsClipboardManager::save_dib_to_png(void* dib_handle, size_t dib_size, const std::wstring& file_path)
+void ClipboardManager::save_dib_to_png(void* dib_handle, size_t dib_size, const std::wstring& file_path)
 {
     if (dib_handle == nullptr || dib_size < sizeof(BITMAPINFOHEADER))
         throw std::invalid_argument("Invalid DIB data");
@@ -361,7 +361,7 @@ void WindowsClipboardManager::save_dib_to_png(void* dib_handle, size_t dib_size,
         throw std::runtime_error("Failed to save PNG file");
 }
 
-bool WindowsClipboardManager::save_image_to_png(const std::string& file_path)
+bool ClipboardManager::save_image_to_png(const std::string& file_path)
 {
     auto [dib_data, dib_size] = get_dib();
     if (!dib_data)

@@ -1,4 +1,4 @@
-#include "windows_register_manager.hpp"
+#include "register_manager.hpp"
 #include "hotkey_keys.hpp"
 #include <windows.h>
 #include <cctype>
@@ -18,12 +18,12 @@ namespace
     }
 }
 
-WindowsRegisterManager::~WindowsRegisterManager()
+RegisterManager::~RegisterManager()
 {
     unregister_all();
 }
 
-void WindowsRegisterManager::register_hotkey(const AppConfig::HotKeyBinding& binding)
+void RegisterManager::register_hotkey(const AppConfig::HotKeyBinding& binding)
 {
     static std::unordered_map<std::string, int> keys_str;
 
@@ -85,7 +85,7 @@ void WindowsRegisterManager::register_hotkey(const AppConfig::HotKeyBinding& bin
     actions_by_id[id].push_back(binding.action);
 }
 
-void WindowsRegisterManager::register_hotkeys(const std::vector<AppConfig::HotKeyBinding>& bindings)
+void RegisterManager::register_hotkeys(const std::vector<AppConfig::HotKeyBinding>& bindings)
 {
     for (const AppConfig::HotKeyBinding& binding : bindings)
     {
@@ -93,7 +93,7 @@ void WindowsRegisterManager::register_hotkeys(const std::vector<AppConfig::HotKe
     }
 }
 
-void WindowsRegisterManager::unregister_all()
+void RegisterManager::unregister_all()
 {
     for (int key_id : register_keys)
     {
@@ -103,7 +103,7 @@ void WindowsRegisterManager::unregister_all()
     actions_by_id.clear();
 }
 
-std::vector<std::string> WindowsRegisterManager::action_for_id(int id) const
+std::vector<std::string> RegisterManager::action_for_id(int id) const
 {
     auto it = actions_by_id.find(id);
     if (it == actions_by_id.end())

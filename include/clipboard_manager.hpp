@@ -1,25 +1,24 @@
 #pragma once
 
-#include "clipboard_manager.hpp"
 #include <windows.h>
 #include <string>
 #include <vector>
 #include <stdexcept>
 #include <utility>
 
-class WindowsClipboardManager : public ClipboardManager
+class ClipboardManager
 {
 public:
-    WindowsClipboardManager();
-    ~WindowsClipboardManager() override;
+    ClipboardManager();
+    ~ClipboardManager();
 
     // ClipboardManager 接口实现
-    std::string get_text() override;
-    void set_text(const std::string& text) override;
-    bool has_image() override;
-    std::vector<std::string> get_available_image_formats() override;
-    bool save_image_to_png(const std::string& file_path) override;
-    void simulate_paste() override;
+    std::string get_text();
+    void set_text(const std::string& text);
+    bool has_image();
+    std::vector<std::string> get_available_image_formats();
+    bool save_image_to_png(const std::string& file_path);
+    void simulate_paste();
 
 private:
     static bool gdiplus_initialized;

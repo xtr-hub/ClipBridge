@@ -6,16 +6,12 @@ find_package(GTest REQUIRED)
 # 创建测试可执行文件
 add_executable(ClipBridgeTests
     src/main.cpp
-    src/platform/windows/windows_clipboard_manager_test.cpp
-    src/platform/windows/windows_path_processer_test.cpp
+    src/clipboard_manager_test.cpp
 )
 
 # 链接头文件目录
 target_include_directories(ClipBridgeTests PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../include/core"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../include/platform"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../include/platform/windows"
     "${GTEST_INCLUDE_DIRS}"
 )
 

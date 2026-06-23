@@ -7,7 +7,6 @@
 #include "config_manager.hpp"
 #include "app_config.hpp"
 #include "register_manager.hpp"
-#include "windows_register_manager.hpp"
 #include <memory>
 #include <string>
 
@@ -36,10 +35,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     ConfigManager config_manager;
     AppConfig config = config_manager.load();// 加载配置到内存中
 
-    // 注册热键（使用抽象接口 + 工厂）
-    auto register_manager = RegisterManager::create();
-    auto win_register_manager = dynamic_cast<WindowsRegisterManager*>(register_manager.get());
-    register_manager->register_hotkeys(config.hotkeys);
+    // 注册热键
+    RegisterManager register_manager;
+    register_manager.register_hotkeys(config.hotkeys);
 
     // 事件管理器
     ActionManager action_manager(config);
@@ -62,9 +60,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // 主消息循环:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
-        if (msg.message == WM_HOTKEY && win_register_manager)
+        if (msg.message == WM_HOTKEY)
         {
-            for(std::string action : win_register_manager->action_for_id(msg.wParam))
+            for(std::string action : register_manager.action_for_id(msg.wParam))
                     action_manager.run(action);// 跑起来
         }
 
@@ -75,7 +73,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
-    register_manager->unregister_all();
+    register_manager.unregister_all();
     return (int)msg.wParam;
 }
 
@@ -142,7 +140,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 //  WM_COMMAND  - 处理应用程序菜单
 //  WM_PAINT    - 绘制主窗口
-//  WM_DESTROY  - 发送退出消息并返回
+ WM_DESTROY  - 发送退出消息并返回
 //
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
