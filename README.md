@@ -11,6 +11,10 @@ ClipBridge 是一个 Windows 快捷键工具，用于把剪贴板图片快速保
 - `clipboard_image_path` - 将剪贴板图片保存为 PNG 文件，并把文件路径复制到剪贴板
 - `strip_newlines` - 移除剪贴板文本中的换行符（`\n` 和 `\r`）
 
+### 多动作绑定
+
+同一个快捷键可以绑定多个动作。按下快捷键时，动作会按照 `hotkeys` 列表中的顺序依次执行。
+
 ## 配置文件
 
 项目使用 JSON 配置。当前示例格式如下：
@@ -42,9 +46,28 @@ ClipBridge 是一个 Windows 快捷键工具，用于把剪贴板图片快速保
 }
 ```
 
+### 多动作绑定示例
+
+```json
+{
+  "hotkeys": [
+    {
+      "action": "strip_newlines",
+      "key": "ctrl+Alt+K"
+    },
+    {
+      "action": "clipboard_image_path",
+      "key": "ctrl+Alt+K"
+    }
+  ]
+}
+```
+
+按下 `Ctrl+Alt+K` 时，会先执行 `strip_newlines`，再执行 `clipboard_image_path`。
+
 字段说明：
 
-- `hotkeys`：快捷键绑定列表。
+- `hotkeys`：快捷键绑定列表。顺序决定动作执行顺序。
 - `hotkeys[].action`：快捷键触发的动作，可用 `clipboard_image_path` 或 `strip_newlines`。
 - `hotkeys[].key`：触发快捷键，使用 `+` 分隔按键。
 - `behavior.auto_paste`：生成路径后是否自动粘贴到当前窗口。
