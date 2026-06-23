@@ -1,6 +1,15 @@
-# ClipBridge
+# ClipBridge (Windows 原生版)
 
 ClipBridge 是一个 Windows 快捷键工具，专为解决 Claude TUI / Claude Code 等终端环境下的剪贴板交互痛点而设计。
+
+> ⚠️ 注意：这是 Windows 原生版本（无 Qt 依赖）。如果你需要跨平台支持（macOS/Linux），请切换到 `qt` 分支。
+
+## 分支说明
+
+| 分支 | 描述 | 推荐场景 |
+|------|------|---------|
+| **master** | Windows 原生版本（当前） | 只需要 Windows，轻量无依赖 |
+| **qt** | Qt 跨平台版本 | 需要 macOS/Linux 支持 |
 
 ## 核心价值
 
@@ -94,3 +103,29 @@ ClipBridge 用两个快捷键解决这两个问题。
 - `output.path.dir`：`custom_path` 模式下的图片保存目录。
 
 项目仍在开发中，功能和配置格式可能会继续变化。
+
+## 构建 (Windows 原生版)
+
+### 前置要求
+
+- CMake 3.10+
+- Visual Studio 2019+
+- vcpkg (可选，用于 nlohmann_json)
+
+### 构建步骤
+
+```bash
+mkdir build && cd build
+cmake .. -G "Visual Studio 17 2022" -A x64
+cmake --build . --config Release
+```
+
+### 使用 vcpkg
+
+如果你想用 vcpkg 安装依赖，在项目根目录：
+
+```bash
+vcpkg install nlohmann-json:x64-windows
+```
+
+然后正常 CMake 构建即可。
