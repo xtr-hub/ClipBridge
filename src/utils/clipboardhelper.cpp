@@ -8,9 +8,12 @@
 #ifdef Q_OS_WIN
 #include <windows.h>
 #elif defined(Q_OS_LINUX)
-// TODO: Linux/X11 实现
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <X11/extensions/XTest.h>
+#include <unistd.h>
 #elif defined(Q_OS_MAC)
-// TODO: macOS 实现
+#include <ApplicationServices/ApplicationServices.h>
 #endif
 
 namespace ClipBridge {
@@ -64,9 +67,36 @@ void ClipboardHelper::simulatePaste()
     keybd_event('V', 0, KEYEVENTF_KEYUP, 0);
     keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, 0);
 #elif defined(Q_OS_LINUX)
-    // TODO: Linux/X11 实现 - XTestFakeKeyEvent
+    // 模拟 Ctrl+V
+    Display *dpy = XOpenDisplay(nullptr);
+    if (dpy) {
+        XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_Control_L), True, 0);
+        XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_v), True, 0);
+        XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_v), False, 0);
+        XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_Control_L), False, 0);
+        XFlush(dpy);
+        XCloseDisplay(dpy);
+    }
 #elif defined(Q_OS_MAC)
-    // TODO: macOS 实现 - CGEventPost
+    // 模拟 Cmd+V
+    CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+    if (source) {
+        CGEventRef cmdDown = CGEventCreateKeyboardEvent(source, kVK_Command, true);
+        CGEventRef vDown = CGEventCreateKeyboardEvent(source, kVK_ANSI_V, true);
+        CGEventRef vUp = CGEventCreateKeyboardEvent(source, kVK_ANSI_V, false);
+        CGEventRef cmdUp = CGEventCreateKeyboardEvent(source, kVK_Command, false);
+
+        CGEventPost(kCGHIDEventTap, cmdDown);
+        CGEventPost(kCGHIDEventTap, vDown);
+        CGEventPost(kCGHIDEventTap, vUp);
+        CGEventPost(kCGHIDEventTap, cmdUp);
+
+        CFRelease(cmdDown);
+        CFRelease(vDown);
+        CFRelease(vUp);
+        CFRelease(cmdUp);
+        CFRelease(source);
+    }
 #endif
 }
 

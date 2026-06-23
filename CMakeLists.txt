@@ -41,6 +41,26 @@ target_link_libraries(ClipBridge PRIVATE
     Qt6::Widgets
 )
 
+# 平台特定设置
+if(WIN32)
+    set_target_properties(ClipBridge PROPERTIES
+        WIN32_EXECUTABLE ON
+    )
+elseif(APPLE)
+    # macOS 特定设置
+    find_library(APP_SERVICES ApplicationServices)
+    target_link_libraries(ClipBridge PRIVATE ${APP_SERVICES})
+elseif(UNIX AND NOT APPLE)
+    # Linux 特定设置 - 可选的 X11 支持
+    find_package(X11 QUIET)
+    if(X11_FOUND)
+        find_package(X11_XTest QUIET)
+        if(X11_XTest_FOUND)
+            target_link_libraries(ClipBridge PRIVATE X11::X11 X11::XTest)
+        endif()
+    endif()
+endif()
+
 # 包含目录
 target_include_directories(ClipBridge PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -48,13 +68,6 @@ target_include_directories(ClipBridge PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
     ${CMAKE_CURRENT_SOURCE_DIR}/src/utils
 )
-
-# Windows 特定配置
-if(WIN32)
-    set_target_properties(ClipBridge PROPERTIES
-        WIN32_EXECUTABLE ON
-    )
-endif()
 
 # 复制配置文件
 add_custom_command(TARGET ClipBridge POST_BUILD

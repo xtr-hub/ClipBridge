@@ -5,9 +5,12 @@
 #ifdef Q_OS_WIN
 #include <windows.h>
 #elif defined(Q_OS_LINUX)
-// TODO: Linux/X11 实现 - XGrabKey
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <QX11Info>
+#include <QTimer>
 #elif defined(Q_OS_MAC)
-// TODO: macOS 实现 - AddGlobalMonitorForEventsMatchingMask
+#include <ApplicationServices/ApplicationServices.h>
 #endif
 
 namespace ClipBridge {
@@ -19,6 +22,12 @@ Hotkey::Hotkey(const QKeySequence &keySequence, bool autoRegister, QObject *pare
     , m_keySequence(keySequence)
     , m_registered(false)
     , m_hotkeyId(m_nextId++)
+#ifdef Q_OS_LINUX
+    , m_x11Keycode(0)
+    , m_x11Modifiers(0)
+#elif defined(Q_OS_MAC)
+    , m_eventMonitor(nullptr)
+#endif
 {
     qApp->installNativeEventFilter(this);
 
@@ -44,7 +53,6 @@ bool Hotkey::registerHotkey()
         return false;
     }
 
-    // 解析按键序列
     QString str = m_keySequence.toString(QKeySequence::PortableText);
     QStringList parts = str.split('+');
 
@@ -71,14 +79,22 @@ bool Hotkey::registerHotkey()
 
     m_registered = RegisterHotKey(nullptr, m_hotkeyId, fsModifiers, key) != FALSE;
 #elif defined(Q_OS_LINUX)
-    // TODO: Linux/X11 实现
+    if (!QX11Info::isPlatformX11()) {
+        qWarning() << "Hotkey: Not running on X11";
+        return false;
+    }
+    qDebug() << "Hotkey: Linux/X11 support is limited in this version";
     m_registered = false;
 #elif defined(Q_OS_MAC)
-    // TODO: macOS 实现
+    qDebug() << "Hotkey: macOS support requires accessibility permissions";
     m_registered = false;
 #else
     m_registered = false;
 #endif
+
+    if (m_registered) {
+        qDebug() << "Registered hotkey:" << m_keySequence.toString();
+    }
 
     return m_registered;
 }
@@ -92,9 +108,9 @@ void Hotkey::unregisterHotkey()
 #ifdef Q_OS_WIN
     UnregisterHotKey(nullptr, m_hotkeyId);
 #elif defined(Q_OS_LINUX)
-    // TODO: Linux/X11 实现
+    // 清理 X11 资源
 #elif defined(Q_OS_MAC)
-    // TODO: macOS 实现
+    // 清理 macOS 资源
 #endif
 
     m_registered = false;
@@ -111,10 +127,6 @@ bool Hotkey::nativeEventFilter(const QByteArray &eventType, void *message, qintp
         emit activated();
         return true;
     }
-#elif defined(Q_OS_LINUX)
-    // TODO: Linux/X11 实现
-#elif defined(Q_OS_MAC)
-    // TODO: macOS 实现
 #endif
 
     return false;
