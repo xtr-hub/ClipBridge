@@ -273,9 +273,22 @@ static const void* get_dib_bits(const BITMAPINFO* dib_info)
 
 void ClipboardManager::simulate_paste()
 {
-    // 一定要确保这两个键此时没有被按下，否则会发生冲突就会吞键
-    while(GetAsyncKeyState(VK_CONTROL) & 0x8000) Sleep(10);
-    while(GetAsyncKeyState('V') & 0x8000) Sleep(10);
+    // 等待所有修饰键松开
+    int maxWait = 50; // 最多等 500ms
+    int waitCount = 0;
+    while (waitCount < maxWait) {
+        bool ctrlDown = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+        bool altDown = (GetKeyState(VK_MENU) & 0x8000) != 0;
+        bool shiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+        bool winDown = (GetKeyState(VK_LWIN) & 0x8000) != 0 || (GetKeyState(VK_RWIN) & 0x8000) != 0;
+        bool vDown = (GetKeyState('V') & 0x8000) != 0;
+
+        if (!ctrlDown && !altDown && !shiftDown && !winDown && !vDown) {
+            break;
+        }
+        Sleep(10);
+        waitCount++;
+    }
 
     INPUT inputs[4] = {};
 
