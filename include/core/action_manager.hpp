@@ -10,12 +10,13 @@ class ActionManager
 {
 public:
 	explicit ActionManager(const AppConfig& config) : config(config) {}
+	void update_config(const AppConfig& new_config) { config = new_config; }
 	void run(const std::string& action, const AppConfig::Behavior& behavior);
 
 private:
 	using Handler = void (ActionManager::*)(const AppConfig::Behavior&);
 
-	const AppConfig& config;
+	AppConfig config;
 
 	static const std::unordered_map<std::string, Handler> handlers;
 

@@ -23,12 +23,13 @@ project ("ClipBridge")
 # 添加源文件
 set(SOURCES
     "src/ClipBridge.cpp"
-    "src/action_manager.cpp"
-    "src/config_manager.cpp"
-    "src/hotkey_keys.cpp"
-    "src/clipboard_manager.cpp"
-    "src/register_manager.cpp"
-    "src/path_processer.cpp"
+    "src/core/action_manager.cpp"
+    "src/core/config_manager.cpp"
+    "src/core/hotkey_keys.cpp"
+    "src/core/clipboard_manager.cpp"
+    "src/core/register_manager.cpp"
+    "src/core/path_processer.cpp"
+    "src/ui/settings_dialog.cpp"
 )
 
 # 添加头文件
@@ -37,13 +38,14 @@ set(HEADERS
     "include/framework.h"
     "include/targetver.h"
     "include/Resource.h"
-    "include/app_config.hpp"
-    "include/action_manager.hpp"
-    "include/config_manager.hpp"
-    "include/hotkey_keys.hpp"
-    "include/clipboard_manager.hpp"
-    "include/register_manager.hpp"
-    "include/path_processer.hpp"
+    "include/core/app_config.hpp"
+    "include/core/action_manager.hpp"
+    "include/core/config_manager.hpp"
+    "include/core/hotkey_keys.hpp"
+    "include/core/clipboard_manager.hpp"
+    "include/core/register_manager.hpp"
+    "include/core/path_processer.hpp"
+    "include/ui/settings_dialog.hpp"
 )
 
 # 添加资源文件

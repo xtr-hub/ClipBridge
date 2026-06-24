@@ -63,3 +63,5 @@ resources/RCa*
 
 # Downloaded dependencies (if any)
 include/nlohmann/
+
+ClipBridge.pro

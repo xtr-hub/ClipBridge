@@ -3,10 +3,11 @@
 
 #include "framework.h"
 #include "ClipBridge.h"
-#include "action_manager.hpp"
-#include "config_manager.hpp"
-#include "app_config.hpp"
-#include "register_manager.hpp"
+#include "core/action_manager.hpp"
+#include "core/config_manager.hpp"
+#include "core/app_config.hpp"
+#include "core/register_manager.hpp"
+#include "ui/settings_dialog.hpp"
 #include <memory>
 #include <string>
 
@@ -22,13 +23,13 @@ NOTIFYICONDATAW nid;                            // 托盘图标数据
 ConfigManager* g_config_manager;               // 配置管理器指针
 AppConfig* g_config;                         // 配置指针
 RegisterManager* g_register_manager;             // 热键管理器指针
+ActionManager* g_action_manager;                // 动作管理器指针
 
 // 此代码模块中包含的函数的前向声明:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    SettingsDlgProc(HWND, UINT, WPARAM, LPARAM);
 void                AddTrayIcon(HWND hWnd);
 void                RemoveTrayIcon();
 void                ShowTrayMenu(HWND hWnd);
@@ -57,6 +58,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     g_config_manager = &config_manager;
     g_config = &config;
     g_register_manager = &register_manager;
+    g_action_manager = &action_manager;
 
     // 初始化全局字符串
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -80,7 +82,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             AppConfig::Behavior behavior = register_manager.behavior_for_id(msg.wParam);
             for(std::string action : register_manager.action_for_id(msg.wParam))
-                    action_manager.run(action, behavior);// 跑起来
+                action_manager.run(action, behavior);// 跑起来
         }
 
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -282,59 +284,6 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
             return (INT_PTR)TRUE;
         }
         break;
-    }
-    return (INT_PTR)FALSE;
-}
-
-// "设置"框的消息处理程序。
-INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        {
-            if (g_config)
-            {
-                SetDlgItemTextW(hDlg, IDC_FORMAT_EDIT, std::wstring(g_config->output.format.begin(), g_config->output.format.end()).c_str());
-                SetDlgItemTextW(hDlg, IDC_PATH_EDIT, std::wstring(g_config->output.path.dir.begin(), g_config->output.path.dir.end()).c_str());
-                CheckDlgButton(hDlg, IDC_AUTOPASTE_CHECK, g_config->default_behavior.auto_paste ? BST_CHECKED : BST_UNCHECKED);
-                CheckDlgButton(hDlg, IDC_AUTOSUBMIT_CHECK, g_config->default_behavior.auto_submit ? BST_CHECKED : BST_UNCHECKED);
-            }
-            return (INT_PTR)TRUE;
-        }
-        break;
-    case WM_COMMAND:
-        {
-            int wmId = LOWORD(wParam);
-            if (wmId == IDC_SAVE_BUTTON)
-            {
-                if (g_config && g_config_manager)
-                {
-                    WCHAR buf[1024];
-                    GetDlgItemTextW(hDlg, IDC_FORMAT_EDIT, buf, 1024);
-                    g_config->output.format = CW2A(buf);
-
-                    GetDlgItemTextW(hDlg, IDC_PATH_EDIT, buf, 1024);
-                    g_config->output.path.dir = CW2A(buf);
-
-                    g_config->default_behavior.auto_paste = (IsDlgButtonChecked(hDlg, IDC_AUTOPASTE_CHECK) == BST_CHECKED);
-                    g_config->default_behavior.auto_submit = (IsDlgButtonChecked(hDlg, IDC_AUTOSUBMIT_CHECK) == BST_CHECKED);
-
-                    g_config_manager->save(*g_config);
-
-                    MessageBoxW(hDlg, L"设置已保存", L"提示", MB_OK | MB_ICONINFORMATION);
-                }
-                EndDialog(hDlg, IDOK);
-                return (INT_PTR)TRUE;
-            }
-            else if (wmId == IDC_CANCEL_BUTTON)
-            {
-                EndDialog(hDlg, IDCANCEL);
-                return (INT_PTR)TRUE;
-            }
-            break;
-        }
     }
     return (INT_PTR)FALSE;
 }

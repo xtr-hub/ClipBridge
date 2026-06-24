@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <windows.h>
-#include "path_processer.hpp"
+#include "core/path_processer.hpp"
 
 TEST(PathProcesserTest, DefaultPath) {
     PathProcesser pp;

@@ -1,6 +1,6 @@
-#include "action_manager.hpp"
-#include "clipboard_manager.hpp"
-#include "path_processer.hpp"
+#include "core/action_manager.hpp"
+#include "core/clipboard_manager.hpp"
+#include "core/path_processer.hpp"
 #include <unordered_map>
 #include <stdexcept>
 #include <filesystem>
