@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QHash>
 #include <QPointer>
+#include <QThread>
 
 #include "core/AppConfig.h"
 #include "core/ActionManager.h"

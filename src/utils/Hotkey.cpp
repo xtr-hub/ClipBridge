@@ -32,7 +32,12 @@ Hotkey::Hotkey(const QKeySequence &keySequence, bool autoRegister, QObject *pare
     , m_flags(0)
 #endif
 {
-    qApp->installNativeEventFilter(this);
+    // 只安装一次 nativeEventFilter
+    static bool eventFilterInstalled = false;
+    if (!eventFilterInstalled) {
+        qApp->installNativeEventFilter(this);
+        eventFilterInstalled = true;
+    }
 
     if (autoRegister) {
         registerHotkey();
@@ -42,7 +47,7 @@ Hotkey::Hotkey(const QKeySequence &keySequence, bool autoRegister, QObject *pare
 Hotkey::~Hotkey()
 {
     unregisterHotkey();
-    qApp->removeNativeEventFilter(this);
+    // 不 removeNativeEventFilter！避免多次安装/删除导致崩溃
 }
 
 #ifdef Q_OS_MAC
@@ -132,8 +137,7 @@ bool Hotkey::registerHotkey()
             modifiers |= Qt::ShiftModifier;
         } else if (p == "meta" || p == "super" || p == "win") {
             modifiers |= Qt::MetaModifier;
-        } else if (!p.isEmpty()) {
-            QKeySequence ks(p);
+        } else if (!p.isEmpty()) { QKeySequence ks(p);
             if (!ks.isEmpty()) {
                 key = ks[0] & ~Qt::KeyboardModifierMask;
             }
@@ -196,8 +200,7 @@ bool Hotkey::registerHotkey()
             (const void**)&kAXTrustedCheckOptionPrompt,
             (const void**)&kCFBooleanTrue,
             1,
-            nullptr,
-            nullptr);
+            nullptr, nullptr);
         AXIsProcessTrustedWithOptions(options);
         CFRelease(options);
         return false;

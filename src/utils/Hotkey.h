@@ -26,7 +26,7 @@ class Hotkey : public QObject, public QAbstractNativeEventFilter
 
 public:
     explicit Hotkey(const QKeySequence &keySequence, bool autoRegister = false, QObject *parent = nullptr);
-    ~Hotkey() override;
+    ~Hotkey();
 
     bool isRegistered() const { return m_registered; }
     bool registerHotkey();

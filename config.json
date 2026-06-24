@@ -1,24 +1,31 @@
 {
-	"hotkeys": [
-		{
-			"action": "clipboard_image_path",
-			"key": "ctrl+Alt+I"
-		},
-		{
-			"action": "strip_newlines",
-			"key": "ctrl+Alt+I"
-		}
-	],
-	"behavior": {
-		"auto_paste": true,
-		"auto_submit": false
-	},
-	"system": "windows",
-	"output": {
-		"format": "请查看这张剪贴版图片分析内容\n{path}",
-		"path": {
-			"mode": "custom_path",
-			"dir": "C:\\Users\\37863\\Desktop\\临时图片"
-		}
-	}
+    "hotkeys": [
+        {
+            "action": "clipboard_image_path",
+            "key": "Ctrl+Alt+I",
+            "behavior": {
+                "auto_paste": true,
+                "auto_submit": false
+            }
+        },
+        {
+            "action": "strip_newlines",
+            "key": "Ctrl+Alt+J",
+            "behavior": {
+                "auto_paste": true,
+                "auto_submit": false
+            }
+        }
+    ],
+    "default_behavior": {
+        "auto_paste": true,
+        "auto_submit": false
+    },
+    "output": {
+        "format": "请查看这张剪贴板图片分析内容\n{path}",
+        "path": {
+            "mode": "workspace",
+            "dir": ""
+        }
+    }
 }
