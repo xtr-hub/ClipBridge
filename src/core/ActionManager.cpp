@@ -23,6 +23,11 @@ void ActionManager::run(const QString &action, const AppConfig::Behavior &behavi
     }
 }
 
+void ActionManager::updateConfig(const AppConfig &config)
+{
+    m_config = config;
+}
+
 void ActionManager::clipboardImagePath(const AppConfig::Behavior &behavior)
 {
     if (!ClipboardHelper::hasImage()) {

@@ -14,6 +14,7 @@
 #include <unistd.h>
 #elif defined(Q_OS_MAC)
 #include <ApplicationServices/ApplicationServices.h>
+#include <Carbon/Carbon.h>
 #endif
 
 namespace ClipBridge {
@@ -83,10 +84,10 @@ void ClipboardHelper::simulatePaste()
         CGEventRef vUp = CGEventCreateKeyboardEvent(source, kVK_ANSI_V, false);
         CGEventRef cmdUp = CGEventCreateKeyboardEvent(source, kVK_Command, false);
 
-        CGEventPost(kCGEventTap, cmdDown);
-        CGEventPost(kCGEventTap, vDown);
-        CGEventPost(kCGEventTap, vUp);
-        CGEventPost(kCGEventTap, cmdUp);
+        CGEventPost(kCGHIDEventTap, cmdDown);
+        CGEventPost(kCGHIDEventTap, vDown);
+        CGEventPost(kCGHIDEventTap, vUp);
+        CGEventPost(kCGHIDEventTap, cmdUp);
 
         CFRelease(cmdDown);
         CFRelease(vDown);

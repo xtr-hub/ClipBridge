@@ -10,6 +10,7 @@
 #include <QX11Info>
 #elif defined(Q_OS_MAC)
 #include <ApplicationServices/ApplicationServices.h>
+#include <Carbon/Carbon.h>
 #endif
 
 namespace ClipBridge {
@@ -45,7 +46,7 @@ Hotkey::~Hotkey()
 }
 
 #ifdef Q_OS_MAC
-void Hotkey::macKeyEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
+CGEventRef Hotkey::macKeyEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
     Q_UNUSED(proxy);
 
@@ -59,6 +60,8 @@ void Hotkey::macKeyEventCallback(CGEventTapProxy proxy, CGEventType type, CGEven
             QMetaObject::invokeMethod(hotkey, "activated", Qt::QueuedConnection);
         }
     }
+
+    return event;
 }
 #endif
 
@@ -240,7 +243,7 @@ bool Hotkey::registerHotkey()
         return false;
     }
 
-    m_eventTap = CGEventTapCreate(kCGEventTap, kCGHeadInsertEventTap, kCGEventTapOptionListenOnly,
+    m_eventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionListenOnly,
         CGEventMaskBit(kCGEventKeyDown),
         &Hotkey::macKeyEventCallback, this);
 
@@ -289,7 +292,7 @@ void Hotkey::unregisterHotkey()
         CGEventTapEnable((CFMachPortRef)m_eventTap, false);
         if (m_runLoopSource) {
             CFRunLoopRemoveSource(CFRunLoopGetCurrent(), (CFRunLoopSourceRef)m_runLoopSource, kCFRunLoopCommonModes);
-            CFRelease((CFRunLoopSourceRef)m_runLoopSource;
+            CFRelease((CFRunLoopSourceRef)m_runLoopSource);
             m_runLoopSource = nullptr;
         }
         CFRelease((CFMachPortRef)m_eventTap);

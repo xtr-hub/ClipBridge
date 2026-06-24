@@ -36,6 +36,12 @@ signals:
      */
     void quitRequested();
 
+    /**
+     * @brief 配置已更新
+     * @param config 新的配置
+     */
+    void configUpdated(const AppConfig &config);
+
 private slots:
     /**
      * @brief 显示关于对话框

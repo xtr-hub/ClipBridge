@@ -51,6 +51,7 @@ void TrayIcon::showSettings()
     SettingsDialog dialog(m_config);
     if (dialog.exec() == QDialog::Accepted) {
         m_config = dialog.config();
+        emit configUpdated(m_config);
     }
 }
 

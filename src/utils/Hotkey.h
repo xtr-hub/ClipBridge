@@ -3,6 +3,12 @@
 #include <QObject>
 #include <QKeySequence>
 #include <QAbstractNativeEventFilter>
+#include <QtGlobal>
+
+#ifdef Q_OS_MAC
+#include <ApplicationServices/ApplicationServices.h>
+#include <Carbon/Carbon.h>
+#endif
 
 namespace ClipBridge {
 
@@ -32,7 +38,11 @@ signals:
     void activated();
 
 protected:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override;
+#else
+    bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) override;
+#endif
 
 private:
     QKeySequence m_keySequence;
@@ -53,7 +63,7 @@ private:
     void *m_runLoopSource;
     CGKeyCode m_keycode;
     CGEventFlags m_flags;
-    static void macKeyEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon);
+    static CGEventRef macKeyEventCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon);
 #endif
 };
 

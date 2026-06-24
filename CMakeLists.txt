@@ -7,6 +7,22 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# Common Qt installation paths (for convenience)
+list(APPEND CMAKE_PREFIX_PATH
+    # macOS
+    "~/Qt/5.15.2/clang_64"
+    "~/5.15.2/clang_64"
+    "/usr/local/opt/qt5"
+    "/opt/homebrew/opt/qt5"
+    "/opt/homebrew/opt/qt6"
+    # Windows
+    "C:/Qt/5.15.2/msvc2019_64"
+    "C:/Qt/6.5.0/msvc2019_64"
+    # Linux
+    "/usr"
+    "/opt/qt5"
+)
+
 # Try to find Qt6 first, then Qt5
 find_package(Qt6 QUIET COMPONENTS Core Gui Widgets)
 if(Qt6_FOUND)
@@ -76,5 +92,5 @@ target_include_directories(ClipBridge PRIVATE
 add_custom_command(TARGET ClipBridge POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${CMAKE_CURRENT_SOURCE_DIR}/config.json"
-    $<TARGET_FILE_DIR>/config.json
+    $<TARGET_FILE_DIR:ClipBridge>/config.json
 )

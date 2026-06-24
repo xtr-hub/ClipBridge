@@ -33,6 +33,12 @@ public:
      */
     void run(const QString &action, const AppConfig::Behavior &behavior);
 
+    /**
+     * @brief 更新配置
+     * @param config 新的配置
+     */
+    void updateConfig(const AppConfig &config);
+
 private:
     AppConfig m_config;
     QHash<QString, std::function<void(const AppConfig::Behavior &)>> m_handlers;

@@ -16,6 +16,8 @@
 #include <QLabel>
 #include <QGroupBox>
 #include <QListWidget>
+#include <QComboBox>
+#include <QHBoxLayout>
 
 #include "core/AppConfig.h"
 
@@ -35,16 +37,21 @@ private slots:
     void addHotkey();
     void editHotkey();
     void removeHotkey();
+    void browsePath();
+    void onPathModeChanged(int index);
 
 private:
     void setupUI();
     void loadConfigToUI();
+    void updatePathInputState();
 
     AppConfig m_config;
 
     QListWidget *m_hotkeyList;
     QLineEdit *m_formatEdit;
+    QComboBox *m_pathModeCombo;
     QLineEdit *m_customPathEdit;
+    QPushButton *m_browseBtn;
     QCheckBox *m_defaultAutoPasteCheck;
     QCheckBox *m_defaultAutoSubmitCheck;
 };
