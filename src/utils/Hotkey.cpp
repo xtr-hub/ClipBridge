@@ -16,9 +16,13 @@
 namespace ClipBridge {
 
 int Hotkey::m_nextId = 1;
+QList<Hotkey*> Hotkey::s_allHotkeys;
+QMutex Hotkey::s_hotkeyMutex;
 
-Hotkey::Hotkey(const QKeySequence &keySequence, bool autoRegister, QObject *parent)
+Hotkey::Hotkey(const QString &action, const QKeySequence &keySequence, const AppConfig::Behavior &behavior, bool autoRegister, QObject *parent)
     : QObject(parent)
+    , m_action(action)
+    , m_behavior(behavior)
     , m_keySequence(keySequence)
     , m_registered(false)
     , m_hotkeyId(m_nextId++)
@@ -39,6 +43,12 @@ Hotkey::Hotkey(const QKeySequence &keySequence, bool autoRegister, QObject *pare
         eventFilterInstalled = true;
     }
 
+    // 添加到全局列表
+    {
+        QMutexLocker locker(&s_hotkeyMutex);
+        s_allHotkeys.append(this);
+    }
+
     if (autoRegister) {
         registerHotkey();
     }
@@ -46,8 +56,18 @@ Hotkey::Hotkey(const QKeySequence &keySequence, bool autoRegister, QObject *pare
 
 Hotkey::~Hotkey()
 {
+    // 先从全局列表移除，这样回调就不会访问这个对象了
+    {
+        QMutexLocker locker(&s_hotkeyMutex);
+        s_allHotkeys.removeAll(this);
+    }
+
     unregisterHotkey();
-    // 不 removeNativeEventFilter！避免多次安装/删除导致崩溃
+}
+
+void Hotkey::trigger()
+{
+    emit activated(m_action, m_behavior);
 }
 
 #ifdef Q_OS_MAC
@@ -58,11 +78,23 @@ CGEventRef Hotkey::macKeyEventCallback(CGEventTapProxy proxy, CGEventType type, 
     if (type == kCGEventKeyDown && refcon) {
         Hotkey *hotkey = static_cast<Hotkey*>(refcon);
 
+        // 关键安全检查：先验证 hotkey 是否还在全局列表里
+        bool isValid = false;
+        {
+            QMutexLocker locker(&s_hotkeyMutex);
+            isValid = s_allHotkeys.contains(hotkey);
+        }
+
+        if (!isValid) {
+            return event;
+        }
+
         CGKeyCode keycode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
         CGEventFlags flags = CGEventGetFlags(event) & (kCGEventFlagMaskControl | kCGEventFlagMaskShift | kCGEventFlagMaskAlternate | kCGEventFlagMaskCommand);
 
         if (keycode == hotkey->m_keycode && flags == hotkey->m_flags) {
-            QMetaObject::invokeMethod(hotkey, "activated", Qt::QueuedConnection);
+            // 安全发射信号，用 QueuedConnection 确保在主线程执行
+            QMetaObject::invokeMethod(hotkey, "trigger", Qt::QueuedConnection);
         }
     }
 
@@ -137,7 +169,8 @@ bool Hotkey::registerHotkey()
             modifiers |= Qt::ShiftModifier;
         } else if (p == "meta" || p == "super" || p == "win") {
             modifiers |= Qt::MetaModifier;
-        } else if (!p.isEmpty()) { QKeySequence ks(p);
+        } else if (!p.isEmpty()) {
+            QKeySequence ks(p);
             if (!ks.isEmpty()) {
                 key = ks[0] & ~Qt::KeyboardModifierMask;
             }
@@ -161,9 +194,9 @@ bool Hotkey::registerHotkey()
     else if (key == Qt::Key_F10) keysym = XK_F10;
     else if (key == Qt::Key_F11) keysym = XK_F11;
     else if (key == Qt::Key_F12) keysym = XK_F12;
-    else if (key == Qt::Key_I) keysym = XK_i;
-    else if (key == Qt::Key_J) keysym = XK_j;
-    else if (key == Qt::Key_K) keysym = XK_k;
+    else if (key == Qt::Key_I) keysym = XK_I;
+    else if (key == Qt::Key_J) keysym = XK_J;
+    else if (key == Qt::Key_K) keysym = XK_K;
 
     if (keysym == 0) {
         qWarning() << "Hotkey: Unsupported key";
@@ -320,7 +353,7 @@ bool Hotkey::nativeEventFilter(const QByteArray &eventType, void *message, long 
 #ifdef Q_OS_WIN
     MSG *msg = static_cast<MSG *>(message);
     if (msg->message == WM_HOTKEY && msg->wParam == m_hotkeyId) {
-        emit activated();
+        emit activated(m_action, m_behavior);
         return true;
     }
 #elif defined(Q_OS_LINUX)
@@ -334,7 +367,7 @@ bool Hotkey::nativeEventFilter(const QByteArray &eventType, void *message, long 
                     if (event.xkey.keycode == m_x11Keycode) {
                         unsigned int state = event.xkey.state & (ControlMask | ShiftMask | Mod1Mask | Mod4Mask);
                         if (state == m_x11Modifiers) {
-                            emit activated();
+                            emit activated(m_action, m_behavior);
                             return true;
                         }
                     }

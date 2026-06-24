@@ -22,7 +22,13 @@ using namespace ClipBridge;
 
 int main(int argc, char *argv[])
 {
+    // 注册自定义类型，用于信号槽
+    qRegisterMetaType<AppConfig::Behavior>("AppConfig::Behavior");
+
     QApplication app(argc, argv);
+
+    // macOS: 防止没有窗口时应用自动退出
+    QApplication::setQuitOnLastWindowClosed(false);
 
     QApplication::setApplicationName("ClipBridge");
     QApplication::setApplicationVersion("2.0");
@@ -36,18 +42,19 @@ int main(int argc, char *argv[])
 
     // 热键管理
     QVector<QPointer<Hotkey>> hotkeys;
+
     auto registerHotkeys = [&](const AppConfig &newConfig) {
-        // 清理旧热键
+        // 只 unregister 旧热键，不 delete！防止崩溃！
         for (auto hotkey : hotkeys) {
             if (hotkey) {
-                delete hotkey;
+                hotkey->unregisterHotkey();
             }
         }
         hotkeys.clear();
 
         // 注册新热键
         for (const auto &binding : newConfig.hotkeys) {
-            Hotkey *hotkey = new Hotkey(binding.keySequence, true);
+            Hotkey *hotkey = new Hotkey(binding.action, binding.keySequence, binding.behavior, true);
 
             if (hotkey->isRegistered()) {
                 qDebug() << "Registered hotkey:" << binding.keySequence.toString()
@@ -55,10 +62,10 @@ int main(int argc, char *argv[])
                          << "(autoPaste:" << binding.behavior.autoPaste
                          << ", autoSubmit:" << binding.behavior.autoSubmit << ")";
 
-                // 连接热键信号 - 这里我们使用值捕获，因为 binding 在循环结束后还会存在于 config 中
-                QObject::connect(hotkey, &Hotkey::activated, [&manager, binding]() {
-                    qDebug() << "Hotkey triggered, running action:" << binding.action;
-                    manager.run(binding.action, binding.behavior);
+                // 连接热键信号
+                QObject::connect(hotkey, &Hotkey::activated, [&manager](const QString &action, const AppConfig::Behavior &behavior) {
+                    qDebug() << "Hotkey triggered, running action:" << action;
+                    manager.run(action, behavior);
                 });
 
                 hotkeys.append(hotkey);

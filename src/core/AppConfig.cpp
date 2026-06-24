@@ -69,12 +69,8 @@ AppConfig AppConfig::load(const QString &path)
     if (root.contains("output")) {
         QJsonObject output = root["output"].toObject();
         config.output.format = output["format"].toString("{path}");
-
-        if (output.contains("path")) {
-            QJsonObject pathObj = output["path"].toObject();
-            config.output.mode = pathObj["mode"].toString("workspace");
-            config.output.dir = pathObj["dir"].toString();
-        }
+        config.output.mode = output["mode"].toString("workspace");
+        config.output.dir = output["dir"].toString();
     }
 
     return config;
@@ -106,12 +102,8 @@ void AppConfig::save(const QString &path) const
 
     QJsonObject outputObj;
     outputObj["format"] = output.format;
-
-    QJsonObject pathObj;
-    pathObj["mode"] = output.mode;
-    pathObj["dir"] = output.dir;
-    outputObj["path"] = pathObj;
-
+    outputObj["mode"] = output.mode;
+    outputObj["dir"] = output.dir;
     root["output"] = outputObj;
 
     QJsonDocument doc(root);

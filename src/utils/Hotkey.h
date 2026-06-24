@@ -4,11 +4,14 @@
 #include <QKeySequence>
 #include <QAbstractNativeEventFilter>
 #include <QtGlobal>
+#include <QString>
 
 #ifdef Q_OS_MAC
 #include <ApplicationServices/ApplicationServices.h>
 #include <Carbon/Carbon.h>
 #endif
+
+#include "core/AppConfig.h"
 
 namespace ClipBridge {
 
@@ -25,7 +28,7 @@ class Hotkey : public QObject, public QAbstractNativeEventFilter
     Q_OBJECT
 
 public:
-    explicit Hotkey(const QKeySequence &keySequence, bool autoRegister = false, QObject *parent = nullptr);
+    explicit Hotkey(const QString &action, const QKeySequence &keySequence, const AppConfig::Behavior &behavior, bool autoRegister = false, QObject *parent = nullptr);
     ~Hotkey();
 
     bool isRegistered() const { return m_registered; }
@@ -33,9 +36,14 @@ public:
     void unregisterHotkey();
 
     QKeySequence keySequence() const { return m_keySequence; }
+    QString action() const { return m_action; }
+    AppConfig::Behavior behavior() const { return m_behavior; }
 
 signals:
-    void activated();
+    void activated(const QString &action, const AppConfig::Behavior &behavior);
+
+private slots:
+    void trigger();
 
 protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -45,11 +53,17 @@ protected:
 #endif
 
 private:
+    QString m_action;
+    AppConfig::Behavior m_behavior;
     QKeySequence m_keySequence;
     bool m_registered;
     int m_hotkeyId;
 
     static int m_nextId;
+
+    // 所有热键实例列表（线程安全）
+    static QList<Hotkey*> s_allHotkeys;
+    static QMutex s_hotkeyMutex;
 
 #ifdef Q_OS_WIN
     // Windows 专用
