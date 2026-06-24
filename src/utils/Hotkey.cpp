@@ -97,7 +97,7 @@ bool Hotkey::registerHotkey()
         }
     }
 
-    m_registered = RegisterHotKey(nullptr, m_hotkeyId, fsModifiers, key) != FALSE;
+    m_registered = RegisterHotKey(NULL, m_hotkeyId, fsModifiers, key) != FALSE;
 #elif defined(Q_OS_LINUX)
     if (!QX11Info::isPlatformX11()) {
         qWarning() << "Hotkey: Not running on X11";
@@ -182,6 +182,7 @@ bool Hotkey::registerHotkey()
         return false;
     }
 
+    // 检查辅助功能权限
     bool hasPermission = AXIsProcessTrusted();
     if (!hasPermission) {
         qWarning() << "Hotkey: Accessibility permissions required!";
@@ -271,7 +272,7 @@ void Hotkey::unregisterHotkey()
     }
 
 #ifdef Q_OS_WIN
-    UnregisterHotKey(nullptr, m_hotkeyId);
+    UnregisterHotKey(NULL, m_hotkeyId);
 #elif defined(Q_OS_LINUX)
     if (QX11Info::isPlatformX11()) {
         Display *dpy = QX11Info::display();
@@ -288,7 +289,7 @@ void Hotkey::unregisterHotkey()
         CGEventTapEnable((CFMachPortRef)m_eventTap, false);
         if (m_runLoopSource) {
             CFRunLoopRemoveSource(CFRunLoopGetCurrent(), (CFRunLoopSourceRef)m_runLoopSource, kCFRunLoopCommonModes);
-            CFRelease((CFRunLoopSourceRef)m_runLoopSource);
+            CFRelease((CFRunLoopSourceRef)m_runLoopSource;
             m_runLoopSource = nullptr;
         }
         CFRelease((CFMachPortRef)m_eventTap);
@@ -299,10 +300,16 @@ void Hotkey::unregisterHotkey()
     m_registered = false;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool Hotkey::nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result)
 {
-    Q_UNUSED(eventType);
     Q_UNUSED(result);
+#else
+bool Hotkey::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
+{
+    Q_UNUSED(result);
+#endif
+    Q_UNUSED(eventType);
 
 #ifdef Q_OS_WIN
     MSG *msg = static_cast<MSG *>(message);

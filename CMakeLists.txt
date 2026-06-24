@@ -7,7 +7,16 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+# Try to find Qt6 first, then Qt5
+find_package(Qt6 QUIET COMPONENTS Core Gui Widgets)
+if(Qt6_FOUND)
+    set(QT_VERSION_MAJOR 6)
+    message(STATUS "Building with Qt6")
+else()
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+    set(QT_VERSION_MAJOR 5)
+    message(STATUS "Building with Qt5")
+endif()
 
 set(SOURCES
     src/main.cpp
@@ -33,10 +42,11 @@ add_executable(ClipBridge
     ${HEADERS}
 )
 
+# Link Qt libraries (works for both Qt5 and Qt6)
 target_link_libraries(ClipBridge PRIVATE
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
 )
 
 if(WIN32)
