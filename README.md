@@ -50,24 +50,29 @@ ClipBridge 用两个快捷键解决这两个问题。
   "hotkeys": [
     {
       "action": "clipboard_image_path",
-      "key": "ctrl+Alt+I"
+      "key": "ctrl+Alt+I",
+      "behavior": {
+        "auto_paste": true,
+        "auto_submit": false
+      }
     },
     {
       "action": "strip_newlines",
-      "key": "ctrl+Alt+J"
+      "key": "ctrl+Alt+J",
+      "behavior": {
+        "auto_paste": true,
+        "auto_submit": false
+      }
     }
   ],
-  "behavior": {
+  "default_behavior": {
     "auto_paste": true,
     "auto_submit": false
   },
-  "system": "windows",
   "output": {
-    "format": "请查看这张剪贴版图片分析内容\n{path}",
-    "path": {
-      "mode": "custom_path",
-      "dir": "C:\\Users\\37863\\Desktop\\临时图片"
-    }
+    "format": "{path}",
+    "mode": "workspace",
+    "dir": ""
   }
 }
 ```
@@ -93,14 +98,16 @@ ClipBridge 用两个快捷键解决这两个问题。
 
 字段说明：
 
-- `hotkeys`：快捷键绑定列表。顺序决定动作执行顺序。
-- `hotkeys[].action`：快捷键触发的动作，可用 `clipboard_image_path` 或 `strip_newlines`。
-- `hotkeys[].key`：触发快捷键，使用 `+` 分隔按键。
-- `behavior.auto_paste`：生成路径后是否自动粘贴到当前窗口。
-- `behavior.auto_submit`：是否自动提交，默认建议保持 `false`。
-- `output.format`：粘贴文本格式，`{path}` 会被替换为图片路径。
-- `output.path.mode`：图片保存路径模式，支持 `custom_path` 和 `workspace`。
-- `output.path.dir`：`custom_path` 模式下的图片保存目录。
+- `hotkeys`: 快捷键绑定列表。
+- `hotkeys[].action`: 快捷键触发的动作，可用 `clipboard_image_path` 或 `strip_newlines`。
+- `hotkeys[].key`: 触发快捷键，使用 `+` 分隔按键。
+- `hotkeys[].behavior`: (可选) 该热键的专属行为配置，不填则使用 `default_behavior`。
+- `default_behavior`: 默认行为配置，用于没有单独配置 `behavior` 的热键。
+- `default_behavior.auto_paste`: 执行动作后是否自动粘贴到当前窗口。
+- `default_behavior.auto_submit`: 是否自动提交，默认建议保持 `false`。
+- `output.format`: 粘贴文本格式，`{path}` 会被替换为图片路径。
+- `output.mode`: 图片保存路径模式，支持 `custom_path` 和 `workspace`（保存到桌面的 ClipBridge Images 目录）。
+- `output.dir`: `custom_path` 模式下的图片保存目录。
 
 项目仍在开发中，功能和配置格式可能会继续变化。
 
