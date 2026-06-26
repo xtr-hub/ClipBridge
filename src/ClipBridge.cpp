@@ -203,8 +203,7 @@ void ShowTrayMenu(HWND hWnd)
 // 显示设置对话框
 void ShowSettingsDialog(HWND hWnd)
 {
-    MessageBoxW(hWnd, L"托盘单击成功！设置对话框将在后续添加。", L"ClipBridge", MB_OK | MB_ICONINFORMATION);
-    // DialogBox(hInst, MAKEINTRESOURCE(IDD_SETTINGSDIALOG), hWnd, SettingsDlgProc);
+    DialogBox(hInst, MAKEINTRESOURCE(IDD_SETTINGSDIALOG), hWnd, SettingsDlgProc);
 }
 
 //
