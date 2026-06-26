@@ -28,6 +28,7 @@ set(SOURCES
     "src/core/clipboard_manager.cpp"
     "src/core/register_manager.cpp"
     "src/core/path_processer.cpp"
+    "src/core/string_utils.cpp"
     "src/ui/settings_dialog.cpp"
 )
 
@@ -44,6 +45,7 @@ set(HEADERS
     "include/core/clipboard_manager.hpp"
     "include/core/register_manager.hpp"
     "include/core/path_processer.hpp"
+    "include/core/string_utils.hpp"
     "include/ui/settings_dialog.hpp"
 )
 

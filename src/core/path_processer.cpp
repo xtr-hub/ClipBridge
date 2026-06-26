@@ -1,18 +1,10 @@
 #include "core/path_processer.hpp"
+#include "core/string_utils.hpp"
 #include <windows.h>
 #include <shlobj.h>
 #include <stdexcept>
 
-// UTF-8 转 UTF-16
-static std::wstring utf8_to_utf16(const std::string& str)
-{
-    if (str.empty()) return {};
-    int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), nullptr, 0);
-    if (size <= 0) return {};
-    std::wstring result(size, L'\0');
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), &result[0], size);
-    return result;
-}
+using string_utils::utf8_to_wide;
 
 std::string PathProcesser::get_workspace_path()
 {
@@ -36,7 +28,7 @@ std::string PathProcesser::default_path(const std::string& dir_name)
     if (result == 0 || result > MAX_PATH) throw std::runtime_error("Failed to read tempdir");
 
     std::wstring full_path = temp_path;
-    full_path += utf8_to_utf16(dir_name);
+    full_path += utf8_to_wide(dir_name);
 
     int size = WideCharToMultiByte(CP_UTF8, 0, full_path.c_str(), -1, nullptr, 0, nullptr, nullptr);
     if (size <= 0) throw std::runtime_error("Failed to convert utf-8");
@@ -70,7 +62,7 @@ std::string PathProcesser::join_paths(const std::string& base, const std::string
 
 bool PathProcesser::ensure_directory_exists(const std::string& path)
 {
-    std::wstring wpath = utf8_to_utf16(path);
+    std::wstring wpath = utf8_to_wide(path);
 
     DWORD attrs = GetFileAttributesW(wpath.c_str());
     if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
