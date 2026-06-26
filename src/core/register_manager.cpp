@@ -1,5 +1,5 @@
-#include "register_manager.hpp"
-#include "hotkey_keys.hpp"
+#include "core/register_manager.hpp"
+#include "core/hotkey_keys.hpp"
 #include <windows.h>
 #include <cctype>
 #include <string>
@@ -13,7 +13,7 @@ namespace
         for (char& ch : value)
         {
             ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
-        }7
+        }
         return value;
     }
 }

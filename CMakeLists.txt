@@ -20,9 +20,8 @@ endif()
 
 project ("ClipBridge")
 
-# 添加源文件
+# 添加源文件（不包含 ClipBridge.cpp，因为它有 WinMain）
 set(SOURCES
-    "src/ClipBridge.cpp"
     "src/core/action_manager.cpp"
     "src/core/config_manager.cpp"
     "src/core/hotkey_keys.cpp"
@@ -95,6 +94,8 @@ target_link_libraries(ClipBridge PRIVATE ClipBridgeCore)
 if(MSVC)
   target_compile_definitions(ClipBridge PRIVATE _UNICODE UNICODE)
   target_compile_definitions(ClipBridgeCore PRIVATE _UNICODE UNICODE)
+  target_compile_options(ClipBridge PRIVATE /utf-8)
+  target_compile_options(ClipBridgeCore PRIVATE /utf-8)
 endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

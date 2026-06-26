@@ -1,4 +1,4 @@
-#include "clipboard_manager.hpp"
+#include "core/clipboard_manager.hpp"
 #include <windows.h>
 #include <gdiplus.h>
 #include <vector>

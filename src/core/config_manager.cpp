@@ -1,4 +1,4 @@
-#include "config_manager.hpp"
+#include "core/config_manager.hpp"
 
 #include <filesystem>
 #include <fstream>

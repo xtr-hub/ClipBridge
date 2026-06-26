@@ -12,6 +12,17 @@
 #include <objbase.h>
 #include <string>
 
+// UTF-16 转 UTF-8
+static std::string WideToUTF8(const std::wstring& wstr)
+{
+    if (wstr.empty()) return {};
+    int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
+    if (size <= 0) return {};
+    std::string result(size, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), &result[0], size, nullptr, nullptr);
+    return result;
+}
+
 // 更新路径输入框状态（根据模式选择启用/禁用）
 void UpdatePathInputState(HWND hDlg)
 {
@@ -66,8 +77,10 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
                 SendMessageW(hCombo, CB_SETCURSEL, modeIndex, 0);
 
                 // 设置其他控件
-                SetDlgItemTextW(hDlg, IDC_FORMAT_EDIT, std::wstring(g_config->output.format.begin(), g_config->output.format.end()).c_str());
-                SetDlgItemTextW(hDlg, IDC_PATH_EDIT, std::wstring(g_config->output.path.dir.begin(), g_config->output.path.dir.end()).c_str());
+                std::wstring formatWstr(g_config->output.format.begin(), g_config->output.format.end());
+                SetDlgItemTextW(hDlg, IDC_FORMAT_EDIT, formatWstr.c_str());
+                std::wstring pathWstr(g_config->output.path.dir.begin(), g_config->output.path.dir.end());
+                SetDlgItemTextW(hDlg, IDC_PATH_EDIT, pathWstr.c_str());
                 CheckDlgButton(hDlg, IDC_AUTOPASTE_CHECK, g_config->default_behavior.auto_paste ? BST_CHECKED : BST_UNCHECKED);
                 CheckDlgButton(hDlg, IDC_AUTOSUBMIT_CHECK, g_config->default_behavior.auto_submit ? BST_CHECKED : BST_UNCHECKED);
 
@@ -85,7 +98,7 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
                 {
                     WCHAR buf[1024];
                     GetDlgItemTextW(hDlg, IDC_FORMAT_EDIT, buf, 1024);
-                    g_config->output.format = CW2A(buf);
+                    g_config->output.format = WideToUTF8(buf);
 
                     // 获取路径模式
                     HWND hCombo = GetDlgItem(hDlg, IDC_PATH_MODE_COMBO);
@@ -95,7 +108,7 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
                         AppConfig::Output::Path::Mode::custom_path;
 
                     GetDlgItemTextW(hDlg, IDC_PATH_EDIT, buf, 1024);
-                    g_config->output.path.dir = CW2A(buf);
+                    g_config->output.path.dir = WideToUTF8(buf);
 
                     g_config->default_behavior.auto_paste = (IsDlgButtonChecked(hDlg, IDC_AUTOPASTE_CHECK) == BST_CHECKED);
                     g_config->default_behavior.auto_submit = (IsDlgButtonChecked(hDlg, IDC_AUTOSUBMIT_CHECK) == BST_CHECKED);

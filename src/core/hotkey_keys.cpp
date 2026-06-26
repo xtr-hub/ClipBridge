@@ -1,4 +1,4 @@
-#include "hotkey_keys.hpp"
+#include "core/hotkey_keys.hpp"
 
 const std::unordered_map<std::string, UINT> keys_map = {
     {"ctrl", MOD_CONTROL},
