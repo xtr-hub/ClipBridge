@@ -1,49 +1,89 @@
 # ClipBridge (Windows 原生版)
 
-ClipBridge 是一个 Windows 快捷键工具，专为解决 Claude TUI / Claude Code 等终端环境下的剪贴板交互痛点而设计。
+Windows 快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅
 
-> ⚠️ 注意：这是 Windows 原生版本（无 Qt 依赖）。如果你需要跨平台支持（macOS/Linux），请切换到 `qt` 分支。
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://github.com/xtr-hub/ClipBridge)
+[![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](CMakeLists.txt)
+[![CMake](https://img.shields.io/badge/CMake-3.10%2B-orange.svg)](CMakeLists.txt)
+[![GitHub stars](https://img.shields.io/github/stars/xtr-hub/ClipBridge?style=social)](https://github.com/xtr-hub/ClipBridge)
+
+---
+
+## 目录
+
+[![✨ 核心功能](https://img.shields.io/badge/-核心功能-blue?style=flat-square)](#核心功能)
+[![🚀 快速开始](https://img.shields.io/badge/-快速开始-green?style=flat-square)](#快速开始)
+[![⚙️ 配置说明](https://img.shields.io/badge/-配置说明-orange?style=flat-square)](#配置说明)
+[![🌿 分支说明](https://img.shields.io/badge/-分支说明-purple?style=flat-square)](#分支说明)
+[![🛠️ 构建指南](https://img.shields.io/badge/-构建指南-red?style=flat-square)](#构建指南)
+[![📁 项目结构](https://img.shields.io/badge/-项目结构-yellow?style=flat-square)](#项目结构)
+[![❓ 常见问题](https://img.shields.io/badge/-常见问题-cyan?style=flat-square)](#常见问题)
+
+---
 
 ## 分支说明
 
-| 分支 | 描述 | 推荐场景 |
-|------|------|---------|
-| **master** | Windows 原生版本（当前） | 只需要 Windows，轻量无依赖 |
-| **qt** | Qt 跨平台版本 | 需要 macOS/Linux 支持 |
+> **重要**：两个版本功能一致，区别在于技术栈
 
-## 核心价值
+| 分支 | 技术栈 | 描述 | 推荐场景 |
+| --- | --- | --- | --- |
+| **master** | Win32 API | Windows 原生版本（当前） | 只需要 Windows，轻量无依赖 |
+| **qt** | Qt 6/5 | Qt 跨平台版本 | 需要 macOS/Linux 支持 |
 
-### 解决的痛点
+---
 
-在使用终端工具时，以下两个场景特别让人头疼：
+## 核心功能
 
-1. **截图无法直接粘贴** —— 网页聊天界面里随手一贴就能发图，但终端里不行
-2. **复制命令带多余换行** —— 从终端复制多行命令时，因为终端自动换行导致粘贴后无法直接执行
+### 1. clipboard_image_path —— TUI 发图神器
 
-ClipBridge 用两个快捷键解决这两个问题。
+在 Claude TUI / Claude Code 里发截图，不再需要手动保存文件、复制路径！
 
-### clipboard_image_path —— TUI 里的图片引用
+- 截图 → 按快捷键 → 自动保存图片 → 自动粘贴路径 → 直接发送
+- 支持自定义格式文案（比如 `请查看这张图片：{path}`）
+- 支持自定义保存路径
 
-按下快捷键后，自动把剪贴板里的图片保存为本地 PNG 文件，然后把文件路径（配合自定义格式文案）填入剪贴板并自动粘贴。
+### 2. strip_newlines —— 清理换行符
 
-这样你在 Claude TUI 里想发截图时：
+从终端、日志、文档复制多行文本时，经常因为终端宽度限制被自动插入换行符，导致粘贴后无法直接执行。
 
-- 截图 → 按下 `Ctrl+Alt+I` → 图片路径自动出现在输入框里 → 直接发送
-- Claude Code 可以读取本地路径的图片，体验就和网页版一样顺畅
+- 按快捷键，一键去除所有换行符（`\n` 和 `\r`）
+- 命令即贴即用，无需手动清理
 
-### strip_newlines —— 一键去除多余换行
+### 3. 每个热键独立配置
 
-从终端、日志、文档里复制多行文本或命令时，终端渲染引擎经常会因为宽度限制自动插入换行符，导致粘贴后不能直接执行。
+- 每个快捷键可以设置独立的 `auto_paste` 和 `auto_submit` 行为
+- 支持多动作绑定，同一个快捷键按顺序执行多个动作
 
-按下 `Ctrl+Alt+J` 后，自动移除剪贴板文本里的所有换行符（`\n` 和 `\r`），让命令即贴即用。
+---
 
-### 多动作绑定
+## 快速开始
 
-同一个快捷键可以绑定多个动作，按列表顺序依次执行。
+### 下载运行
 
-## 配置文件
+1. 从 Releases（未来）下载预编译版本
+2. 或者从源码构建（见下方）
+3. 运行程序，系统托盘出现 ClipBridge 图标
 
-项目使用 JSON 配置。当前示例格式如下：
+### 基本使用
+
+1. 截图 → 按 `Ctrl+Alt+I` → 图片路径自动粘贴到当前输入框
+2. 复制多行命令 → 按 `Ctrl+Alt+J` → 换行符已清理，可以直接执行
+
+### 图形界面设置
+
+- 左键/右键点击托盘图标 → 打开设置界面
+- 在设置界面里可以：
+  - 查看和管理热键
+  - 配置图片保存格式和路径
+  - 设置默认行为
+  - 保存后自动热重载，无需重启
+
+---
+
+## 配置说明
+
+配置文件 `config.json` 在程序同目录下，格式如下：
 
 ```json
 {
@@ -77,47 +117,30 @@ ClipBridge 用两个快捷键解决这两个问题。
 }
 ```
 
-### 多动作绑定示例
+### 字段详解
 
-```json
-{
-  "hotkeys": [
-    {
-      "action": "strip_newlines",
-      "key": "ctrl+Alt+K"
-    },
-    {
-      "action": "clipboard_image_path",
-      "key": "ctrl+Alt+K"
-    }
-  ]
-}
-```
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `hotkeys` | array | 快捷键绑定列表 |
+| `hotkeys[].action` | string | 动作：`clipboard_image_path` 或 `strip_newlines` |
+| `hotkeys[].key` | string | 快捷键，用 `+` 分隔（如 `ctrl+alt+i`） |
+| `hotkeys[].behavior` | object | 可选，该热键的独立行为 |
+| `default_behavior` | object | 默认行为配置 |
+| `default_behavior.auto_paste` | bool | 执行动作后是否自动粘贴 |
+| `default_behavior.auto_submit` | bool | 是否自动提交（慎用） |
+| `output.format` | string | 粘贴文本格式，`{path}` 会被替换为图片路径 |
+| `output.mode` | string | `workspace`（桌面）或 `custom_path`（自定义） |
+| `output.dir` | string | `custom_path` 模式下的保存目录 |
 
-按下 `Ctrl+Alt+K` 时，会先执行 `strip_newlines`，再执行 `clipboard_image_path`。
+---
 
-字段说明：
-
-- `hotkeys`: 快捷键绑定列表。
-- `hotkeys[].action`: 快捷键触发的动作，可用 `clipboard_image_path` 或 `strip_newlines`。
-- `hotkeys[].key`: 触发快捷键，使用 `+` 分隔按键。
-- `hotkeys[].behavior`: (可选) 该热键的专属行为配置，不填则使用 `default_behavior`。
-- `default_behavior`: 默认行为配置，用于没有单独配置 `behavior` 的热键。
-- `default_behavior.auto_paste`: 执行动作后是否自动粘贴到当前窗口。
-- `default_behavior.auto_submit`: 是否自动提交，默认建议保持 `false`。
-- `output.format`: 粘贴文本格式，`{path}` 会被替换为图片路径。
-- `output.mode`: 图片保存路径模式，支持 `custom_path` 和 `workspace`（保存到桌面的 ClipBridge Images 目录）。
-- `output.dir`: `custom_path` 模式下的图片保存目录。
-
-项目仍在开发中，功能和配置格式可能会继续变化。
-
-## 构建 (Windows 原生版)
+## 构建指南
 
 ### 前置要求
 
-- CMake 3.10+
-- Visual Studio 2019+
-- vcpkg (可选，用于 nlohmann_json)
+- **CMake 3.10+**
+- **Visual Studio 2019+**
+- vcpkg（可选，用于 nlohmann_json）
 
 ### 构建步骤
 
@@ -136,3 +159,81 @@ vcpkg install nlohmann-json:x64-windows
 ```
 
 然后正常 CMake 构建即可。
+
+---
+
+## 项目结构
+
+```text
+ClipBridge/
+├── CMakeLists.txt           # CMake 构建配置
+├── config.json              # 示例配置文件
+├── README.md                # 本文档
+├── include/
+│   ├── ClipBridge.h         # 主程序头文件
+│   ├── framework.h
+│   ├── Resource.h
+│   ├── targetver.h
+│   └── core/
+│       ├── app_config.hpp   # 配置数据结构
+│       ├── action_manager.hpp # 动作管理
+│       ├── config_manager.hpp # 配置读写
+│       ├── hotkey_keys.hpp  # 热键映射
+│       ├── clipboard_manager.hpp # 剪贴板管理
+│       ├── register_manager.hpp # 热键注册
+│       ├── path_processer.hpp # 路径处理
+│       └── string_utils.hpp # 字符串工具
+├── src/
+│   ├── ClipBridge.cpp       # 主程序入口（WinMain）
+│   └── core/
+│       ├── action_manager.cpp
+│       ├── config_manager.cpp
+│       ├── hotkey_keys.cpp
+│       ├── clipboard_manager.cpp
+│       ├── register_manager.cpp
+│       ├── path_processer.cpp
+│       └── string_utils.cpp
+├── resources/
+│   ├── ClipBridge.rc        # Windows 资源文件
+│   ├── ClipBridge.ico       # 程序图标
+│   └── small.ico
+└── test/                    # 测试代码
+```
+
+---
+
+## 常见问题
+
+### Q: 编译警告 "该文件包含不能在当前代码页中表示的字符"
+
+A: 在 CMakeLists.txt 中已经添加了 `/utf-8` 编译选项，应该没问题。如果还有问题，确保文件保存为 UTF-8 with BOM 格式。
+
+### Q: 找不到 nlohmann/json.hpp？
+
+A: 项目支持两种方式：
+
+1. 使用 vcpkg 安装：`vcpkg install nlohmann-json:x64-windows`
+2. 使用头文件-only 模式：项目会自动检测并使用
+
+### Q: 想要自定义热键？
+
+A: 两种方式：
+
+1. 编辑 `config.json` 文件
+2. 使用图形设置界面
+
+---
+
+## 许可证
+
+本项目采用 MIT 许可证，详见 LICENSE 文件。
+
+---
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+---
+
+Made with ❤️ for Claude TUI users
