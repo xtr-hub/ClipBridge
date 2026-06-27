@@ -7,7 +7,7 @@
 [![Qt](https://img.shields.io/badge/Qt-5.15%2B%20%7C%206.0%2B-green.svg)](#构建指南)
 [![CMake](https://img.shields.io/badge/CMake-3.16%2B-orange.svg)](CMakeLists.txt)
 [![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](CMakeLists.txt)
-[![GitHub stars](https://img.shields.io/github/stars/your-username/ClipBridge?style=social)](https://github.com/your-username/ClipBridge)
+[![GitHub stars](https://img.shields.io/github/stars/your-username/ClipBridge?style=social)](https://github.com/xtr-hub/ClipBridge)
 
 ---
 
