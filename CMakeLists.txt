@@ -7,6 +7,12 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# MSVC 编译选项
+if(MSVC)
+    add_compile_options(/Zc:__cplusplus)
+    add_compile_options(/utf-8)
+endif()
+
 # Common Qt installation paths (for convenience)
 list(APPEND CMAKE_PREFIX_PATH
     # macOS
@@ -18,6 +24,7 @@ list(APPEND CMAKE_PREFIX_PATH
     # Windows
     "C:/Qt/5.15.2/msvc2019_64"
     "C:/Qt/6.5.0/msvc2019_64"
+    "D:/tools/qt/6.11.1/mingw_64"
     # Linux
     "/usr"
     "/opt/qt5"
