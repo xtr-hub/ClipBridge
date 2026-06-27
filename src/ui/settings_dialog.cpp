@@ -111,10 +111,7 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
                     g_register_manager->unregister_all();
                     g_register_manager->register_hotkeys(g_config->hotkeys);
                     g_action_manager->update_config(*g_config);
-
-                    MessageBoxW(hDlg, L"设置已保存，已自动热更新！", L"提示", MB_OK | MB_ICONINFORMATION);
                 }
-                EndDialog(hDlg, IDOK);
                 return (INT_PTR)TRUE;
             }
             else if (wmId == IDC_CANCEL_BUTTON)
