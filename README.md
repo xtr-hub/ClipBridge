@@ -190,9 +190,20 @@
    构建完成后，可执行文件在 `build/`（MinGW）或 `build/Release/`（Visual Studio）目录。
    CMake 会自动运行 `windeployqt` 复制 Qt DLL 到输出目录。
 
-4. **打包发布**
+4. **一键构建打包（推荐）**
 
-   项目包含打包脚本，构建完成后运行：
+   项目包含一键构建打包脚本，一行命令搞定：
+   ```cmd
+   # 使用批处理脚本
+   build_and_package.bat
+
+   # 或使用 PowerShell 脚本
+   powershell -ExecutionPolicy Bypass -File build_and_package.ps1
+   ```
+
+5. **打包发布**
+
+   如果你已经手动构建过，只想打包，运行：
    ```cmd
    # 使用批处理脚本
    package.bat
