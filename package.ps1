@@ -15,12 +15,12 @@ if (-not (Test-Path "build")) {
 }
 
 # Detect build output path (support MinGW and MSVC)
-$exePath = ""
+$sourceDir = ""
 if (Test-Path "build\ClipBridge.exe") {
-    $exePath = "build\ClipBridge.exe"
+    $sourceDir = "build"
     Write-Host "[INFO] Detected MinGW build" -ForegroundColor Green
 } elseif (Test-Path "build\Release\ClipBridge.exe") {
-    $exePath = "build\Release\ClipBridge.exe"
+    $sourceDir = "build\Release"
     Write-Host "[INFO] Detected MSVC build" -ForegroundColor Green
 } else {
     Write-Host "[ERROR] ClipBridge.exe not found! Please compile first." -ForegroundColor Red
@@ -29,91 +29,6 @@ if (Test-Path "build\ClipBridge.exe") {
     Write-Host "  - build\Release\ClipBridge.exe (MSVC)"
     Read-Host "Press Enter to exit"
     exit 1
-}
-
-# Find Qt directory
-$qtDir = ""
-$qtPaths = @(
-    "D:\tools\qt\6.11.1\mingw_64",
-    "C:\Qt\6.5.0\msvc2019_64",
-    "C:\Qt\5.15.2\msvc2019_64",
-    "C:\Qt\5.15.2\mingw81_64"
-)
-
-foreach ($path in $qtPaths) {
-    if (Test-Path "$path\bin\windeployqt.exe") {
-        $qtDir = $path
-        break
-    }
-}
-
-if (-not $qtDir -and $env:QT_DIR) {
-    $qtDir = $env:QT_DIR
-}
-
-if (-not $qtDir) {
-    Write-Host "[WARNING] Qt directory not found automatically, please set QT_DIR env var" -ForegroundColor Yellow
-    Write-Host "Example: `$env:QT_DIR = `"D:\tools\qt\6.11.1\mingw_64`"" -ForegroundColor Gray
-    Write-Host ""
-} else {
-    Write-Host "[INFO] Using Qt directory: $qtDir" -ForegroundColor Cyan
-    $env:PATH = "$qtDir\bin;$env:PATH"
-}
-
-# Create package directory
-$packageDir = "ClipBridge_Qt"
-if (Test-Path $packageDir) {
-    Write-Host "[INFO] Cleaning old package directory..." -ForegroundColor Yellow
-    Remove-Item -Path $packageDir -Recurse -Force
-}
-New-Item -Path $packageDir -ItemType Directory | Out-Null
-
-Write-Host "[INFO] Copying files..." -ForegroundColor Cyan
-
-# Copy main executable
-Copy-Item $exePath -Destination "$packageDir\" -Force
-
-# Copy config file
-Copy-Item "config.json" -Destination "$packageDir\" -Force
-
-# Copy docs
-Copy-Item "README.md" -Destination "$packageDir\" -Force
-Copy-Item "LICENSE" -Destination "$packageDir\" -Force
-
-# Use windeployqt to package Qt dependencies
-$exeDeployPath = Join-Path $packageDir "ClipBridge.exe"
-if (Test-Path $exeDeployPath) {
-    Write-Host "[INFO] Using windeployqt to package Qt dependencies..." -ForegroundColor Cyan
-
-    # Try to find windeployqt
-    $windeployqtPath = $null
-
-    # First try from QT_DIR
-    if ($qtDir) {
-        $testPath = Join-Path $qtDir "bin\windeployqt.exe"
-        if (Test-Path $testPath) {
-            $windeployqtPath = $testPath
-            Write-Host "[INFO] Found windeployqt at: $windeployqtPath" -ForegroundColor Cyan
-        }
-    }
-
-    # Then try from PATH
-    if (-not $windeployqtPath) {
-        $cmd = Get-Command "windeployqt.exe" -ErrorAction SilentlyContinue
-        if ($cmd) {
-            $windeployqtPath = $cmd.Source
-            Write-Host "[INFO] Found windeployqt on PATH: $windeployqtPath" -ForegroundColor Cyan
-        }
-    }
-
-    if ($windeployqtPath) {
-        & $windeployqtPath --release --no-translations --no-system-d3d-compiler --no-opengl-sw $exeDeployPath
-    } else {
-        Write-Host "[ERROR] Cannot find windeployqt!" -ForegroundColor Red
-        Write-Host "QT_DIR is: $qtDir" -ForegroundColor Yellow
-        Write-Host "Please make sure Qt is installed and QT_DIR is set correctly" -ForegroundColor Red
-        exit 1
-    }
 }
 
 # Read version from CMakeLists.txt
@@ -155,6 +70,26 @@ if (-not $version) {
 if (-not $version) {
     $version = Get-Date -Format "yyyyMMdd"
     Write-Host "[INFO] Using date as version: $version" -ForegroundColor Yellow
+}
+
+# Create package directory
+$packageDir = "ClipBridge_Qt"
+if (Test-Path $packageDir) {
+    Write-Host "[INFO] Cleaning old package directory..." -ForegroundColor Yellow
+    Remove-Item -Path $packageDir -Recurse -Force
+}
+New-Item -Path $packageDir -ItemType Directory | Out-Null
+
+Write-Host "[INFO] Copying files from $sourceDir..." -ForegroundColor Cyan
+
+# Copy everything from build directory (already has DLLs from windeployqt)
+Copy-Item "$sourceDir\*" -Destination "$packageDir\" -Recurse -Force
+
+# Copy additional files
+Copy-Item "README.md" -Destination "$packageDir\" -Force
+Copy-Item "config.json" -Destination "$packageDir\" -Force
+if (Test-Path "LICENSE") {
+    Copy-Item "LICENSE" -Destination "$packageDir\" -Force
 }
 
 # Create zip package
