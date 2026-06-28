@@ -78,25 +78,50 @@ jobs:
             VERSION=$(date +%Y%m%d)
           fi
 
-          # Create package directory
-          PACKAGE_DIR=ClipBridge_Qt
-          rm -rf $PACKAGE_DIR
-          mkdir -p $PACKAGE_DIR
+          # Create App bundle structure
+          APP_DIR=ClipBridge.app
+          rm -rf $APP_DIR
+          mkdir -p $APP_DIR/Contents/MacOS
+          mkdir -p $APP_DIR/Contents/Resources
 
-          # Copy everything from build
-          cp -r build/* $PACKAGE_DIR/
-
-          # Copy additional files
-          cp README.md $PACKAGE_DIR/
-          cp config.json $PACKAGE_DIR/
+          # Copy executable and resources
+          cp build/ClipBridge $APP_DIR/Contents/MacOS/
+          cp config.json $APP_DIR/Contents/Resources/
+          cp README.md $APP_DIR/Contents/Resources/
           if [ -f LICENSE ]; then
-            cp LICENSE $PACKAGE_DIR/
+            cp LICENSE $APP_DIR/Contents/Resources/
+          fi
+
+          # Use macdeployqt to copy Qt frameworks
+          if [ -d "$Qt6_DIR/bin/macdeployqt" ]; then
+            $Qt6_DIR/bin/macdeployqt $APP_DIR
+          elif [ -d "$Qt6_DIR/bin/macdeployqt.app" ]; then
+            $Qt6_DIR/bin/macdeployqt.app/Contents/MacOS/macdeployqt $APP_DIR
+          else
+            # Try to find macdeployqt in Qt6_DIR
+            if [ -n "$Qt6_DIR" ]; then
+              if [ -f "$Qt6_DIR/bin/macdeployqt" ]; then
+                "$Qt6_DIR/bin/macdeployqt" $APP_DIR
+              elif [ -f "$Qt6_DIR/bin/macdeployqt.app/Contents/MacOS/macdeployqt" ]; then
+                "$Qt6_DIR/bin/macdeployqt.app/Contents/MacOS/macdeployqt" $APP_DIR
+              else
+                # Look for macdeployqt in common places
+                if [ -f "/usr/local/Qt6/bin/macdeployqt" ]; then
+                  /usr/local/Qt6/bin/macdeployqt $APP_DIR
+                elif [ -f "/usr/local/opt/qt6/bin/macdeployqt" ]; then
+                  /usr/local/opt/qt6/bin/macdeployqt $APP_DIR
+                else
+                  echo "WARNING: macdeployqt not found, attempting to manually copy frameworks"
+                  # Manual copy is complex, just zip the app without it as a fallback
+                fi
+              fi
+            fi
           fi
 
           # Create zip
           ZIP_NAME=ClipBridge_macOS_${VERSION}.zip
           rm -f $ZIP_NAME
-          (cd $PACKAGE_DIR && zip -r ../$ZIP_NAME .)
+          ditto -c -k --sequesterRsrc --keepParent $APP_DIR $ZIP_NAME
           echo "Created $ZIP_NAME"
 
       - name: Upload artifact
