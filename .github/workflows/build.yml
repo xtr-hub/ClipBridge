@@ -7,13 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to build (e.g., 2.0.0)'
+        description: 'Version to build (e.g., 1.0.0)'
         required: false
         default: 'dev'
 
 jobs:
-  build_windows_qt:
-    name: Windows (Qt, MinGW)
+  build_windows:
+    name: Windows (MinGW)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,35 +48,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ClipBridge_Windows_Qt
+          name: ClipBridge_Windows
           path: ClipBridge_Qt_*.zip
-
-  build_windows_win32:
-    name: Windows (Win32 API)
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Checkout win32 branch
-        run: |
-          git fetch origin win32
-          git checkout win32
-
-      - name: Configure CMake
-        run: cmake -B build -G "Visual Studio 17 2022" -A x64
-
-      - name: Build
-        run: cmake --build build --config Release -j8
-
-      - name: Package
-        shell: powershell
-        run: powershell -ExecutionPolicy Bypass -File package.ps1
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ClipBridge_Windows_Win32
-          path: ClipBridge_Win32_*.zip
 
   build_macos:
     name: macOS
@@ -185,7 +158,7 @@ jobs:
 
   create_release:
     name: Create Release
-    needs: [build_windows_qt, build_windows_win32, build_macos, build_linux]
+    needs: [build_windows, build_macos, build_linux]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -214,8 +187,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           files: |
-            ClipBridge_Windows_Qt/ClipBridge_Qt_*.zip
-            ClipBridge_Windows_Win32/ClipBridge_Win32_*.zip
+            ClipBridge_Windows/ClipBridge_Qt_*.zip
             ClipBridge_macOS/ClipBridge_macOS.zip
             ClipBridge_Linux/ClipBridge_Linux.zip
           tag_name: ${{ steps.get_version.outputs.VERSION && format('v{0}', steps.get_version.outputs.VERSION) || github.ref_name }}
