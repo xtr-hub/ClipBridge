@@ -150,6 +150,22 @@ cmake .. -G "Visual Studio 17 2022" -A x64
 cmake --build . --config Release
 ```
 
+构建完成后，可执行文件在 `build/Release/` 目录。
+
+### 打包发布
+
+项目包含打包脚本，构建完成后运行：
+
+```cmd
+# 使用批处理脚本
+package.bat
+
+# 或使用 PowerShell 脚本
+powershell -ExecutionPolicy Bypass -File package.ps1
+```
+
+脚本会创建包含所有依赖的 `ClipBridge_Win32` 文件夹和 zip 压缩包。
+
 ### 使用 vcpkg
 
 如果你想用 vcpkg 安装依赖，在项目根目录：
