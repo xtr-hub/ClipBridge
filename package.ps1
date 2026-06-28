@@ -107,7 +107,7 @@ function Get-VersionFromCMake {
     param([string]$cmakePath)
     if (Test-Path $cmakePath) {
         $content = Get-Content $cmakePath -Raw
-        if ($content -match 'project\(ClipBridge VERSION ([0-9]+\.[0-9]+\.[0-9]+)') {
+        if ($content -match "project\(ClipBridge VERSION (\d+\.\d+\.\d+)") {
             return $matches[1]
         }
     }
