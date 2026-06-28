@@ -47,11 +47,126 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ClipBridge_Windows
-          path: ClipBridge_Qt_*.zip
+          path: ClipBridge_Windows_*.zip
+
+  build_macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5.0'
+          host: 'mac'
+          target: 'desktop'
+          arch: 'clang_64'
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build -j8
+
+      - name: Package
+        run: |
+          # Read version from CMakeLists.txt
+          VERSION=$(sed -n 's/project(ClipBridge VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          if [ -z "$VERSION" ]; then
+            VERSION=$(date +%Y%m%d)
+          fi
+
+          # Create package directory
+          PACKAGE_DIR=ClipBridge_Qt
+          rm -rf $PACKAGE_DIR
+          mkdir -p $PACKAGE_DIR
+
+          # Copy everything from build
+          cp -r build/* $PACKAGE_DIR/
+
+          # Copy additional files
+          cp README.md $PACKAGE_DIR/
+          cp config.json $PACKAGE_DIR/
+          if [ -f LICENSE ]; then
+            cp LICENSE $PACKAGE_DIR/
+          fi
+
+          # Create zip
+          ZIP_NAME=ClipBridge_macOS_${VERSION}.zip
+          rm -f $ZIP_NAME
+          (cd $PACKAGE_DIR && zip -r ../$ZIP_NAME .)
+          echo "Created $ZIP_NAME"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClipBridge_macOS
+          path: ClipBridge_macOS_*.zip
+
+  build_linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libgl1-mesa-dev libx11-dev libxtst-dev
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5.0'
+          host: 'linux'
+          target: 'desktop'
+          arch: 'gcc_64'
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build -j8
+
+      - name: Package
+        run: |
+          # Read version from CMakeLists.txt
+          VERSION=$(sed -n 's/project(ClipBridge VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          if [ -z "$VERSION" ]; then
+            VERSION=$(date +%Y%m%d)
+          fi
+
+          # Create package directory
+          PACKAGE_DIR=ClipBridge_Qt
+          rm -rf $PACKAGE_DIR
+          mkdir -p $PACKAGE_DIR
+
+          # Copy everything from build
+          cp -r build/* $PACKAGE_DIR/
+
+          # Copy additional files
+          cp README.md $PACKAGE_DIR/
+          cp config.json $PACKAGE_DIR/
+          if [ -f LICENSE ]; then
+            cp LICENSE $PACKAGE_DIR/
+          fi
+
+          # Create zip
+          ZIP_NAME=ClipBridge_Linux_${VERSION}.zip
+          rm -f $ZIP_NAME
+          (cd $PACKAGE_DIR && zip -r ../$ZIP_NAME .)
+          echo "Created $ZIP_NAME"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClipBridge_Linux
+          path: ClipBridge_Linux_*.zip
 
   create_release:
     name: Create Release
-    needs: [build_windows]
+    needs: [build_windows, build_macos, build_linux]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -80,7 +195,9 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           files: |
-            ClipBridge_Windows/ClipBridge_Qt_*.zip
+            ClipBridge_Windows/ClipBridge_Windows_*.zip
+            ClipBridge_macOS/ClipBridge_macOS_*.zip
+            ClipBridge_Linux/ClipBridge_Linux_*.zip
           tag_name: ${{ steps.get_version.outputs.VERSION && format('v{0}', steps.get_version.outputs.VERSION) || github.ref_name }}
           name: Release ${{ steps.get_version.outputs.VERSION || github.ref_name }}
           draft: false

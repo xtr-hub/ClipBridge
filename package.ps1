@@ -93,7 +93,7 @@ if (Test-Path "LICENSE") {
 }
 
 # Create zip package
-$zipName = "ClipBridge_Qt_$version.zip"
+$zipName = "ClipBridge_Windows_$version.zip"
 if (Test-Path $zipName) {
     Remove-Item $zipName -Force
 }
