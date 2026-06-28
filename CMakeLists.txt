@@ -43,12 +43,12 @@ else()
 endif()
 
 # Try to find Qt6 first, then Qt5
-find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Svg)
+find_package(Qt6 QUIET COMPONENTS Core Gui Widgets)
 if(Qt6_FOUND)
     set(QT_VERSION_MAJOR 6)
     message(STATUS "Building with Qt6")
 else()
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Svg)
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
     set(QT_VERSION_MAJOR 5)
     message(STATUS "Building with Qt5")
 endif()
@@ -79,7 +79,6 @@ set(HEADERS
 add_executable(ClipBridge
     ${SOURCES}
     ${HEADERS}
-    resources.qrc
 )
 
 # Link Qt libraries (works for both Qt5 and Qt6)
@@ -87,7 +86,6 @@ target_link_libraries(ClipBridge PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Svg
 )
 
 if(WIN32)
