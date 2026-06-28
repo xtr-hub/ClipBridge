@@ -18,7 +18,7 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("ClipBridge")
+project ("ClipBridge" VERSION 2.0.0)
 
 # 添加源文件（不包含 ClipBridge.cpp，因为它有 WinMain）
 set(SOURCES

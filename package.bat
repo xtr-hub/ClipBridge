@@ -44,9 +44,26 @@ REM 复制文档
 copy "README.md" "%PACKAGE_DIR%\" >nul
 copy "LICENSE" "%PACKAGE_DIR%\" >nul
 
-REM 获取版本号（从 git tag 或使用日期）
-for /f "tokens=*" %%i in ('git describe --tags --abbrev=0 2^>nul') do set "VERSION=%%i"
-if "%VERSION%"=="" set "VERSION=%date:~0,4%%date:~5,2%%date:~8,2%"
+REM 获取版本号 - 优先从 CMakeLists.txt 读取
+set "VERSION="
+if exist "CMakeLists.txt" (
+    for /f "tokens=4" %%i in ('findstr /r "project.*ClipBridge.*VERSION" CMakeLists.txt') do (
+        set "VERSION=%%i"
+    )
+)
+if defined VERSION (
+    echo [信息] 从 CMakeLists.txt 读取版本: %VERSION%
+) else (
+    REM 尝试从 git tag 获取
+    for /f "tokens=*" %%i in ('git describe --tags --abbrev=0 2^>nul') do set "VERSION=%%i"
+    if defined VERSION (
+        echo [信息] 从 git tag 读取版本: %VERSION%
+    ) else (
+        REM 使用日期作为后备
+        set "VERSION=%date:~0,4%%date:~5,2%%date:~8,2%"
+        echo [信息] 使用日期作为版本: %VERSION%
+    )
+)
 
 REM 创建 zip 压缩包
 set "ZIP_NAME=ClipBridge_Win32_%VERSION%.zip"
