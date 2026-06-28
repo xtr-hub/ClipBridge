@@ -61,6 +61,7 @@ set(SOURCES
     src/ui/HotkeyEditDialog.cpp
     src/utils/ClipboardHelper.cpp
     src/utils/Hotkey.cpp
+    src/utils/Simulator.cpp
 )
 
 set(HEADERS
@@ -71,6 +72,7 @@ set(HEADERS
     src/ui/HotkeyEditDialog.h
     src/utils/ClipboardHelper.h
     src/utils/Hotkey.h
+    src/utils/Simulator.h
 )
 
 add_executable(ClipBridge

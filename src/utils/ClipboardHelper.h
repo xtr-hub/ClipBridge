@@ -50,11 +50,7 @@ public:
      * @param text 文本内容
      */
     static void setText(const QString &text);
-
-    /**
-     * @brief 模拟粘贴按键 (Ctrl+V)
-     */
-    static void simulatePaste();
+    
 };
 
 } // namespace ClipBridge

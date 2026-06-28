@@ -1,5 +1,6 @@
 #include "ActionManager.h"
 #include "ClipboardHelper.h"
+#include "Simulator.h"
 #include <QDateTime>
 #include <QDir>
 #include <QStandardPaths>
@@ -55,7 +56,10 @@ void ActionManager::clipboardImagePath(const AppConfig::Behavior &behavior)
     ClipboardHelper::setText(outputText);
 
     if (behavior.autoPaste) {
-        ClipboardHelper::simulatePaste();
+        qDebug() << "About to call Simulator::simulatePaste()";
+        Simulator::simulatePaste();
+    } else {
+        qDebug() << "autoPaste is false, skipping paste";
     }
 
     qDebug() << "Image saved to:" << fullPath;
@@ -76,7 +80,10 @@ void ActionManager::stripNewlines(const AppConfig::Behavior &behavior)
     ClipboardHelper::setText(result);
 
     if (behavior.autoPaste) {
-        ClipboardHelper::simulatePaste();
+        qDebug() << "About to call Simulator::simulatePaste()";
+        Simulator::simulatePaste();
+    } else {
+        qDebug() << "autoPaste is false, skipping paste";
     }
 
     qDebug() << "Strip newlines done!";
