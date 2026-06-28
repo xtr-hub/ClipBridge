@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     QApplication::setQuitOnLastWindowClosed(false);
 
     QApplication::setApplicationName("ClipBridge");
-    QApplication::setApplicationVersion("2.0");
+    QApplication::setApplicationVersion("1.0.0");
     QApplication::setOrganizationName("ClipBridge");
     QApplication::setWindowIcon(QIcon(":/resources/icon.svg"));
 

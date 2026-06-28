@@ -112,7 +112,7 @@ if defined VERSION (
 )
 
 REM 创建 zip 压缩包
-set "ZIP_NAME=ClipBridge_Qt_%VERSION%.zip"
+set "ZIP_NAME=ClipBridge_Windows_%VERSION%.zip"
 if exist "%ZIP_NAME%" del "%ZIP_NAME%"
 
 echo [信息] 创建压缩包: %ZIP_NAME%...
