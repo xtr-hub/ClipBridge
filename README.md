@@ -28,7 +28,7 @@ Windows 快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺�
 
 | 分支 | 技术栈 | 描述 | 推荐场景 |
 | --- | --- | --- | --- |
-| **master** | Win32 API | Windows 原生版本（当前） | 只需要 Windows，轻量无依赖 |
+| **win32** | Win32 API | Windows 原生版本（当前） | 只需要 Windows，轻量无依赖 |
 | **qt** | Qt 6/5 | Qt 跨平台版本 | 需要 macOS/Linux 支持 |
 
 ---
