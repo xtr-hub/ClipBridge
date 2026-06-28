@@ -43,12 +43,12 @@ else()
 endif()
 
 # Try to find Qt6 first, then Qt5
-find_package(Qt6 QUIET COMPONENTS Core Gui Widgets)
+find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Svg)
 if(Qt6_FOUND)
     set(QT_VERSION_MAJOR 6)
     message(STATUS "Building with Qt6")
 else()
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Svg)
     set(QT_VERSION_MAJOR 5)
     message(STATUS "Building with Qt5")
 endif()
@@ -87,6 +87,7 @@ target_link_libraries(ClipBridge PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Svg
 )
 
 if(WIN32)
