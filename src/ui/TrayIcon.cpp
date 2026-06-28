@@ -31,6 +31,11 @@ TrayIcon::TrayIcon(const AppConfig &config, QObject *parent)
     connect(m_settingsAction, &QAction::triggered, this, &TrayIcon::showSettings);
     connect(m_aboutAction, &QAction::triggered, this, &TrayIcon::showAbout);
     connect(m_quitAction, &QAction::triggered, this, &TrayIcon::quitRequested);
+    connect(this, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
+        if (reason == QSystemTrayIcon::Trigger) {  // Left click
+            showSettings();
+        }
+    });
 }
 
 void TrayIcon::showAbout()
@@ -39,10 +44,10 @@ void TrayIcon::showAbout()
         "关于 ClipBridge",
         "<h3>ClipBridge</h3>"
         "<p>剪贴板工具 - 让终端中的图片粘贴更简单</p>"
-        "<p>快捷键:</p>"
+        "<p>功能:</p>"
         "<ul>"
-        "<li>Ctrl+Alt+I: 将剪贴板图片转为路径</li>"
-        "<li>Ctrl+Alt+J: 去除文本换行符</li>"
+        "<li> 将剪贴板图片转为路径</li>"
+        "<li> 去除文本换行符</li>"
         "</ul>");
 }
 

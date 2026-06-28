@@ -10,7 +10,7 @@
         },
         {
             "action": "strip_newlines",
-            "key": "Ctrl+Alt+J",
+            "key": "Ctrl+Alt+K",
             "behavior": {
                 "auto_paste": true,
                 "auto_submit": false

@@ -5,6 +5,8 @@
 #include <QAbstractNativeEventFilter>
 #include <QtGlobal>
 #include <QString>
+#include <QMutex>
+#include <QList>
 
 #ifdef Q_OS_MAC
 #include <ApplicationServices/ApplicationServices.h>
@@ -19,9 +21,9 @@ namespace ClipBridge {
  * @brief 全局热键支持
  *
  * 平台支持:
- * - Windows: ✅ 完整实现
- * - Linux (X11): ✅ 完整实现
- * - macOS: ✅ 完整实现 (需要辅助功能权限)
+ * - Windows: 完整实现
+ * - Linux (X11): 完整实现
+ * - macOS: 完整实现 (需要辅助功能权限)
  */
 class Hotkey : public QObject, public QAbstractNativeEventFilter
 {
@@ -44,6 +46,10 @@ signals:
 
 private slots:
     void trigger();
+
+public:
+    // Static function to handle global events (called by global event filter)
+    static bool handleGlobalEvent(const QByteArray &eventType, void *message, void *result);
 
 protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)

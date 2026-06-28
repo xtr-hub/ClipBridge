@@ -20,6 +20,7 @@
 #include <QHBoxLayout>
 
 #include "core/AppConfig.h"
+#include "ui/HotkeyEditDialog.h"
 
 namespace ClipBridge {
 

@@ -1,4 +1,5 @@
 #include "SettingsDialog.h"
+#include "HotkeyEditDialog.h"
 #include <QMessageBox>
 #include <QDir>
 #include <QFileInfo>
@@ -12,8 +13,8 @@ SettingsDialog::SettingsDialog(const AppConfig &config, QWidget *parent)
     : QDialog(parent), m_config(config)
 {
     setWindowTitle("ClipBridge 设置");
-    setMinimumSize(600, 500);
-    resize(650, 550);
+    setMinimumSize(680, 620);
+    resize(720, 650);
 
     setupUI();
     loadConfigToUI();
@@ -22,18 +23,21 @@ SettingsDialog::SettingsDialog(const AppConfig &config, QWidget *parent)
 void SettingsDialog::setupUI()
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(15);
-    mainLayout->setContentsMargins(20, 20, 20, 20);
+    mainLayout->setSpacing(20);
+    mainLayout->setContentsMargins(25, 25, 25, 25);
 
     // 热键组
     QGroupBox *hotkeyGroup = new QGroupBox("快捷键", this);
     QVBoxLayout *hotkeyLayout = new QVBoxLayout(hotkeyGroup);
+    hotkeyLayout->setSpacing(12);
+    hotkeyLayout->setContentsMargins(18, 22, 18, 18);
 
     m_hotkeyList = new QListWidget(this);
     m_hotkeyList->setMaximumHeight(150);
     hotkeyLayout->addWidget(m_hotkeyList);
 
     QHBoxLayout *buttonLayout = new QHBoxLayout();
+    buttonLayout->setSpacing(10);
     QPushButton *addBtn = new QPushButton("添加", this);
     QPushButton *editBtn = new QPushButton("编辑", this);
     QPushButton *removeBtn = new QPushButton("删除", this);
@@ -48,20 +52,25 @@ void SettingsDialog::setupUI()
     // 输出设置组
     QGroupBox *outputGroup = new QGroupBox("输出设置", this);
     QFormLayout *outputLayout = new QFormLayout(outputGroup);
-    outputLayout->setSpacing(12);
-    outputLayout->setContentsMargins(15, 20, 15, 20);
+    outputLayout->setSpacing(15);
+    outputLayout->setContentsMargins(18, 25, 18, 22);
+    outputLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
     m_formatEdit = new QLineEdit(this);
+    m_formatEdit->setMinimumHeight(28);
     m_formatEdit->setPlaceholderText("例如: 请查看这张图片 {path}");
     outputLayout->addRow("格式:", m_formatEdit);
 
     m_pathModeCombo = new QComboBox(this);
+    m_pathModeCombo->setMinimumHeight(28);
     m_pathModeCombo->addItem("工作区默认路径", "workspace");
     m_pathModeCombo->addItem("自定义路径", "custom_path");
     outputLayout->addRow("保存模式:", m_pathModeCombo);
 
     QHBoxLayout *pathLayout = new QHBoxLayout();
+    pathLayout->setSpacing(10);
     m_customPathEdit = new QLineEdit(this);
+    m_customPathEdit->setMinimumHeight(28);
     m_customPathEdit->setPlaceholderText("选择自定义图片保存路径");
     m_browseBtn = new QPushButton("浏览...", this);
     m_browseBtn->setMaximumWidth(100);
@@ -75,7 +84,8 @@ void SettingsDialog::setupUI()
     // 默认行为配置组
     QGroupBox *defaultBehaviorGroup = new QGroupBox("默认行为配置（用于新添加的热键）", this);
     QVBoxLayout *defaultBehaviorLayout = new QVBoxLayout(defaultBehaviorGroup);
-    defaultBehaviorLayout->setContentsMargins(15, 20, 15, 20);
+    defaultBehaviorLayout->setSpacing(12);
+    defaultBehaviorLayout->setContentsMargins(18, 25, 18, 22);
 
     m_defaultAutoPasteCheck = new QCheckBox("自动粘贴", this);
     m_defaultAutoSubmitCheck = new QCheckBox("自动提交", this);
@@ -88,10 +98,13 @@ void SettingsDialog::setupUI()
 
     // 底部按钮
     QHBoxLayout *bottomLayout = new QHBoxLayout();
+    bottomLayout->setSpacing(10);
     QPushButton *saveBtn = new QPushButton("保存", this);
-    saveBtn->setMinimumWidth(80);
+    saveBtn->setMinimumWidth(90);
+    saveBtn->setMinimumHeight(30);
     QPushButton *cancelBtn = new QPushButton("取消", this);
-    cancelBtn->setMinimumWidth(80);
+    cancelBtn->setMinimumWidth(90);
+    cancelBtn->setMinimumHeight(30);
 
     bottomLayout->addStretch();
     bottomLayout->addWidget(saveBtn);
@@ -172,8 +185,7 @@ void SettingsDialog::browsePath()
         this,
         "选择图片保存目录",
         initialPath,
-        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-    );
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if (!dirPath.isEmpty()) {
         m_customPathEdit->setText(dirPath);
@@ -182,17 +194,47 @@ void SettingsDialog::browsePath()
 
 void SettingsDialog::addHotkey()
 {
-    QMessageBox::information(this, "提示", "编辑功能请在 config.json 中手动添加。\n完整 GUI 编辑功能正在开发中。");
+    HotkeyEditDialog dialog(m_config, HotkeyEditDialog::AddMode, -1, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        m_config.hotkeys.append(dialog.hotkeyBinding());
+        loadConfigToUI();
+    }
 }
 
 void SettingsDialog::editHotkey()
 {
-    QMessageBox::information(this, "提示", "编辑功能请在 config.json 中手动修改。\n完整 GUI 编辑功能正在开发中。");
+    int currentRow = m_hotkeyList->currentRow();
+    if (currentRow < 0 || currentRow >= m_config.hotkeys.size()) {
+        QMessageBox::information(this, "提示", "请先选择要编辑的热键！");
+        return;
+    }
+
+    HotkeyEditDialog dialog(m_config, HotkeyEditDialog::EditMode, currentRow, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        m_config.hotkeys[currentRow] = dialog.hotkeyBinding();
+        loadConfigToUI();
+    }
 }
 
 void SettingsDialog::removeHotkey()
 {
-    QMessageBox::information(this, "提示", "删除功能请在 config.json 中手动修改。\n完整 GUI 编辑功能正在开发中。");
+    int currentRow = m_hotkeyList->currentRow();
+    if (currentRow < 0 || currentRow >= m_config.hotkeys.size()) {
+        QMessageBox::information(this, "提示", "请先选择要删除的热键！");
+        return;
+    }
+
+    auto reply = QMessageBox::question(
+        this,
+        "确认删除",
+        "确定要删除这个热键吗？",
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        m_config.hotkeys.removeAt(currentRow);
+        loadConfigToUI();
+    }
 }
 
 void SettingsDialog::saveConfig()
@@ -205,7 +247,6 @@ void SettingsDialog::saveConfig()
 
     m_config.save(QDir(QCoreApplication::applicationDirPath()).filePath("config.json"));
 
-    QMessageBox::information(this, "成功", "配置已保存！\n已自动热更新，无需重启程序。");
     accept();
 }
 

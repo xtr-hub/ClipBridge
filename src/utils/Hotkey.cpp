@@ -15,6 +15,23 @@
 
 namespace ClipBridge {
 
+namespace {
+    // Global event filter to handle all hotkeys
+    class HotkeyEventFilter : public QAbstractNativeEventFilter {
+    public:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override
+#else
+        bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) override
+#endif
+        {
+            return Hotkey::handleGlobalEvent(eventType, message, result);
+        }
+    };
+
+    HotkeyEventFilter *g_hotkeyEventFilter = nullptr;
+}
+
 int Hotkey::m_nextId = 1;
 QList<Hotkey*> Hotkey::s_allHotkeys;
 QMutex Hotkey::s_hotkeyMutex;
@@ -36,11 +53,10 @@ Hotkey::Hotkey(const QString &action, const QKeySequence &keySequence, const App
     , m_flags(0)
 #endif
 {
-    // 只安装一次 nativeEventFilter
-    static bool eventFilterInstalled = false;
-    if (!eventFilterInstalled) {
-        qApp->installNativeEventFilter(this);
-        eventFilterInstalled = true;
+    // Install global event filter once
+    if (!g_hotkeyEventFilter) {
+        g_hotkeyEventFilter = new HotkeyEventFilter();
+        qApp->installNativeEventFilter(g_hotkeyEventFilter);
     }
 
     // 添加到全局列表
@@ -68,6 +84,49 @@ Hotkey::~Hotkey()
 void Hotkey::trigger()
 {
     emit activated(m_action, m_behavior);
+}
+
+bool Hotkey::handleGlobalEvent(const QByteArray &eventType, void *message, void *result)
+{
+    Q_UNUSED(eventType);
+    Q_UNUSED(result);
+
+#ifdef Q_OS_WIN
+    MSG *msg = static_cast<MSG *>(message);
+    if (msg->message == WM_HOTKEY) {
+        // Find the hotkey that matches this ID
+        QMutexLocker locker(&s_hotkeyMutex);
+        for (Hotkey *hotkey : s_allHotkeys) {
+            if (hotkey->m_hotkeyId == static_cast<int>(msg->wParam)) {
+                emit hotkey->activated(hotkey->m_action, hotkey->m_behavior);
+                return true;
+            }
+        }
+    }
+#elif defined(Q_OS_LINUX)
+    if (QX11Info::isPlatformX11()) {
+        Display *dpy = QX11Info::display();
+        if (dpy) {
+            while (XPending(dpy)) {
+                XEvent event;
+                XNextEvent(dpy, &event);
+                if (event.type == KeyPress) {
+                    QMutexLocker locker(&s_hotkeyMutex);
+                    for (Hotkey *hotkey : s_allHotkeys) {
+                        if (hotkey->m_registered && event.xkey.keycode == hotkey->m_x11Keycode) {
+                            unsigned int state = event.xkey.state & (ControlMask | ShiftMask | Mod1Mask | Mod4Mask);
+                            if (state == hotkey->m_x11Modifiers) {
+                                emit hotkey->activated(hotkey->m_action, hotkey->m_behavior);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+#endif
+    return false;
 }
 
 #ifdef Q_OS_MAC
@@ -339,44 +398,16 @@ void Hotkey::unregisterHotkey()
     m_registered = false;
 }
 
+// The global HotkeyEventFilter handles events now, so we don't need per-instance filtering
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 bool Hotkey::nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result)
-{
-    Q_UNUSED(result);
 #else
 bool Hotkey::nativeEventFilter(const QByteArray &eventType, void *message, long *result)
+#endif
 {
-    Q_UNUSED(result);
-#endif
     Q_UNUSED(eventType);
-
-#ifdef Q_OS_WIN
-    MSG *msg = static_cast<MSG *>(message);
-    if (msg->message == WM_HOTKEY && msg->wParam == m_hotkeyId) {
-        emit activated(m_action, m_behavior);
-        return true;
-    }
-#elif defined(Q_OS_LINUX)
-    if (QX11Info::isPlatformX11() && m_registered) {
-        Display *dpy = QX11Info::display();
-        if (dpy) {
-            while (XPending(dpy)) {
-                XEvent event;
-                XNextEvent(dpy, &event);
-                if (event.type == KeyPress) {
-                    if (event.xkey.keycode == m_x11Keycode) {
-                        unsigned int state = event.xkey.state & (ControlMask | ShiftMask | Mod1Mask | Mod4Mask);
-                        if (state == m_x11Modifiers) {
-                            emit activated(m_action, m_behavior);
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-#endif
-
+    Q_UNUSED(message);
+    Q_UNUSED(result);
     return false;
 }
 

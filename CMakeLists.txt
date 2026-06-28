@@ -14,21 +14,32 @@ if(MSVC)
 endif()
 
 # Common Qt installation paths (for convenience)
-list(APPEND CMAKE_PREFIX_PATH
-    # macOS
-    "~/Qt/5.15.2/clang_64"
-    "~/5.15.2/clang_64"
-    "/usr/local/opt/qt5"
-    "/opt/homebrew/opt/qt5"
-    "/opt/homebrew/opt/qt6"
-    # Windows
-    "C:/Qt/5.15.2/msvc2019_64"
-    "C:/Qt/6.5.0/msvc2019_64"
-    "D:/tools/qt/6.11.1/mingw_64"
-    # Linux
-    "/usr"
-    "/opt/qt5"
-)
+# Prefer environment variables, fall back to default paths
+if(NOT DEFINED ENV{CMAKE_PREFIX_PATH} AND NOT DEFINED ENV{QTDIR} AND NOT DEFINED ENV{Qt6_DIR} AND NOT DEFINED ENV{Qt5_DIR})
+    list(APPEND CMAKE_PREFIX_PATH
+        # macOS
+        "~/Qt/5.15.2/clang_64"
+        "~/5.15.2/clang_64"
+        "/usr/local/opt/qt5"
+        "/opt/homebrew/opt/qt5"
+        "/opt/homebrew/opt/qt6"
+        # Windows
+        "C:/Qt/5.15.2/msvc2019_64"
+        "C:/Qt/6.5.0/msvc2019_64"
+        "D:/tools/qt/6.11.1/mingw_64"
+        # Linux
+        "/usr"
+        "/opt/qt5"
+    )
+else()
+    # Use environment variables if set
+    if(DEFINED ENV{QTDIR})
+        list(APPEND CMAKE_PREFIX_PATH "$ENV{QTDIR}")
+    endif()
+    if(DEFINED ENV{CMAKE_PREFIX_PATH})
+        list(APPEND CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
+    endif()
+endif()
 
 # Try to find Qt6 first, then Qt5
 find_package(Qt6 QUIET COMPONENTS Core Gui Widgets)
@@ -47,6 +58,7 @@ set(SOURCES
     src/core/AppConfig.cpp
     src/ui/TrayIcon.cpp
     src/ui/SettingsDialog.cpp
+    src/ui/HotkeyEditDialog.cpp
     src/utils/ClipboardHelper.cpp
     src/utils/Hotkey.cpp
 )
@@ -56,6 +68,7 @@ set(HEADERS
     src/core/AppConfig.h
     src/ui/TrayIcon.h
     src/ui/SettingsDialog.h
+    src/ui/HotkeyEditDialog.h
     src/utils/ClipboardHelper.h
     src/utils/Hotkey.h
 )
@@ -73,9 +86,10 @@ target_link_libraries(ClipBridge PRIVATE
 )
 
 if(WIN32)
-    set_target_properties(ClipBridge PROPERTIES
-        WIN32_EXECUTABLE ON
-    )
+    # Disable WIN32_EXECUTABLE for Qt6 + MinGW to avoid linking issues
+    # set_target_properties(ClipBridge PROPERTIES
+    #     WIN32_EXECUTABLE ON
+    # )
 elseif(APPLE)
     find_library(APP_SERVICES ApplicationServices)
     target_link_libraries(ClipBridge PRIVATE ${APP_SERVICES})
@@ -101,3 +115,30 @@ add_custom_command(TARGET ClipBridge POST_BUILD
     "${CMAKE_CURRENT_SOURCE_DIR}/config.json"
     $<TARGET_FILE_DIR:ClipBridge>/config.json
 )
+
+# Copy Qt DLLs on Windows
+if(WIN32)
+    # Find Qt DLL directory
+    get_target_property(_qt6_core_location Qt6::Core LOCATION)
+    get_filename_component(_qt6_bin_dir "${_qt6_core_location}" DIRECTORY)
+    get_filename_component(_qt6_dir "${_qt6_bin_dir}" DIRECTORY)
+
+    # Copy required Qt DLLs
+    add_custom_command(TARGET ClipBridge POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${_qt6_bin_dir}/Qt6Core.dll"
+            "${_qt6_bin_dir}/Qt6Gui.dll"
+            "${_qt6_bin_dir}/Qt6Widgets.dll"
+            $<TARGET_FILE_DIR:ClipBridge>/
+        COMMENT "Copying Qt6 DLLs to output directory"
+    )
+
+    # Copy Qt platform plugin
+    add_custom_command(TARGET ClipBridge POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:ClipBridge>/platforms
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${_qt6_dir}/plugins/platforms/qwindows.dll"
+            $<TARGET_FILE_DIR:ClipBridge>/platforms/
+        COMMENT "Copying Qt6 platform plugin"
+    )
+endif()
