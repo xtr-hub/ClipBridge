@@ -42,6 +42,10 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName("ClipBridge");
     QApplication::setApplicationVersion("2.0");
     QApplication::setOrganizationName("ClipBridge");
+    QApplication::setWindowIcon(QIcon(":/resources/icon.svg"));
+
+    // 启用深色模式自适应
+    app.setStyle("Fusion");
 
     QString configPath = QDir(QCoreApplication::applicationDirPath()).filePath("config.json");
 

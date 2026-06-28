@@ -8,8 +8,9 @@ HotkeyEditDialog::HotkeyEditDialog(const AppConfig &config, Mode mode, int editI
     : QDialog(parent), m_config(config), m_mode(mode), m_editIndex(editIndex)
 {
     setWindowTitle(mode == AddMode ? "添加热键" : "编辑热键");
-    setMinimumSize(450, 360);
-    resize(480, 380);
+    setWindowIcon(QIcon(":/resources/icon.svg"));
+    setMinimumSize(380, 340);
+    resize(400, 360);
 
     if (m_mode == EditMode && m_editIndex >= 0 && m_editIndex < m_config.hotkeys.size()) {
         m_binding = m_config.hotkeys[m_editIndex];
@@ -27,11 +28,11 @@ HotkeyEditDialog::HotkeyEditDialog(const AppConfig &config, Mode mode, int editI
 void HotkeyEditDialog::setupUI()
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(20);
-    mainLayout->setContentsMargins(25, 25, 25, 25);
+    mainLayout->setSpacing(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
 
     QFormLayout *formLayout = new QFormLayout();
-    formLayout->setSpacing(15);
+    formLayout->setSpacing(12);
 
     m_actionCombo = new QComboBox(this);
     m_actionCombo->setMinimumHeight(28);
@@ -51,8 +52,8 @@ void HotkeyEditDialog::setupUI()
     // Behavior group
     QGroupBox *behaviorGroup = new QGroupBox("行为设置", this);
     QVBoxLayout *behaviorLayout = new QVBoxLayout(behaviorGroup);
-    behaviorLayout->setSpacing(12);
-    behaviorLayout->setContentsMargins(18, 22, 18, 18);
+    behaviorLayout->setSpacing(10);
+    behaviorLayout->setContentsMargins(12, 18, 12, 15);
 
     m_autoPasteCheck = new QCheckBox("自动粘贴", this);
     m_autoPasteCheck->setToolTip("执行动作后自动将结果粘贴到当前活动窗口");

@@ -13,8 +13,9 @@ SettingsDialog::SettingsDialog(const AppConfig &config, QWidget *parent)
     : QDialog(parent), m_config(config)
 {
     setWindowTitle("ClipBridge 设置");
-    setMinimumSize(680, 620);
-    resize(720, 650);
+    setWindowIcon(QIcon(":/resources/icon.svg"));
+    setMinimumSize(520, 580);
+    resize(560, 600);
 
     setupUI();
     loadConfigToUI();
@@ -23,14 +24,14 @@ SettingsDialog::SettingsDialog(const AppConfig &config, QWidget *parent)
 void SettingsDialog::setupUI()
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(20);
-    mainLayout->setContentsMargins(25, 25, 25, 25);
+    mainLayout->setSpacing(15);
+    mainLayout->setContentsMargins(15, 15, 15, 15);
 
     // 热键组
     QGroupBox *hotkeyGroup = new QGroupBox("快捷键", this);
     QVBoxLayout *hotkeyLayout = new QVBoxLayout(hotkeyGroup);
-    hotkeyLayout->setSpacing(12);
-    hotkeyLayout->setContentsMargins(18, 22, 18, 18);
+    hotkeyLayout->setSpacing(10);
+    hotkeyLayout->setContentsMargins(12, 18, 12, 12);
 
     m_hotkeyList = new QListWidget(this);
     m_hotkeyList->setMaximumHeight(150);
@@ -52,8 +53,8 @@ void SettingsDialog::setupUI()
     // 输出设置组
     QGroupBox *outputGroup = new QGroupBox("输出设置", this);
     QFormLayout *outputLayout = new QFormLayout(outputGroup);
-    outputLayout->setSpacing(15);
-    outputLayout->setContentsMargins(18, 25, 18, 22);
+    outputLayout->setSpacing(12);
+    outputLayout->setContentsMargins(12, 18, 12, 15);
     outputLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
     m_formatEdit = new QLineEdit(this);
@@ -84,8 +85,8 @@ void SettingsDialog::setupUI()
     // 默认行为配置组
     QGroupBox *defaultBehaviorGroup = new QGroupBox("默认行为配置（用于新添加的热键）", this);
     QVBoxLayout *defaultBehaviorLayout = new QVBoxLayout(defaultBehaviorGroup);
-    defaultBehaviorLayout->setSpacing(12);
-    defaultBehaviorLayout->setContentsMargins(18, 25, 18, 22);
+    defaultBehaviorLayout->setSpacing(10);
+    defaultBehaviorLayout->setContentsMargins(12, 18, 12, 15);
 
     m_defaultAutoPasteCheck = new QCheckBox("自动粘贴", this);
     m_defaultAutoSubmitCheck = new QCheckBox("自动提交", this);
