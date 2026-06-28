@@ -92,14 +92,45 @@ if (Test-Path $exePath) {
     }
 }
 
-# 获取版本号
-try {
-    $version = git describe --tags --abbrev=0 2>$null
-} catch {
-    $version = ""
+# 从 CMakeLists.txt 读取版本号
+function Get-VersionFromCMake {
+    param([string]$cmakePath)
+    if (Test-Path $cmakePath) {
+        $content = Get-Content $cmakePath -Raw
+        if ($content -match 'project\(ClipBridge VERSION ([0-9]+\.[0-9]+\.[0-9]+)') {
+            return $matches[1]
+        }
+    }
+    return $null
 }
+
+# 获取版本号
+$version = $null
+
+# 1. 优先从 CMakeLists.txt 读取
+$cmakeVersion = Get-VersionFromCMake "CMakeLists.txt"
+if ($cmakeVersion) {
+    $version = $cmakeVersion
+    Write-Host "[信息] 从 CMakeLists.txt 读取版本: $version" -ForegroundColor Cyan
+}
+
+# 2. 尝试从 git tag 获取
+if (-not $version) {
+    try {
+        $gitVersion = git describe --tags --abbrev=0 2>$null
+        if ($gitVersion) {
+            $version = $gitVersion
+            Write-Host "[信息] 从 git tag 读取版本: $version" -ForegroundColor Cyan
+        }
+    } catch {
+        $version = $null
+    }
+}
+
+# 3. 使用日期作为后备
 if (-not $version) {
     $version = Get-Date -Format "yyyyMMdd"
+    Write-Host "[信息] 使用日期作为版本: $version" -ForegroundColor Yellow
 }
 
 # 创建 zip 压缩包
