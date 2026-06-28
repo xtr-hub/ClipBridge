@@ -11,6 +11,7 @@ set(CMAKE_AUTOUIC ON)
 if(MSVC)
     add_compile_options(/Zc:__cplusplus)
     add_compile_options(/utf-8)
+    add_compile_options(/permissive-)
 endif()
 
 # Common Qt installation paths (for convenience)
@@ -118,29 +119,29 @@ add_custom_command(TARGET ClipBridge POST_BUILD
     $<TARGET_FILE_DIR:ClipBridge>/config.json
 )
 
-# Copy Qt DLLs on Windows
+# Copy Qt DLLs on Windows - using windeployqt instead for reliability
 if(WIN32)
-    # Find Qt DLL directory
-    get_target_property(_qt6_core_location Qt6::Core LOCATION)
-    get_filename_component(_qt6_bin_dir "${_qt6_core_location}" DIRECTORY)
-    get_filename_component(_qt6_dir "${_qt6_bin_dir}" DIRECTORY)
+    # Find windeployqt
+    if(QT_VERSION_MAJOR EQUAL 6)
+        get_target_property(_qt_core_location Qt6::Core LOCATION)
+    else()
+        get_target_property(_qt_core_location Qt5::Core LOCATION)
+    endif()
+    get_filename_component(_qt_bin_dir "${_qt_core_location}" DIRECTORY)
+    find_program(_windeployqt_exe windeployqt PATHS "${_qt_bin_dir}")
 
-    # Copy required Qt DLLs
-    add_custom_command(TARGET ClipBridge POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${_qt6_bin_dir}/Qt6Core.dll"
-            "${_qt6_bin_dir}/Qt6Gui.dll"
-            "${_qt6_bin_dir}/Qt6Widgets.dll"
-            $<TARGET_FILE_DIR:ClipBridge>/
-        COMMENT "Copying Qt6 DLLs to output directory"
-    )
-
-    # Copy Qt platform plugin
-    add_custom_command(TARGET ClipBridge POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:ClipBridge>/platforms
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${_qt6_dir}/plugins/platforms/qwindows.dll"
-            $<TARGET_FILE_DIR:ClipBridge>/platforms/
-        COMMENT "Copying Qt6 platform plugin"
-    )
+    if(_windeployqt_exe)
+        # Run windeployqt to copy all required Qt DLLs and plugins
+        add_custom_command(TARGET ClipBridge POST_BUILD
+            COMMAND "${_windeployqt_exe}"
+            --no-translations
+            --no-system-d3d-compiler
+            --no-opengl-sw
+            --no-quick-import
+            "$<TARGET_FILE:ClipBridge>"
+            COMMENT "Deploying Qt ${QT_VERSION_MAJOR} runtime using windeployqt"
+        )
+    else()
+        message(WARNING "windeployqt not found - you'll need to manually copy Qt DLLs")
+    endif()
 endif()
