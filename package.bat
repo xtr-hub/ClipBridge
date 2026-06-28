@@ -9,17 +9,15 @@ REM 检查是否存在 build 目录
 if not exist "build" (
     echo [错误] 未找到 build 目录，请先编译项目！
     echo 运行以下命令编译：
-    echo   mkdir build
-    echo   cd build
-    echo   cmake .. -G "Visual Studio 17 2022" -A x64
-    echo   cmake --build . --config Release
+    echo   cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+    echo   cmake --build build
     pause
     exit /b 1
 )
 
-REM 检查 Release 编译结果
-if not exist "build\Release\ClipBridge.exe" (
-    echo [错误] 未找到 ClipBridge.exe，请先编译 Release 版本！
+REM 检查编译结果
+if not exist "build\ClipBridge.exe" (
+    echo [错误] 未找到 ClipBridge.exe，请先编译！
     pause
     exit /b 1
 )
@@ -53,8 +51,8 @@ mkdir "%PACKAGE_DIR%"
 
 echo [信息] 复制文件...
 
-REM 复制主程序和已有的 DLL
-xcopy "build\Release\*" "%PACKAGE_DIR%\" /E /I /Y >nul
+REM 复制主程序
+copy "build\ClipBridge.exe" "%PACKAGE_DIR%\" >nul
 
 REM 复制配置文件
 copy "config.json" "%PACKAGE_DIR%\" >nul

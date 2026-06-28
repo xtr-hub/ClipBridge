@@ -8,17 +8,15 @@ Write-Host ""
 if (-not (Test-Path "build")) {
     Write-Host "[错误] 未找到 build 目录，请先编译项目！" -ForegroundColor Red
     Write-Host "运行以下命令编译：" -ForegroundColor Yellow
-    Write-Host "  mkdir build"
-    Write-Host "  cd build"
-    Write-Host "  cmake .. -G 'Visual Studio 17 2022' -A x64"
-    Write-Host "  cmake --build . --config Release"
+    Write-Host "  cmake -B build -G `"MinGW Makefiles`" -DCMAKE_BUILD_TYPE=Release"
+    Write-Host "  cmake --build build"
     Read-Host "按回车键退出"
     exit 1
 }
 
-# 检查 Release 编译结果
-if (-not (Test-Path "build\Release\ClipBridge.exe")) {
-    Write-Host "[错误] 未找到 ClipBridge.exe，请先编译 Release 版本！" -ForegroundColor Red
+# 检查编译结果
+if (-not (Test-Path "build\ClipBridge.exe")) {
+    Write-Host "[错误] 未找到 ClipBridge.exe，请先编译！" -ForegroundColor Red
     Read-Host "按回车键退出"
     exit 1
 }
@@ -44,7 +42,7 @@ if (-not $qtDir -and $env:QT_DIR) {
 
 if (-not $qtDir) {
     Write-Host "[警告] 未自动找到 Qt 目录，请手动设置 QT_DIR 环境变量" -ForegroundColor Yellow
-    Write-Host "例如: `$env:QT_DIR = 'C:\Qt\6.5.0\msvc2019_64'" -ForegroundColor Gray
+    Write-Host "例如: `$env:QT_DIR = `"D:\tools\qt\6.11.1\mingw_64`"" -ForegroundColor Gray
     Write-Host ""
 } else {
     Write-Host "[信息] 使用 Qt 目录: $qtDir" -ForegroundColor Cyan
@@ -61,8 +59,8 @@ New-Item -Path $packageDir -ItemType Directory | Out-Null
 
 Write-Host "[信息] 复制文件..." -ForegroundColor Cyan
 
-# 复制主程序和已有的 DLL
-Copy-Item -Path "build\Release\*" -Destination "$packageDir\" -Recurse -Force
+# 复制主程序
+Copy-Item "build\ClipBridge.exe" -Destination "$packageDir\" -Force
 
 # 复制配置文件
 Copy-Item "config.json" -Destination "$packageDir\" -Force

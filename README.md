@@ -162,27 +162,46 @@
 
 2. **配置 Qt 路径**
 
-   编辑 `CMakeLists.txt`，添加你的 Qt 安装路径：
+   编辑 `CMakeLists.txt`，添加你的 Qt 安装路径（默认已配置常见路径）：
 
    ```cmake
    list(APPEND CMAKE_PREFIX_PATH
        # 改为你的实际路径
-       "D:/Qt/6.11.1/msvc2019_64"
+       "C:/Qt/6.11.1/msvc2019_64"
        "D:/tools/qt/6.11.1/mingw_64"
    )
    ```
 
 3. **构建项目**
 
-   使用 VS Code CMake Tools 插件（推荐），或命令行：
+   方式一：使用 MinGW（推荐）
+   ```bash
+   cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+   cmake --build build -j8
+   ```
 
+   方式二：使用 Visual Studio
    ```bash
    mkdir build && cd build
    cmake -G "Visual Studio 17 2022" -A x64 ..
    cmake --build . --config Release
    ```
 
-   构建完成后，可执行文件在 `build/Release/` 目录。
+   构建完成后，可执行文件在 `build/`（MinGW）或 `build/Release/`（Visual Studio）目录。
+   CMake 会自动运行 `windeployqt` 复制 Qt DLL 到输出目录。
+
+4. **打包发布**
+
+   项目包含打包脚本，构建完成后运行：
+   ```cmd
+   # 使用批处理脚本
+   package.bat
+
+   # 或使用 PowerShell 脚本
+   powershell -ExecutionPolicy Bypass -File package.ps1
+   ```
+
+   脚本会创建包含所有依赖的 `ClipBridge_Qt` 文件夹和 zip 压缩包。
 
 ---
 
