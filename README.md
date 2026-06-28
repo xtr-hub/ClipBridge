@@ -142,8 +142,20 @@ Windows 快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺�
 - **Visual Studio 2019+**
 - vcpkg（可选，用于 nlohmann_json）
 
+### 一键构建打包（推荐）
+
+项目包含一键构建打包脚本，一行命令搞定：
+```cmd
+# 使用批处理脚本
+build_and_package.bat
+
+# 或使用 PowerShell 脚本
+powershell -ExecutionPolicy Bypass -File build_and_package.ps1
+```
+
 ### 构建步骤
 
+如果你想手动构建：
 ```bash
 mkdir build && cd build
 cmake .. -G "Visual Studio 17 2022" -A x64
@@ -154,8 +166,7 @@ cmake --build . --config Release
 
 ### 打包发布
 
-项目包含打包脚本，构建完成后运行：
-
+如果你已经手动构建过，只想打包，运行：
 ```cmd
 # 使用批处理脚本
 package.bat
