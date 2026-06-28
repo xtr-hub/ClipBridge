@@ -89,10 +89,10 @@ target_link_libraries(ClipBridge PRIVATE
 )
 
 if(WIN32)
-    # Disable WIN32_EXECUTABLE for Qt6 + MinGW to avoid linking issues
-    # set_target_properties(ClipBridge PROPERTIES
-    #     WIN32_EXECUTABLE ON
-    # )
+    # 设置为 Windows GUI 应用（不显示控制台窗口）
+    set_target_properties(ClipBridge PROPERTIES
+        WIN32_EXECUTABLE ON
+    )
 elseif(APPLE)
     find_library(APP_SERVICES ApplicationServices)
     target_link_libraries(ClipBridge PRIVATE ${APP_SERVICES})
