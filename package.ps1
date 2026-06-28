@@ -14,9 +14,19 @@ if (-not (Test-Path "build")) {
     exit 1
 }
 
-# 检查编译结果
-if (-not (Test-Path "build\ClipBridge.exe")) {
+# 检测编译输出路径（支持 MinGW 和 MSVC）
+$exePath = ""
+if (Test-Path "build\ClipBridge.exe") {
+    $exePath = "build\ClipBridge.exe"
+    Write-Host "[信息] 检测到 MinGW 编译输出" -ForegroundColor Green
+} elseif (Test-Path "build\Release\ClipBridge.exe") {
+    $exePath = "build\Release\ClipBridge.exe"
+    Write-Host "[信息] 检测到 MSVC 编译输出" -ForegroundColor Green
+} else {
     Write-Host "[错误] 未找到 ClipBridge.exe，请先编译！" -ForegroundColor Red
+    Write-Host "查找路径：" -ForegroundColor Yellow
+    Write-Host "  - build\ClipBridge.exe (MinGW)"
+    Write-Host "  - build\Release\ClipBridge.exe (MSVC)"
     Read-Host "按回车键退出"
     exit 1
 }
@@ -60,7 +70,7 @@ New-Item -Path $packageDir -ItemType Directory | Out-Null
 Write-Host "[信息] 复制文件..." -ForegroundColor Cyan
 
 # 复制主程序
-Copy-Item "build\ClipBridge.exe" -Destination "$packageDir\" -Force
+Copy-Item $exePath -Destination "$packageDir\" -Force
 
 # 复制配置文件
 Copy-Item "config.json" -Destination "$packageDir\" -Force

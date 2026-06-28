@@ -15,9 +15,19 @@ if not exist "build" (
     exit /b 1
 )
 
-REM 检查编译结果
-if not exist "build\ClipBridge.exe" (
+REM 检测编译输出路径（支持 MinGW 和 MSVC）
+set "EXE_PATH="
+if exist "build\ClipBridge.exe" (
+    set "EXE_PATH=build\ClipBridge.exe"
+    echo [信息] 检测到 MinGW 编译输出
+) else if exist "build\Release\ClipBridge.exe" (
+    set "EXE_PATH=build\Release\ClipBridge.exe"
+    echo [信息] 检测到 MSVC 编译输出
+) else (
     echo [错误] 未找到 ClipBridge.exe，请先编译！
+    echo 查找路径：
+    echo   - build\ClipBridge.exe (MinGW)
+    echo   - build\Release\ClipBridge.exe (MSVC)
     pause
     exit /b 1
 )
@@ -52,7 +62,7 @@ mkdir "%PACKAGE_DIR%"
 echo [信息] 复制文件...
 
 REM 复制主程序
-copy "build\ClipBridge.exe" "%PACKAGE_DIR%\" >nul
+copy "%EXE_PATH%" "%PACKAGE_DIR%\" >nul
 
 REM 复制配置文件
 copy "config.json" "%PACKAGE_DIR%\" >nul
