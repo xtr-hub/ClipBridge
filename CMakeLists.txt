@@ -89,10 +89,8 @@ target_link_libraries(ClipBridge PRIVATE
 )
 
 if(WIN32)
-    # 设置为 Windows GUI 应用（不显示控制台窗口）
-    set_target_properties(ClipBridge PROPERTIES
-        WIN32_EXECUTABLE ON
-    )
+    # 不在 CMake 里设置 WIN32_EXECUTABLE，避免 MinGW 链接问题
+    # 在 main.cpp 里用 FreeConsole() 隐藏控制台窗口
 elseif(APPLE)
     find_library(APP_SERVICES ApplicationServices)
     target_link_libraries(ClipBridge PRIVATE ${APP_SERVICES})

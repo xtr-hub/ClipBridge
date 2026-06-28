@@ -5,6 +5,10 @@
  * @date 2026
  */
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <QApplication>
 #include <QFileInfo>
 #include <QDir>
@@ -22,6 +26,11 @@ using namespace ClipBridge;
 
 int main(int argc, char *argv[])
 {
+#ifdef _WIN32
+    // 隐藏控制台窗口
+    FreeConsole();
+#endif
+
     // 注册自定义类型，用于信号槽
     qRegisterMetaType<AppConfig::Behavior>("AppConfig::Behavior");
 
