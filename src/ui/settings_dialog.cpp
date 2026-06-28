@@ -1,3 +1,4 @@
+
 /**
  * @file settings_dialog.cpp
  * @brief 设置对话框实现
@@ -111,6 +112,8 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
                     g_register_manager->unregister_all();
                     g_register_manager->register_hotkeys(g_config->hotkeys);
                     g_action_manager->update_config(*g_config);
+
+                    EndDialog(hDlg, IDOK);
                 }
                 return (INT_PTR)TRUE;
             }
@@ -131,6 +134,17 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
             }
             break;
         }
+    case WM_CLOSE:
+        EndDialog(hDlg, IDCANCEL);
+        return (INT_PTR)TRUE;
+    case WM_SYSCOMMAND:
+        if (wParam == SC_CLOSE)
+        {
+            EndDialog(hDlg, IDCANCEL);
+            return (INT_PTR)TRUE;
+        }
+        break;
     }
     return (INT_PTR)FALSE;
 }
+
