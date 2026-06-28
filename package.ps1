@@ -85,20 +85,33 @@ $exeDeployPath = Join-Path $packageDir "ClipBridge.exe"
 if (Test-Path $exeDeployPath) {
     Write-Host "[INFO] Using windeployqt to package Qt dependencies..." -ForegroundColor Cyan
 
-    $windeployqt = Get-Command "windeployqt.exe" -ErrorAction SilentlyContinue
-    if (-not $windeployqt -and $qtDir) {
-        $windeployqtPath = Join-Path $qtDir "bin\windeployqt.exe"
-        if (Test-Path $windeployqtPath) {
-            $windeployqt = $windeployqtPath
+    # Try to find windeployqt
+    $windeployqtPath = $null
+
+    # First try from QT_DIR
+    if ($qtDir) {
+        $testPath = Join-Path $qtDir "bin\windeployqt.exe"
+        if (Test-Path $testPath) {
+            $windeployqtPath = $testPath
+            Write-Host "[INFO] Found windeployqt at: $windeployqtPath" -ForegroundColor Cyan
         }
     }
 
-    if ($windeployqt) {
-        & $windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw $exeDeployPath
+    # Then try from PATH
+    if (-not $windeployqtPath) {
+        $cmd = Get-Command "windeployqt.exe" -ErrorAction SilentlyContinue
+        if ($cmd) {
+            $windeployqtPath = $cmd.Source
+            Write-Host "[INFO] Found windeployqt on PATH: $windeployqtPath" -ForegroundColor Cyan
+        }
+    }
+
+    if ($windeployqtPath) {
+        & $windeployqtPath --release --no-translations --no-system-d3d-compiler --no-opengl-sw $exeDeployPath
     } else {
         Write-Host "[ERROR] Cannot find windeployqt!" -ForegroundColor Red
+        Write-Host "QT_DIR is: $qtDir" -ForegroundColor Yellow
         Write-Host "Please make sure Qt is installed and QT_DIR is set correctly" -ForegroundColor Red
-        Read-Host "Press Enter to exit"
         exit 1
     }
 }
