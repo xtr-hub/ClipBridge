@@ -56,10 +56,11 @@ void ActionManager::clipboardImagePath(const AppConfig::Behavior &behavior)
     ClipboardHelper::setText(outputText);
 
     if (behavior.autoPaste) {
-        qDebug() << "About to call Simulator::simulatePaste()";
         Simulator::simulatePaste();
-    } else {
-        qDebug() << "autoPaste is false, skipping paste";
+    }
+
+    if (behavior.autoSubmit) {
+        Simulator::simulateEnter();
     }
 
     qDebug() << "Image saved to:" << fullPath;
@@ -80,10 +81,11 @@ void ActionManager::stripNewlines(const AppConfig::Behavior &behavior)
     ClipboardHelper::setText(result);
 
     if (behavior.autoPaste) {
-        qDebug() << "About to call Simulator::simulatePaste()";
         Simulator::simulatePaste();
-    } else {
-        qDebug() << "autoPaste is false, skipping paste";
+    }
+
+    if (behavior.autoSubmit) {
+        Simulator::simulateEnter();
     }
 
     qDebug() << "Strip newlines done!";

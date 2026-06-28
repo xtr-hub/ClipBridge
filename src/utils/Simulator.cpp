@@ -122,4 +122,72 @@ void Simulator::simulatePaste()
 #endif
 }
 
+void Simulator::simulateEnter()
+{
+#ifdef Q_OS_WIN
+    // 等待所有修饰键松开
+    int maxWait = 50; // 最多等 500ms
+    int waitCount = 0;
+    while (waitCount < maxWait) {
+        bool ctrlDown = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+        bool altDown = (GetKeyState(VK_MENU) & 0x8000) != 0;
+        bool shiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+        bool winDown = (GetKeyState(VK_LWIN) & 0x8000) != 0 || (GetKeyState(VK_RWIN) & 0x8000) != 0;
+
+        if (!ctrlDown && !altDown && !shiftDown && !winDown) {
+            break;
+        }
+        Sleep(10);
+        waitCount++;
+    }
+
+    keybd_event(VK_RETURN, 0, 0, 0);
+    keybd_event(VK_RETURN, 0, KEYEVENTF_KEYUP, 0);
+#elif defined(Q_OS_LINUX)
+    Display *dpy = XOpenDisplay(nullptr);
+    if (dpy) {
+        // 先发送松开事件
+        XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_Control_L), False, 0);
+        XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_Shift_L), False, 0);
+        XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_Alt_L), False, 0);
+        XFlush(dpy);
+        usleep(50000);
+
+        XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_Return), True, 0);
+        XTestFakeKeyEvent(dpy, XKeysymToKeycode(dpy, XK_Return), False, 0);
+        XFlush(dpy);
+        XCloseDisplay(dpy);
+    }
+#elif defined(Q_OS_MAC)
+    // 等待所有修饰键松开
+    int maxWait = 50; // 最多等 500ms
+    int waitCount = 0;
+    while (waitCount < maxWait) {
+        bool cmdDown = CGEventSourceKeyState(kCGEventSourceStateHIDSystemState, kVK_Command);
+        bool optDown = CGEventSourceKeyState(kCGEventSourceStateHIDSystemState, kVK_Option);
+        bool ctrlDown = CGEventSourceKeyState(kCGEventSourceStateHIDSystemState, kVK_Control);
+        bool shiftDown = CGEventSourceKeyState(kCGEventSourceStateHIDSystemState, kVK_Shift);
+
+        if (!cmdDown && !optDown && !ctrlDown && !shiftDown) {
+            break;
+        }
+        usleep(10000);
+        waitCount++;
+    }
+
+    CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+    if (source) {
+        CGEventRef enterDown = CGEventCreateKeyboardEvent(source, kVK_Return, true);
+        CGEventPost(kCGHIDEventTap, enterDown);
+        CFRelease(enterDown);
+
+        CGEventRef enterUp = CGEventCreateKeyboardEvent(source, kVK_Return, false);
+        CGEventPost(kCGHIDEventTap, enterUp);
+        CFRelease(enterUp);
+
+        CFRelease(source);
+    }
+#endif
+}
+
 }
