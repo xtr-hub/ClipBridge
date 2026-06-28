@@ -6,6 +6,7 @@
 *.sln.docstates
 
 # Build outputs
+ClipBridge_Qt
 Debug/
 Release/
 x64/
@@ -42,6 +43,7 @@ vcpkg_installed/
 *.lib
 *.dll
 *.exe
+*.zip
 
 # Visual Studio databases
 *.VC.db
