@@ -1,42 +1,43 @@
-# ClipBridge Qt 版本打包脚本 (PowerShell)
+# ClipBridge Qt Packaging Script (PowerShell)
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "   ClipBridge Qt 版本打包脚本" -ForegroundColor Cyan
+Write-Host "   ClipBridge Qt Packaging Script" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# 检查是否存在 build 目录
+# Check if build directory exists
 if (-not (Test-Path "build")) {
-    Write-Host "[错误] 未找到 build 目录，请先编译项目！" -ForegroundColor Red
-    Write-Host "运行以下命令编译：" -ForegroundColor Yellow
+    Write-Host "[ERROR] Build directory not found! Please compile first." -ForegroundColor Red
+    Write-Host "Run these commands to compile:" -ForegroundColor Yellow
     Write-Host "  cmake -B build -G `"MinGW Makefiles`" -DCMAKE_BUILD_TYPE=Release"
     Write-Host "  cmake --build build"
-    Read-Host "按回车键退出"
+    Read-Host "Press Enter to exit"
     exit 1
 }
 
-# 检测编译输出路径（支持 MinGW 和 MSVC）
+# Detect build output path (support MinGW and MSVC)
 $exePath = ""
 if (Test-Path "build\ClipBridge.exe") {
     $exePath = "build\ClipBridge.exe"
-    Write-Host "[信息] 检测到 MinGW 编译输出" -ForegroundColor Green
+    Write-Host "[INFO] Detected MinGW build" -ForegroundColor Green
 } elseif (Test-Path "build\Release\ClipBridge.exe") {
     $exePath = "build\Release\ClipBridge.exe"
-    Write-Host "[信息] 检测到 MSVC 编译输出" -ForegroundColor Green
+    Write-Host "[INFO] Detected MSVC build" -ForegroundColor Green
 } else {
-    Write-Host "[错误] 未找到 ClipBridge.exe，请先编译！" -ForegroundColor Red
-    Write-Host "查找路径：" -ForegroundColor Yellow
+    Write-Host "[ERROR] ClipBridge.exe not found! Please compile first." -ForegroundColor Red
+    Write-Host "Looking for:" -ForegroundColor Yellow
     Write-Host "  - build\ClipBridge.exe (MinGW)"
     Write-Host "  - build\Release\ClipBridge.exe (MSVC)"
-    Read-Host "按回车键退出"
+    Read-Host "Press Enter to exit"
     exit 1
 }
 
-# 查找 Qt 目录
+# Find Qt directory
 $qtDir = ""
 $qtPaths = @(
     "D:\tools\qt\6.11.1\mingw_64",
     "C:\Qt\6.5.0\msvc2019_64",
-    "C:\Qt\5.15.2\msvc2019_64"
+    "C:\Qt\5.15.2\msvc2019_64",
+    "C:\Qt\5.15.2\mingw81_64"
 )
 
 foreach ($path in $qtPaths) {
@@ -51,38 +52,38 @@ if (-not $qtDir -and $env:QT_DIR) {
 }
 
 if (-not $qtDir) {
-    Write-Host "[警告] 未自动找到 Qt 目录，请手动设置 QT_DIR 环境变量" -ForegroundColor Yellow
-    Write-Host "例如: `$env:QT_DIR = `"D:\tools\qt\6.11.1\mingw_64`"" -ForegroundColor Gray
+    Write-Host "[WARNING] Qt directory not found automatically, please set QT_DIR env var" -ForegroundColor Yellow
+    Write-Host "Example: `$env:QT_DIR = `"D:\tools\qt\6.11.1\mingw_64`"" -ForegroundColor Gray
     Write-Host ""
 } else {
-    Write-Host "[信息] 使用 Qt 目录: $qtDir" -ForegroundColor Cyan
+    Write-Host "[INFO] Using Qt directory: $qtDir" -ForegroundColor Cyan
     $env:PATH = "$qtDir\bin;$env:PATH"
 }
 
-# 创建打包目录
+# Create package directory
 $packageDir = "ClipBridge_Qt"
 if (Test-Path $packageDir) {
-    Write-Host "[信息] 清理旧的打包目录..." -ForegroundColor Yellow
+    Write-Host "[INFO] Cleaning old package directory..." -ForegroundColor Yellow
     Remove-Item -Path $packageDir -Recurse -Force
 }
 New-Item -Path $packageDir -ItemType Directory | Out-Null
 
-Write-Host "[信息] 复制文件..." -ForegroundColor Cyan
+Write-Host "[INFO] Copying files..." -ForegroundColor Cyan
 
-# 复制主程序
+# Copy main executable
 Copy-Item $exePath -Destination "$packageDir\" -Force
 
-# 复制配置文件
+# Copy config file
 Copy-Item "config.json" -Destination "$packageDir\" -Force
 
-# 复制文档
+# Copy docs
 Copy-Item "README.md" -Destination "$packageDir\" -Force
 Copy-Item "LICENSE" -Destination "$packageDir\" -Force
 
-# 使用 windeployqt 自动打包 Qt 依赖
-$exePath = Join-Path $packageDir "ClipBridge.exe"
-if (Test-Path $exePath) {
-    Write-Host "[信息] 使用 windeployqt 打包 Qt 依赖..." -ForegroundColor Cyan
+# Use windeployqt to package Qt dependencies
+$exeDeployPath = Join-Path $packageDir "ClipBridge.exe"
+if (Test-Path $exeDeployPath) {
+    Write-Host "[INFO] Using windeployqt to package Qt dependencies..." -ForegroundColor Cyan
 
     $windeployqt = Get-Command "windeployqt.exe" -ErrorAction SilentlyContinue
     if (-not $windeployqt -and $qtDir) {
@@ -93,16 +94,16 @@ if (Test-Path $exePath) {
     }
 
     if ($windeployqt) {
-        & $windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw $exePath
+        & $windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw $exeDeployPath
     } else {
-        Write-Host "[错误] 无法找到 windeployqt！" -ForegroundColor Red
-        Write-Host "请确保已安装 Qt 并正确设置 QT_DIR" -ForegroundColor Red
-        Read-Host "按回车键退出"
+        Write-Host "[ERROR] Cannot find windeployqt!" -ForegroundColor Red
+        Write-Host "Please make sure Qt is installed and QT_DIR is set correctly" -ForegroundColor Red
+        Read-Host "Press Enter to exit"
         exit 1
     }
 }
 
-# 从 CMakeLists.txt 读取版本号
+# Read version from CMakeLists.txt
 function Get-VersionFromCMake {
     param([string]$cmakePath)
     if (Test-Path $cmakePath) {
@@ -114,51 +115,51 @@ function Get-VersionFromCMake {
     return $null
 }
 
-# 获取版本号
+# Get version number
 $version = $null
 
-# 1. 优先从 CMakeLists.txt 读取
+# 1. Try from CMakeLists.txt first
 $cmakeVersion = Get-VersionFromCMake "CMakeLists.txt"
 if ($cmakeVersion) {
     $version = $cmakeVersion
-    Write-Host "[信息] 从 CMakeLists.txt 读取版本: $version" -ForegroundColor Cyan
+    Write-Host "[INFO] Read version from CMakeLists.txt: $version" -ForegroundColor Cyan
 }
 
-# 2. 尝试从 git tag 获取
+# 2. Try from git tag
 if (-not $version) {
     try {
         $gitVersion = git describe --tags --abbrev=0 2>$null
         if ($gitVersion) {
             $version = $gitVersion
-            Write-Host "[信息] 从 git tag 读取版本: $version" -ForegroundColor Cyan
+            Write-Host "[INFO] Read version from git tag: $version" -ForegroundColor Cyan
         }
     } catch {
         $version = $null
     }
 }
 
-# 3. 使用日期作为后备
+# 3. Use date as fallback
 if (-not $version) {
     $version = Get-Date -Format "yyyyMMdd"
-    Write-Host "[信息] 使用日期作为版本: $version" -ForegroundColor Yellow
+    Write-Host "[INFO] Using date as version: $version" -ForegroundColor Yellow
 }
 
-# 创建 zip 压缩包
+# Create zip package
 $zipName = "ClipBridge_Qt_$version.zip"
 if (Test-Path $zipName) {
     Remove-Item $zipName -Force
 }
 
-Write-Host "[信息] 创建压缩包: $zipName..." -ForegroundColor Cyan
+Write-Host "[INFO] Creating zip package: $zipName..." -ForegroundColor Cyan
 Compress-Archive -Path "$packageDir\*" -DestinationPath $zipName -Force
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "   打包完成！" -ForegroundColor Green
+Write-Host "   Packaging complete!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "输出目录: $packageDir" -ForegroundColor White
-Write-Host "压缩包: $zipName" -ForegroundColor White
+Write-Host "Output directory: $packageDir" -ForegroundColor White
+Write-Host "Zip package: $zipName" -ForegroundColor White
 Write-Host ""
 
-# 打开打包目录
+# Open package directory
 explorer $packageDir
