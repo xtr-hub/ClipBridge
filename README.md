@@ -52,7 +52,7 @@
 
 ### 下载运行
 
-1. 从 Releases（未来）下载预编译版本（未来）
+1. 从 [Releases](https://github.com/xtr-hub/ClipBridge/releases) 下载预编译版本
 2. 或者从源码构建（见下方）
 3. 运行程序，系统托盘出现 ClipBridge 图标
 
