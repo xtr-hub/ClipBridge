@@ -79,6 +79,7 @@ set(HEADERS
 add_executable(ClipBridge
     ${SOURCES}
     ${HEADERS}
+    resources.qrc
 )
 
 # Link Qt libraries (works for both Qt5 and Qt6)

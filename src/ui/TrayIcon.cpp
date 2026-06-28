@@ -25,7 +25,7 @@ TrayIcon::TrayIcon(const AppConfig &config, QObject *parent)
     setToolTip("ClipBridge - 剪贴板工具");
 
     if (icon().isNull()) {
-        setIcon(QApplication::style()->standardIcon(QStyle::SP_ComputerIcon));
+        setIcon(QIcon(":/resources/icon.svg"));
     }
 
     connect(m_settingsAction, &QAction::triggered, this, &TrayIcon::showSettings);
