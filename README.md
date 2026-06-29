@@ -10,6 +10,19 @@ Windows 快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺�
 
 ---
 
+## 版本说明
+
+当前版本：**v1.0.0**
+
+### v1.0.0 更新内容
+- 统一 Windows / macOS 版本号到 1.0.0
+- 修复 win32 版设置对话框关闭按钮问题
+- 优化 win32 版对话框宽度
+- 统一压缩包命名格式：`ClipBridge_Windows_<version>.zip`
+- 自动从 CMakeLists.txt 读取版本号
+
+---
+
 ## 目录
 
 [![✨ 核心功能](https://img.shields.io/badge/-核心功能-blue?style=flat-square)](#核心功能)
@@ -153,6 +166,8 @@ build_and_package.bat
 powershell -ExecutionPolicy Bypass -File build_and_package.ps1
 ```
 
+**注意**：打包脚本会自动从 `CMakeLists.txt` 读取版本号，生成 `ClipBridge_Windows_<version>.zip` 压缩包。
+
 ### 构建步骤
 
 如果你想手动构建：
@@ -175,7 +190,7 @@ package.bat
 powershell -ExecutionPolicy Bypass -File package.ps1
 ```
 
-脚本会创建包含所有依赖的 `ClipBridge_Win32` 文件夹和 zip 压缩包。
+脚本会创建包含所有依赖的 `ClipBridge_Win32` 文件夹和 `ClipBridge_Windows_<version>.zip` 压缩包。
 
 ### 使用 vcpkg
 
