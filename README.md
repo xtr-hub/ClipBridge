@@ -1,5 +1,7 @@
 # ClipBridge (Windows 原生版)
 
+> 注意：此分支仍存在许多未完成的功能
+
 Windows 快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
