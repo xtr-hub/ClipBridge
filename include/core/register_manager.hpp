@@ -24,4 +24,5 @@ private:
 	std::vector<int> register_keys;
 	std::unordered_map<int, std::vector<std::string>> actions_by_id;
 	std::unordered_map<int, AppConfig::Behavior> behaviors_by_id;
+	std::unordered_map<std::string, int> keys_str;
 };

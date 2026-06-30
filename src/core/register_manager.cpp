@@ -25,7 +25,6 @@ RegisterManager::~RegisterManager()
 
 void RegisterManager::register_hotkey(const AppConfig::HotKeyBinding& binding)
 {
-    static std::unordered_map<std::string, int> keys_str;
 
     UINT fs_modifiers = MOD_NOREPEAT;
     UINT vk = 0;
@@ -103,6 +102,8 @@ void RegisterManager::unregister_all()
     register_keys.clear();
     actions_by_id.clear();
     behaviors_by_id.clear();
+    keys_str.clear();
+    next_id = 1;
 }
 
 std::vector<std::string> RegisterManager::action_for_id(int id) const
