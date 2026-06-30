@@ -132,6 +132,10 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
                 UpdatePathInputState(hDlg);
                 return (INT_PTR)TRUE;
             }
+            else if (wmId == IDC_ADD_HOTKEY) {
+                
+                return (INT_PTR)TRUE;
+            }
             break;
         }
     case WM_CLOSE:

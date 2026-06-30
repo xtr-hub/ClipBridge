@@ -7,15 +7,21 @@
 #define IDR_MAINFRAME			128
 #define IDD_CLIPBRIDGE_DIALOG	102
 #define IDD_ABOUTBOX			103
-#define IDD_SETTINGSDIALOG		104
 #define IDM_ABOUT				104
 #define IDM_EXIT				105
-#define IDM_SETTINGS			32771
 #define IDI_CLIPBRIDGE			107
 #define IDI_SMALL				108
-#define IDI_TRAY				110
 #define IDC_CLIPBRIDGE			109
 #define IDC_MYICON				2
+#ifndef IDC_STATIC
+#define IDC_STATIC				-1
+#endif
+
+#define IDD_SETTINGSDIALOG		104
+#define IDD_ADD_HOTKEY_DIALOG   105
+
+#define IDM_SETTINGS			32771
+#define IDI_TRAY				110
 #define IDC_FORMAT_EDIT			1000
 #define IDC_PATH_MODE_COMBO		1006
 #define IDC_PATH_EDIT			1001
@@ -24,9 +30,19 @@
 #define IDC_AUTOSUBMIT_CHECK	1003
 #define IDC_SAVE_BUTTON			1005
 #define IDC_CANCEL_BUTTON		1004
-#ifndef IDC_STATIC
-#define IDC_STATIC				-1
-#endif
+#define IDC_HOTKEY_LIST			1008
+#define IDC_ACTION_COMBO		1009
+#define IDC_KEYS_EDIT			1010
+#define IDC_HOTKEY_AUTOPASTE	1011
+#define IDC_HOTKEY_AUTOSUBMIT	1012
+#define IDC_ADD_HOTKEY			1013
+#define IDC_REMOVE_HOTKEY		1014
+
+#define IDC_ACTION_COMBO           1020
+#define IDC_KEYS_EDIT              1021
+#define IDC_AUTOPASTE_CHECK        1022
+#define IDC_AUTOSUBMIT_CHECK       1023
+
 // 新对象的下一组默认值
 //
 #ifdef APSTUDIO_INVOKED
@@ -35,7 +51,7 @@
 #define _APS_NO_MFC					130
 #define _APS_NEXT_RESOURCE_VALUE	129
 #define _APS_NEXT_COMMAND_VALUE		32772
-#define _APS_NEXT_CONTROL_VALUE		1007
+#define _APS_NEXT_CONTROL_VALUE		1015
 #define _APS_NEXT_SYMED_VALUE		111
 #endif
 #endif
