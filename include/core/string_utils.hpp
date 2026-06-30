@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace string_utils {
 
@@ -17,5 +18,9 @@ std::wstring utf8_to_wide(const std::string& str);
  * @return UTF-8 encoded string
  */
 std::string wide_to_utf8(const std::wstring& wstr);
+
+std::vector<std::string> split_string(const std::string& str, char separator);
+
+std::string to_lower(std::string value);
 
 } // namespace string_utils

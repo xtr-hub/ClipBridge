@@ -4,40 +4,14 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <windows.h>
+#include "core/string_utils.hpp"
 
 using json = nlohmann::json;
 
+using string_utils::split_string;
+
 namespace
 {
-    std::vector<std::string> split_string(const std::string& str, char separator)
-    {
-        std::vector<std::string> result;
-        std::string current;
-
-        for (char ch : str)
-        {
-            if (ch == separator)
-            {
-                if (!current.empty())
-                {
-                    result.push_back(current);
-                    current.clear();
-                }
-            }
-            else if (ch != ' ' && ch != '\t' && ch != '\r' && ch != '\n')
-            {
-                current.push_back(ch);
-            }
-        }
-
-        if (!current.empty())
-        {
-            result.push_back(current);
-        }
-
-        return result;
-    }
-
     template<typename T>
     T read(const json& j, const char* key, const T& default_value)
     {

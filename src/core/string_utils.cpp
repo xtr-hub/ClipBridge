@@ -3,6 +3,45 @@
 
 namespace string_utils {
 
+
+std::string to_lower(std::string value)
+    {
+        for (char& ch : value)
+        {
+            ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+        }
+        return value;
+    }
+
+std::vector<std::string> split_string(const std::string& str, char separator)
+{
+        std::vector<std::string> result;
+        std::string current;
+
+        for (char ch : str)
+        {
+            if (ch == separator)
+            {
+                if (!current.empty())
+                {
+                    result.push_back(current);
+                    current.clear();
+                }
+            }
+            else if (ch != ' ' && ch != '\t' && ch != '\r' && ch != '\n')
+            {
+                current.push_back(ch);
+            }
+        }
+
+        if (!current.empty())
+        {
+            result.push_back(current);
+        }
+
+        return result;
+}
+
 std::wstring utf8_to_wide(const std::string& str)
 {
     if (str.empty()) return {};

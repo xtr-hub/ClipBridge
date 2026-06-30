@@ -38,10 +38,10 @@
 #define IDC_ADD_HOTKEY			1013
 #define IDC_REMOVE_HOTKEY		1014
 
-#define IDC_ACTION_COMBO           1020
-#define IDC_KEYS_EDIT              1021
-#define IDC_AUTOPASTE_CHECK        1022
-#define IDC_AUTOSUBMIT_CHECK       1023
+#define IDC_ADD_HOTKEY_ACTION_COMBO           1020
+#define IDC_ADD_HOTKEY_KEYS_EDIT              1021
+#define IDC_ADD_HOTKEY_AUTOPASTE_CHECK        1022
+#define IDC_ADD_HOTKEY_AUTOSUBMIT_CHECK       1023
 
 // 新对象的下一组默认值
 //

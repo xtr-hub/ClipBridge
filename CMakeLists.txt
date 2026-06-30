@@ -30,6 +30,7 @@ set(SOURCES
     "src/core/path_processer.cpp"
     "src/core/string_utils.cpp"
     "src/ui/settings_dialog.cpp"
+    "src/ui/add_hotkey_dialog.cpp"
 )
 
 # 添加头文件
@@ -47,6 +48,7 @@ set(HEADERS
     "include/core/path_processer.hpp"
     "include/core/string_utils.hpp"
     "include/ui/settings_dialog.hpp"
+    "include/ui/add_hotkey_dialog.hpp"
 )
 
 # 添加资源文件

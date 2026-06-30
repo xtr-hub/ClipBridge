@@ -1,7 +1,6 @@
 // ClipBridge.cpp : 定义应用程序的入口点。
 //
 
-#include "framework.h"
 #include "ClipBridge.h"
 #include "core/action_manager.hpp"
 #include "core/config_manager.hpp"

@@ -3,7 +3,8 @@
  * @file settings_dialog.cpp
  * @brief 设置对话框实现
  */
-
+#include "ClipBridge.h"
+#include "ui/add_hotkey_dialog.hpp"
 #include "ui/settings_dialog.hpp"
 #include "Resource.h"
 #include "core/action_manager.hpp"
@@ -16,6 +17,12 @@
 
 using string_utils::utf8_to_wide;
 using string_utils::wide_to_utf8;
+
+// 显示热键调整框
+void ShowAddHotkeyDialog(HWND hwnd)
+{
+    DialogBox(hInst, MAKEINTRESOURCE(IDD_ADD_HOTKEY_DIALOG),hwnd, AddHotkeyDlgProc);
+}
 
 // 更新路径输入框状态（根据模式选择启用/禁用）
 void UpdatePathInputState(HWND hDlg)
@@ -108,10 +115,10 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
                     // 保存配置
                     g_config_manager->save(*g_config);
 
-                    // 热更新：重新注册热键并更新 ActionManager
-                    g_register_manager->unregister_all();
-                    g_register_manager->register_hotkeys(g_config->hotkeys);
-                    g_action_manager->update_config(*g_config);
+                    // // 热更新：重新注册热键并更新 ActionManager
+                    // g_register_manager->unregister_all();
+                    // g_register_manager->register_hotkeys(g_config->hotkeys);
+                    // g_action_manager->update_config(*g_config);
 
                     EndDialog(hDlg, IDOK);
                 }
@@ -133,7 +140,7 @@ INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
                 return (INT_PTR)TRUE;
             }
             else if (wmId == IDC_ADD_HOTKEY) {
-                
+                ShowAddHotkeyDialog(hDlg);
                 return (INT_PTR)TRUE;
             }
             break;
