@@ -8,7 +8,7 @@
   <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat&logo=github" alt="License"></a>
     <a href="#平台支持"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat" alt="Platform"></a>
-    <a href="https://github.com/xtr-hub/ClipBridge/releases/latest"><img src="https://img.shields.io/github/v/release/xtr-hub/ClipBridge?style=flat&logo=github&label=最新版本" alt="GitHub Latest"></a>
+    <a href="https://github.com/xtr-hub/ClipBridge/releases"><img src="https://img.shields.io/badge/Download-Releases-green.svg?style=flat&logo=github" alt="Releases"></a>
   </div>
 </div>
 
