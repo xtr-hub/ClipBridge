@@ -1,61 +1,25 @@
 <div align="center">
-  <img src="resources/icon.svg" width="160" alt="ClipBridge Icon">
-  <h1>ClipBridge</h1>
-  <p>跨平台快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅</p>
-  <br>
-  <p>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
-    <a href="#平台支持"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg" alt="Platform"></a>
-    <a href="#构建指南"><img src="https://img.shields.io/badge/Qt-5.15%2B%20%7C%206.0%2B-green.svg" alt="Qt"></a>
-    <a href="CMakeLists.txt"><img src="https://img.shields.io/badge/CMake-3.16%2B-orange.svg" alt="CMake"></a>
-    <a href="CMakeLists.txt"><img src="https://img.shields.io/badge/C%2B%2B-17-blue.svg" alt="C++"></a>
-    <a href="https://github.com/xtr-hub/ClipBridge"><img src="https://img.shields.io/github/stars/your-username/ClipBridge?style=social" alt="GitHub stars"></a>
-  </p>
+  <img src="resources/icon.svg" alt="logo" width="200" height="200">
+
+  # ClipBridge
+
+  跨平台快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅
+
+  <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat&logo=github" alt="License"></a>
+    <a href="#平台支持"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat" alt="Platform"></a>
+    <a href="https://github.com/xtr-hub/ClipBridge/releases/latest"><img src="https://img.shields.io/github/v/release/xtr-hub/ClipBridge?style=flat&logo=github&label=最新版本" alt="GitHub Latest"></a>
+  </div>
 </div>
 
-<br>
+## 能干什么
 
----
-
-<div align="center">
-  <h2>目录</h2>
-  <p>
-    <a href="#核心功能"><img src="https://img.shields.io/badge/-核心功能-blue?style=flat-square" alt="✨ 核心功能"></a>
-    <a href="#快速开始"><img src="https://img.shields.io/badge/-快速开始-green?style=flat-square" alt="🚀 快速开始"></a>
-    <a href="#配置说明"><img src="https://img.shields.io/badge/-配置说明-orange?style=flat-square" alt="⚙️ 配置说明"></a>
-    <a href="#分支说明"><img src="https://img.shields.io/badge/-分支说明-purple?style=flat-square" alt="🌿 分支说明"></a>
-    <a href="#构建指南"><img src="https://img.shields.io/badge/-构建指南-red?style=flat-square" alt="🛠️ 构建指南"></a>
-    <a href="#平台支持"><img src="https://img.shields.io/badge/-平台支持-lightgrey?style=flat-square" alt="🖥️ 平台支持"></a>
-    <a href="#项目结构"><img src="https://img.shields.io/badge/-项目结构-yellow?style=flat-square" alt="📁 项目结构"></a>
-    <a href="#常见问题"><img src="https://img.shields.io/badge/-常见问题-cyan?style=flat-square" alt="❓ 常见问题"></a>
-  </p>
-</div>
-
----
-
-## 核心功能
-
-### 1. clipboard_image_path —— TUI 发图神器
-
-在 Claude TUI / Claude Code 里发截图，不再需要手动保存文件、复制路径！
-
-- 截图 → 按快捷键 → 自动保存图片 → 自动粘贴路径 → 直接发送
-- 支持自定义格式文案（比如 `请查看这张图片：{path}`）
-- 支持自定义保存路径
-
-### 2. strip_newlines —— 清理换行符
-
-从终端、日志、文档复制多行文本时，经常因为终端宽度限制被自动插入换行符，导致粘贴后无法直接执行。
-
-- 按快捷键，一键去除所有换行符（`\n` 和 `\r`）
-- 命令即贴即用，无需手动清理
-
-### 3. 每个热键独立配置
-
-- 每个快捷键可以设置独立的 `auto_paste` 和 `auto_submit` 行为
-- 支持多动作绑定，同一个快捷键按顺序执行多个动作
-
----
+- TUI 发图神器：截图 → 按快捷键 → 自动保存图片 → 自动粘贴路径 → 直接发送
+- 一键去除换行符：从终端复制多行命令，自动清理换行，即贴即用
+- 自定义输出格式：支持 `{path}` 占位符，配置你想要的文案
+- 图形化热键管理：添加/编辑/删除热键，每个热键独立配置自动粘贴和自动提交
+- 自动热重载：保存配置后立即生效，无需重启
+- 跨平台支持：Windows / macOS / Linux
 
 ## 快速开始
 
