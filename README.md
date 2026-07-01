@@ -1,10 +1,10 @@
 <div align="center">
-  <img src="resources/icon.svg" width="128" alt="ClipBridge Icon">
+  <img src="resources/icon.svg" width="160" alt="ClipBridge Icon">
+  <h1>ClipBridge</h1>
+  <p>跨平台快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅</p>
 </div>
 
-# ClipBridge
-
-跨平台快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅
+<br>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](#平台支持)
@@ -67,12 +67,28 @@
 
 ### 图形界面设置
 
-- 左键/右键点击托盘图标 → 打开设置界面
-- 在设置界面里可以：
-  - 查看和管理热键
-  - 配置图片保存格式和路径
-  - 设置默认行为
-  - 保存后自动热重载，无需重启
+**左键/右键点击托盘图标** → 打开设置界面
+
+**设置界面功能：**
+
+1. **快捷键管理**
+   - 查看现有热键列表（显示动作、按键、行为配置）
+   - 添加新热键
+   - 编辑现有热键（修改动作、按键、行为配置）
+   - 删除热键
+
+2. **输出设置**
+   - 自定义输出格式（支持 `{path}` 占位符）
+   - 选择保存模式：桌面默认路径 / 自定义路径
+   - 图形化选择自定义保存目录
+
+3. **默认行为配置**
+   - 配置新添加热键的默认行为
+   - 自动粘贴
+   - 自动提交
+
+4. **保存后自动热重载**
+   - 无需重启程序，热键配置立即生效
 
 ---
 
@@ -326,8 +342,8 @@ A: 打开"系统偏好设置 → 安全性与隐私 → 辅助功能"，添加�
 ### Q: 想要自定义热键？
 
 A: 两种方式：
-1. 编辑 `config.json` 文件
-2. 使用图形设置界面（开发中）
+1. **推荐：使用图形设置界面（点击托盘图标 → 打开设置）
+2. 手动编辑 `config.json` 文件
 
 ---
 
