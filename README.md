@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="resources/icon.svg" width="128" alt="ClipBridge Icon">
+</div>
+
 # ClipBridge
 
 跨平台快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅
