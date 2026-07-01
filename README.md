@@ -2,16 +2,18 @@
   <img src="resources/icon.svg" width="160" alt="ClipBridge Icon">
   <h1>ClipBridge</h1>
   <p>跨平台快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅</p>
+  <br>
+  <p>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+    <a href="#平台支持"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg" alt="Platform"></a>
+    <a href="#构建指南"><img src="https://img.shields.io/badge/Qt-5.15%2B%20%7C%206.0%2B-green.svg" alt="Qt"></a>
+    <a href="CMakeLists.txt"><img src="https://img.shields.io/badge/CMake-3.16%2B-orange.svg" alt="CMake"></a>
+    <a href="CMakeLists.txt"><img src="https://img.shields.io/badge/C%2B%2B-17-blue.svg" alt="C++"></a>
+    <a href="https://github.com/xtr-hub/ClipBridge"><img src="https://img.shields.io/github/stars/your-username/ClipBridge?style=social" alt="GitHub stars"></a>
+  </p>
 </div>
 
 <br>
-
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](#平台支持)
-[![Qt](https://img.shields.io/badge/Qt-5.15%2B%20%7C%206.0%2B-green.svg)](#构建指南)
-[![CMake](https://img.shields.io/badge/CMake-3.16%2B-orange.svg)](CMakeLists.txt)
-[![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](CMakeLists.txt)
-[![GitHub stars](https://img.shields.io/github/stars/your-username/ClipBridge?style=social)](https://github.com/xtr-hub/ClipBridge)
 
 ---
 
