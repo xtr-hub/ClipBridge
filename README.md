@@ -17,16 +17,19 @@
 
 ---
 
-## 目录
-
-[![✨ 核心功能](https://img.shields.io/badge/-核心功能-blue?style=flat-square)](#核心功能)
-[![🚀 快速开始](https://img.shields.io/badge/-快速开始-green?style=flat-square)](#快速开始)
-[![⚙️ 配置说明](https://img.shields.io/badge/-配置说明-orange?style=flat-square)](#配置说明)
-[![🌿 分支说明](https://img.shields.io/badge/-分支说明-purple?style=flat-square)](#分支说明)
-[![🛠️ 构建指南](https://img.shields.io/badge/-构建指南-red?style=flat-square)](#构建指南)
-[![🖥️ 平台支持](https://img.shields.io/badge/-平台支持-lightgrey?style=flat-square)](#平台支持)
-[![📁 项目结构](https://img.shields.io/badge/-项目结构-yellow?style=flat-square)](#项目结构)
-[![❓ 常见问题](https://img.shields.io/badge/-常见问题-cyan?style=flat-square)](#常见问题)
+<div align="center">
+  <h2>目录</h2>
+  <p>
+    <a href="#核心功能"><img src="https://img.shields.io/badge/-核心功能-blue?style=flat-square" alt="✨ 核心功能"></a>
+    <a href="#快速开始"><img src="https://img.shields.io/badge/-快速开始-green?style=flat-square" alt="🚀 快速开始"></a>
+    <a href="#配置说明"><img src="https://img.shields.io/badge/-配置说明-orange?style=flat-square" alt="⚙️ 配置说明"></a>
+    <a href="#分支说明"><img src="https://img.shields.io/badge/-分支说明-purple?style=flat-square" alt="🌿 分支说明"></a>
+    <a href="#构建指南"><img src="https://img.shields.io/badge/-构建指南-red?style=flat-square" alt="🛠️ 构建指南"></a>
+    <a href="#平台支持"><img src="https://img.shields.io/badge/-平台支持-lightgrey?style=flat-square" alt="🖥️ 平台支持"></a>
+    <a href="#项目结构"><img src="https://img.shields.io/badge/-项目结构-yellow?style=flat-square" alt="📁 项目结构"></a>
+    <a href="#常见问题"><img src="https://img.shields.io/badge/-常见问题-cyan?style=flat-square" alt="❓ 常见问题"></a>
+  </p>
+</div>
 
 ---
 
