@@ -247,29 +247,7 @@ cmake --build . --config Release
 
 ## 项目结构
 
-```
-ClipBridge/
-├── CMakeLists.txt           # CMake 构建配置
-├── config.json              # 示例配置文件
-├── README.md                # 本文档
-└── src/
-    ├── main.cpp             # 程序入口
-    ├── core/
-    │   ├── AppConfig.h      # 配置数据结构
-    │   ├── AppConfig.cpp    # 配置读写
-    │   ├── ActionManager.h  # 动作管理
-    │   └── ActionManager.cpp
-    ├── ui/
-    │   ├── TrayIcon.h       # 托盘图标
-    │   ├── TrayIcon.cpp
-    │   ├── SettingsDialog.h # 设置对话框
-    │   └── SettingsDialog.cpp
-    └── utils/
-        ├── Hotkey.h         # 全局热键封装
-        ├── Hotkey.cpp
-        ├── ClipboardHelper.h # 剪贴板工具
-        └── ClipboardHelper.cpp
-```
+详见 [项目结构](docs/STRUCTURE.md)。
 
 ---
 
@@ -316,16 +294,16 @@ A: 两种方式：
 
 ---
 
-## 许可证
-
-本项目采用 MIT 许可证，详见 LICENSE 文件。
-
----
-
 ## 贡献
 
 欢迎提交 Issue 和 Pull Request！
 
+贡献前请阅读 [贡献指南](docs/CONTRIBUTING.md)。
+
+感谢所有为 ClipBridge 做出贡献的人！
+
 ---
 
-Made with ❤️ for Claude TUI users
+## 许可证
+
+本项目采用 MIT 许可证，详见 LICENSE 文件。
