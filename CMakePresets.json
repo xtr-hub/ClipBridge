@@ -2,13 +2,35 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "GCC 16.1.0 x86_64-w64-mingw32",
-            "displayName": "GCC 16.1.0 x86_64-w64-mingw32",
-            "description": "正在使用编译器: C = d:\\tools\\mingw64\\bin\\gcc.exe, CXX = d:\\tools\\mingw64\\bin\\g++.exe",
+            "name": "macOS-Clang",
+            "displayName": "macOS Clang",
+            "description": "macOS 默认 Clang 编译器",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_PREFIX_PATH": "/usr/local/opt/qt@5"
+            }
+        },
+        {
+            "name": "Windows-MinGW",
+            "displayName": "Windows MinGW",
+            "description": "Windows MinGW 编译器",
             "generator": "MinGW Makefiles",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
             "cacheVariables": {
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_C_COMPILER": "d:/tools/mingw64/bin/gcc.exe",
                 "CMAKE_CXX_COMPILER": "d:/tools/mingw64/bin/g++.exe",
                 "CMAKE_MAKE_PROGRAM": "d:/tools/mingw64/bin/mingw32-make.exe",
