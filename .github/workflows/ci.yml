@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - qt
+      - main
+  pull_request:
+    branches:
+      - master
+      - qt
+      - main
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5.0'
+          host: ${{ matrix.os == 'windows-latest' && 'windows' || 'mac' }}
+          target: 'desktop'
+          arch: ${{ matrix.os == 'windows-latest' && 'win64_mingw' || 'clang_64' }}
+
+      - name: Set up MinGW (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          version: '11.2.0'
+          platform: x64
+
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
+        run: cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure CMake (macOS)
+        if: matrix.os == 'macos-latest'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+
+      - name: Build
+        run: cmake --build build -j8
+
+      - name: Check translations built
+        run: |
+          test -f build/resources/translations/ClipBridge_zh_CN.qm || test -f resources/translations/ClipBridge_zh_CN.qm
+          test -f build/resources/translations/ClipBridge_en_US.qm || test -f resources/translations/ClipBridge_en_US.qm

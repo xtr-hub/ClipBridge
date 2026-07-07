@@ -1,0 +1,38 @@
+#!/bin/sh
+# Local build check before push.
+# Rejects the push if the project fails to configure or build.
+
+set -e
+
+# Allow skipping the check when needed: SKIP_BUILD=1 git push
+if [ "$SKIP_BUILD" = "1" ]; then
+    echo "Skipping local build check (SKIP_BUILD=1)"
+    exit 0
+fi
+
+echo "Running local build check..."
+
+OS=$(uname -s)
+case "$OS" in
+    Darwin)
+        PRESET="macOS-Clang"
+        ;;
+    MINGW*|MSYS*|CYGWIN*)
+        PRESET="Windows-MinGW"
+        ;;
+    Linux)
+        echo "No CMake preset for Linux; skipping local build check."
+        exit 0
+        ;;
+    *)
+        echo "Unknown OS: $OS; skipping local build check."
+        exit 0
+        ;;
+esac
+
+echo "Using CMake preset: $PRESET"
+
+cmake --preset "$PRESET"
+cmake --build "out/build/$PRESET"
+
+echo "Local build check passed."
