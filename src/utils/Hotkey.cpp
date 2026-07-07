@@ -191,7 +191,11 @@ bool Hotkey::registerHotkey()
         } else if (!p.isEmpty()) {
             QKeySequence ks(p);
             if (!ks.isEmpty()) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                key = ks[0].key() & ~Qt::KeyboardModifierMask;
+#else
                 key = ks[0] & ~Qt::KeyboardModifierMask;
+#endif
             }
         }
     }
@@ -231,7 +235,11 @@ bool Hotkey::registerHotkey()
         } else if (!p.isEmpty()) {
             QKeySequence ks(p);
             if (!ks.isEmpty()) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                key = ks[0].key() & ~Qt::KeyboardModifierMask;
+#else
                 key = ks[0] & ~Qt::KeyboardModifierMask;
+#endif
             }
         }
     }

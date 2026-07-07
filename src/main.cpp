@@ -27,6 +27,15 @@
 
 using namespace ClipBridge;
 
+static QString qtTranslationsPath()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    return QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+#else
+    return QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+#endif
+}
+
 int main(int argc, char *argv[])
 {
 #ifdef _WIN32
@@ -71,7 +80,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    QString qtQmPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath) + QString("/qt_%1.qm").arg(language);
+    QString qtQmPath = qtTranslationsPath() + QString("/qt_%1.qm").arg(language);
     if (qtTranslator.load(qtQmPath)) {
         app.installTranslator(&qtTranslator);
     }
@@ -143,7 +152,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-            QString qtQmPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath) + QString("/qt_%1.qm").arg(language);
+            QString qtQmPath = qtTranslationsPath() + QString("/qt_%1.qm").arg(language);
             if (qtTranslator.load(qtQmPath)) {
                 app.installTranslator(&qtTranslator);
             }
