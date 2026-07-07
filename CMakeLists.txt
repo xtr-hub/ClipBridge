@@ -53,6 +53,36 @@ else()
     message(STATUS "Building with Qt5")
 endif()
 
+# Find Qt translation tools
+if(QT_VERSION_MAJOR EQUAL 6)
+    find_package(Qt6LinguistTools QUIET)
+    set(QT_LRELEASE Qt6::lrelease)
+else()
+    find_package(Qt5LinguistTools QUIET)
+    set(QT_LRELEASE Qt5::lrelease)
+endif()
+
+set(TS_FILES
+    resources/translations/ClipBridge_zh_CN.ts
+    resources/translations/ClipBridge_en_US.ts
+)
+
+if(TARGET ${QT_LRELEASE})
+    foreach(ts_file ${TS_FILES})
+        get_filename_component(qm_name ${ts_file} NAME_WE)
+        set(qm_file "${CMAKE_CURRENT_SOURCE_DIR}/resources/translations/${qm_name}.qm")
+        add_custom_command(
+            OUTPUT ${qm_file}
+            COMMAND ${QT_LRELEASE} "${CMAKE_CURRENT_SOURCE_DIR}/${ts_file}" -qm ${qm_file}
+            DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${ts_file}"
+            COMMENT "Generating ${qm_name}.qm"
+        )
+        list(APPEND QM_FILES ${qm_file})
+    endforeach()
+
+    add_custom_target(translations ALL DEPENDS ${QM_FILES})
+endif()
+
 set(SOURCES
     src/main.cpp
     src/core/ActionManager.cpp
@@ -81,6 +111,10 @@ add_executable(ClipBridge
     ${HEADERS}
     resources.qrc
 )
+
+if(TARGET translations)
+    add_dependencies(ClipBridge translations)
+endif()
 
 # Link Qt libraries (works for both Qt5 and Qt6)
 target_link_libraries(ClipBridge PRIVATE
@@ -134,7 +168,6 @@ if(WIN32)
         # Run windeployqt to copy all required Qt DLLs and plugins
         add_custom_command(TARGET ClipBridge POST_BUILD
             COMMAND "${_windeployqt_exe}"
-            --no-translations
             --no-system-d3d-compiler
             --no-opengl-sw
             --no-quick-import

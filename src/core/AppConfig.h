@@ -50,6 +50,7 @@ struct AppConfig
     QVector<HotKeyBinding> hotkeys;  ///< 热键列表
     Behavior defaultBehavior;        ///< 默认行为配置（用于新添加的热键）
     Output output;                   ///< 输出配置
+    QString language = "zh_CN";      ///< 界面语言，如 zh_CN, en_US
 
     /**
      * @brief 从文件加载配置

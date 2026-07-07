@@ -55,6 +55,7 @@ private:
     QPushButton *m_browseBtn;
     QCheckBox *m_defaultAutoPasteCheck;
     QCheckBox *m_defaultAutoSubmitCheck;
+    QComboBox *m_languageCombo;
 };
 
 } // namespace ClipBridge

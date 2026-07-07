@@ -23,9 +23,8 @@
     },
     "output": {
         "format": "请查看这张剪贴板图片分析内容\n{path}",
-        "path": {
-            "mode": "workspace",
-            "dir": ""
-        }
-    }
+        "mode": "workspace",
+        "dir": ""
+    },
+    "language": "zh_CN"
 }

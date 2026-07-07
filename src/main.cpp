@@ -16,6 +16,9 @@
 #include <QHash>
 #include <QPointer>
 #include <QThread>
+#include <QTranslator>
+#include <QLibraryInfo>
+#include <QLocale>
 
 #include "core/AppConfig.h"
 #include "core/ActionManager.h"
@@ -51,6 +54,28 @@ int main(int argc, char *argv[])
 
     // 初始加载配置
     AppConfig config = AppConfig::load(configPath);
+
+    // 安装翻译器（中文为源语言，直接使用 source 文本）
+    QTranslator appTranslator;
+    QTranslator qtTranslator;
+
+    QString language = config.language.isEmpty() ? QLocale::system().name() : config.language;
+
+    if (language != "zh_CN") {
+        QString qmPath = QString(":/resources/translations/ClipBridge_%1.qm").arg(language);
+        if (appTranslator.load(qmPath)) {
+            app.installTranslator(&appTranslator);
+            qDebug() << "Loaded app translation:" << language;
+        } else {
+            qDebug() << "No app translation found for:" << language;
+        }
+    }
+
+    QString qtQmPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath) + QString("/qt_%1.qm").arg(language);
+    if (qtTranslator.load(qtQmPath)) {
+        app.installTranslator(&qtTranslator);
+    }
+
     ActionManager manager(config);
 
     // 热键管理
@@ -100,6 +125,32 @@ int main(int argc, char *argv[])
         qDebug() << "Config updated, reloading...";
         config = newConfig;
         manager.updateConfig(config);
+
+        // 热更新语言
+        QString newLanguage = config.language.isEmpty() ? QLocale::system().name() : config.language;
+        if (newLanguage != language) {
+            language = newLanguage;
+            app.removeTranslator(&appTranslator);
+            app.removeTranslator(&qtTranslator);
+
+            if (language != "zh_CN") {
+                QString qmPath = QString(":/resources/translations/ClipBridge_%1.qm").arg(language);
+                if (appTranslator.load(qmPath)) {
+                    app.installTranslator(&appTranslator);
+                    qDebug() << "Reloaded app translation:" << language;
+                } else {
+                    qDebug() << "No app translation found for:" << language;
+                }
+            }
+
+            QString qtQmPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath) + QString("/qt_%1.qm").arg(language);
+            if (qtTranslator.load(qtQmPath)) {
+                app.installTranslator(&qtTranslator);
+            }
+
+            trayIcon.retranslateMenu();
+        }
+
         registerHotkeys(config);
         qDebug() << "Hot reload complete!";
     });

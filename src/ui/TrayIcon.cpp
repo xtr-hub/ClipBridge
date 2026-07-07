@@ -10,9 +10,9 @@ TrayIcon::TrayIcon(const AppConfig &config, QObject *parent)
 {
     m_menu = new QMenu();
 
-    m_settingsAction = new QAction("设置", this);
-    m_aboutAction = new QAction("关于", this);
-    m_quitAction = new QAction("退出", this);
+    m_settingsAction = new QAction(tr("设置"), this);
+    m_aboutAction = new QAction(tr("关于"), this);
+    m_quitAction = new QAction(tr("退出"), this);
 
     m_menu->addAction(m_settingsAction);
     m_menu->addSeparator();
@@ -22,7 +22,7 @@ TrayIcon::TrayIcon(const AppConfig &config, QObject *parent)
 
     setContextMenu(m_menu);
 
-    setToolTip("ClipBridge - 剪贴板工具");
+    setToolTip(tr("ClipBridge - 剪贴板工具"));
 
     if (icon().isNull()) {
         setIcon(QIcon(":/resources/icon.svg"));
@@ -41,14 +41,24 @@ TrayIcon::TrayIcon(const AppConfig &config, QObject *parent)
 void TrayIcon::showAbout()
 {
     QMessageBox::about(nullptr,
-        "关于 ClipBridge",
-        "<h3>ClipBridge</h3>"
-        "<p>剪贴板工具 - 让终端中的图片粘贴更简单</p>"
-        "<p>功能:</p>"
-        "<ul>"
-        "<li> 将剪贴板图片转为路径</li>"
-        "<li> 去除文本换行符</li>"
-        "</ul>");
+        tr("关于 ClipBridge"),
+        tr("<h3>ClipBridge</h3>"
+           "<p>剪贴板工具 - 让终端中的图片粘贴更简单</p>"
+           "<p>功能:</p>"
+           "<ul>"
+           "<li> 将剪贴板图片转为路径</li>"
+           "<li> 去除文本换行符</li>"
+           "</ul>"));
+}
+
+void TrayIcon::retranslateMenu()
+{
+    m_menu->hide();
+
+    m_settingsAction->setText(tr("设置"));
+    m_aboutAction->setText(tr("关于"));
+    m_quitAction->setText(tr("退出"));
+    setToolTip(tr("ClipBridge - 剪贴板工具"));
 }
 
 void TrayIcon::showSettings()

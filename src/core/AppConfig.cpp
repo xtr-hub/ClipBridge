@@ -73,6 +73,10 @@ AppConfig AppConfig::load(const QString &path)
         config.output.dir = output["dir"].toString();
     }
 
+    if (root.contains("language")) {
+        config.language = root["language"].toString("zh_CN");
+    }
+
     return config;
 }
 
@@ -105,6 +109,8 @@ void AppConfig::save(const QString &path) const
     outputObj["mode"] = output.mode;
     outputObj["dir"] = output.dir;
     root["output"] = outputObj;
+
+    root["language"] = language;
 
     QJsonDocument doc(root);
     QFile file(path);

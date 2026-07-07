@@ -30,6 +30,11 @@ public:
      */
     explicit TrayIcon(const AppConfig &config, QObject *parent = nullptr);
 
+    /**
+     * @brief 重新翻译托盘菜单
+     */
+    void retranslateMenu();
+
 signals:
     /**
      * @brief 请求退出应用
