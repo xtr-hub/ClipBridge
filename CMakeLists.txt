@@ -42,16 +42,10 @@ else()
     endif()
 endif()
 
-# Try to find Qt6 first, then Qt5
-find_package(Qt6 QUIET COMPONENTS Core Gui Widgets Svg)
-if(Qt6_FOUND)
-    set(QT_VERSION_MAJOR 6)
-    message(STATUS "Building with Qt6")
-else()
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Svg)
-    set(QT_VERSION_MAJOR 5)
-    message(STATUS "Building with Qt5")
-endif()
+# Find Qt6 and required modules
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg)
+set(QT_VERSION_MAJOR 6)
+message(STATUS "Building with Qt6")
 
 # Find Qt translation tools
 if(QT_VERSION_MAJOR EQUAL 6)
@@ -116,7 +110,7 @@ if(TARGET translations)
     add_dependencies(ClipBridge translations)
 endif()
 
-# Link Qt libraries (works for both Qt5 and Qt6)
+# Link Qt libraries
 target_link_libraries(ClipBridge PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui

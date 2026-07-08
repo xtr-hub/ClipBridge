@@ -33,6 +33,7 @@ jobs:
           host: ${{ matrix.os == 'windows-latest' && 'windows' || 'mac' }}
           target: 'desktop'
           arch: ${{ matrix.os == 'windows-latest' && 'win64_mingw' || 'clang_64' }}
+          modules: 'qtsvg'
 
       - name: Set up MinGW (Windows)
         if: matrix.os == 'windows-latest'

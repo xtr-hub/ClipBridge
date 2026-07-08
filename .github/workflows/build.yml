@@ -25,6 +25,7 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: 'win64_mingw'
+          modules: 'qtsvg'
 
       - name: Set up MinGW
         uses: egor-tensin/setup-mingw@v2
@@ -63,6 +64,7 @@ jobs:
           target: 'desktop'
           arch: 'clang_64'
           dir: ${{ github.workspace }}/Qt
+          modules: 'qtsvg'
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
