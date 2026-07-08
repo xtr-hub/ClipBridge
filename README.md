@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="resources/icon.svg" alt="logo" width="200" height="200">
+  <img src="resources/icon.png" alt="logo" width="200" height="200">
 
   # ClipBridge
 
