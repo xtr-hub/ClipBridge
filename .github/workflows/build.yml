@@ -21,11 +21,10 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: '6.5.3'
+          version: '5.15.2'
           host: 'windows'
           target: 'desktop'
-          arch: 'win64_mingw'
-          modules: 'qtsvg'
+          arch: 'win64_mingw81'
 
       - name: Set up MinGW
         uses: egor-tensin/setup-mingw@v2
@@ -59,12 +58,11 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: '6.5.3'
+          version: '5.15.2'
           host: 'mac'
           target: 'desktop'
-          arch: 'macos'
+          arch: 'clang_64'
           dir: ${{ github.workspace }}/Qt
-          modules: 'qtsvg'
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
@@ -95,23 +93,23 @@ jobs:
           fi
 
           # Use macdeployqt to copy Qt frameworks
-          if [ -d "$Qt6_DIR/bin/macdeployqt" ]; then
-            $Qt6_DIR/bin/macdeployqt $APP_DIR
-          elif [ -d "$Qt6_DIR/bin/macdeployqt.app" ]; then
-            $Qt6_DIR/bin/macdeployqt.app/Contents/MacOS/macdeployqt $APP_DIR
+          if [ -d "$Qt5_DIR/bin/macdeployqt" ]; then
+            $Qt5_DIR/bin/macdeployqt $APP_DIR
+          elif [ -d "$Qt5_DIR/bin/macdeployqt.app" ]; then
+            $Qt5_DIR/bin/macdeployqt.app/Contents/MacOS/macdeployqt $APP_DIR
           else
-            # Try to find macdeployqt in Qt6_DIR
-            if [ -n "$Qt6_DIR" ]; then
-              if [ -f "$Qt6_DIR/bin/macdeployqt" ]; then
-                "$Qt6_DIR/bin/macdeployqt" $APP_DIR
-              elif [ -f "$Qt6_DIR/bin/macdeployqt.app/Contents/MacOS/macdeployqt" ]; then
-                "$Qt6_DIR/bin/macdeployqt.app/Contents/MacOS/macdeployqt" $APP_DIR
+            # Try to find macdeployqt in Qt5_DIR
+            if [ -n "$Qt5_DIR" ]; then
+              if [ -f "$Qt5_DIR/bin/macdeployqt" ]; then
+                "$Qt5_DIR/bin/macdeployqt" $APP_DIR
+              elif [ -f "$Qt5_DIR/bin/macdeployqt.app/Contents/MacOS/macdeployqt" ]; then
+                "$Qt5_DIR/bin/macdeployqt.app/Contents/MacOS/macdeployqt" $APP_DIR
               else
                 # Look for macdeployqt in common places
-                if [ -f "/usr/local/Qt6/bin/macdeployqt" ]; then
-                  /usr/local/Qt6/bin/macdeployqt $APP_DIR
-                elif [ -f "/usr/local/opt/qt6/bin/macdeployqt" ]; then
-                  /usr/local/opt/qt6/bin/macdeployqt $APP_DIR
+                if [ -f "/usr/local/Qt5/bin/macdeployqt" ]; then
+                  /usr/local/Qt5/bin/macdeployqt $APP_DIR
+                elif [ -f "/usr/local/opt/qt5/bin/macdeployqt" ]; then
+                  /usr/local/opt/qt5/bin/macdeployqt $APP_DIR
                 else
                   echo "WARNING: macdeployqt not found, attempting to manually copy frameworks"
                   # Manual copy is complex, just zip the app without it as a fallback

@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName("ClipBridge");
     QApplication::setApplicationVersion("1.0.0");
     QApplication::setOrganizationName("ClipBridge");
-    QApplication::setWindowIcon(QIcon(":/resources/icon.svg"));
+    QApplication::setWindowIcon(QIcon(":/resources/icon.png"));
 
     // 启用深色模式自适应
     app.setStyle("Fusion");

@@ -19,18 +19,22 @@ endif()
 if(NOT DEFINED ENV{CMAKE_PREFIX_PATH} AND NOT DEFINED ENV{QTDIR} AND NOT DEFINED ENV{Qt6_DIR} AND NOT DEFINED ENV{Qt5_DIR})
     list(APPEND CMAKE_PREFIX_PATH
         # macOS
+        "~/Qt/6.5.3/macos"
         "~/Qt/5.15.2/clang_64"
         "~/5.15.2/clang_64"
         "/usr/local/opt/qt5"
         "/opt/homebrew/opt/qt5"
         "/opt/homebrew/opt/qt6"
         # Windows
-        "C:/Qt/5.15.2/msvc2019_64"
+        "C:/Qt/6.5.3/mingw_64"
         "C:/Qt/6.5.0/msvc2019_64"
+        "C:/Qt/5.15.2/mingw81_64"
+        "C:/Qt/5.15.2/msvc2019_64"
         "D:/tools/qt/6.11.1/mingw_64"
         # Linux
         "/usr"
         "/opt/qt5"
+        "/opt/qt6"
     )
 else()
     # Use environment variables if set
@@ -42,10 +46,16 @@ else()
     endif()
 endif()
 
-# Find Qt6 and required modules
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg)
-set(QT_VERSION_MAJOR 6)
-message(STATUS "Building with Qt6")
+# Find Qt (prefer Qt6, fallback to Qt5)
+find_package(Qt6 QUIET COMPONENTS Core Gui Widgets)
+if(Qt6_FOUND)
+    set(QT_VERSION_MAJOR 6)
+    message(STATUS "Building with Qt6")
+else()
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+    set(QT_VERSION_MAJOR 5)
+    message(STATUS "Building with Qt5")
+endif()
 
 # Find Qt translation tools
 if(QT_VERSION_MAJOR EQUAL 6)
@@ -115,7 +125,6 @@ target_link_libraries(ClipBridge PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Svg
 )
 
 if(WIN32)

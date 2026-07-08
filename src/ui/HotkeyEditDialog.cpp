@@ -8,7 +8,7 @@ HotkeyEditDialog::HotkeyEditDialog(const AppConfig &config, Mode mode, int editI
     : QDialog(parent), m_config(config), m_mode(mode), m_editIndex(editIndex)
 {
     setWindowTitle(mode == AddMode ? tr("添加热键") : tr("编辑热键"));
-    setWindowIcon(QIcon(":/resources/icon.svg"));
+    setWindowIcon(QIcon(":/resources/icon.png"));
     setMinimumSize(380, 340);
     resize(400, 360);
 

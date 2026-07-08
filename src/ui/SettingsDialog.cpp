@@ -13,7 +13,7 @@ SettingsDialog::SettingsDialog(const AppConfig &config, QWidget *parent)
     : QDialog(parent), m_config(config)
 {
     setWindowTitle(tr("ClipBridge 设置"));
-    setWindowIcon(QIcon(":/resources/icon.svg"));
+    setWindowIcon(QIcon(":/resources/icon.png"));
     setMinimumSize(520, 620);
     resize(560, 640);
 

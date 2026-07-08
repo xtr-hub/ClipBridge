@@ -1,6 +1,6 @@
 <RCC>
   <qresource prefix="/">
-    <file>resources/icon.svg</file>
+    <file>resources/icon.png</file>
     <file>resources/translations/ClipBridge_zh_CN.qm</file>
     <file>resources/translations/ClipBridge_en_US.qm</file>
   </qresource>
