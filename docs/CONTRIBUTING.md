@@ -1,5 +1,7 @@
 # 贡献指南
 
+[中文](CONTRIBUTING.md) | [English](CONTRIBUTING_EN.md)
+
 感谢你对 ClipBridge 的兴趣！欢迎提交 Issue 和 Pull Request。
 
 ## 如何贡献

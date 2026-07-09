@@ -12,6 +12,8 @@
   </div>
 </div>
 
+[中文](README.md) | [English](README_EN.md)
+
 ## 能干什么
 
 - TUI 发图神器：截图 → 按快捷键 → 自动保存图片 → 自动粘贴路径 → 直接发送
