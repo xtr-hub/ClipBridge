@@ -63,6 +63,18 @@ public:
      */
     static QStringList getFilePaths();
 
+    /**
+     * @brief 保存当前剪贴板内容为 MIME 数据副本
+     * @return MIME 数据副本（调用方负责释放内存）
+     */
+    static QMimeData *saveClipboard();
+
+    /**
+     * @brief 将剪贴板恢复为指定的 MIME 数据
+     * @param data 要恢复的数据（所有权转移给剪贴板，调用方不应再使用）
+     */
+    static void restoreClipboard(QMimeData *data);
+
 };
 
 } // namespace ClipBridge

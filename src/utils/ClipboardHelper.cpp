@@ -73,4 +73,29 @@ QStringList ClipboardHelper::getFilePaths()
     return paths;
 }
 
+QMimeData *ClipboardHelper::saveClipboard()
+{
+    const QMimeData *src = QApplication::clipboard()->mimeData();
+    if (!src) {
+        return nullptr;
+    }
+
+    QMimeData *dst = new QMimeData();
+    const QStringList formats = src->formats();
+    for (const QString &fmt : formats) {
+        dst->setData(fmt, src->data(fmt));
+    }
+    return dst;
+}
+
+void ClipboardHelper::restoreClipboard(QMimeData *data)
+{
+    if (!data) {
+        return;
+    }
+
+    // QClipboard::setMimeData takes ownership, so hand it over directly.
+    QApplication::clipboard()->setMimeData(data, QClipboard::Clipboard);
+}
+
 } // namespace ClipBridge

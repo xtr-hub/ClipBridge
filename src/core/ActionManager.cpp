@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <QStandardPaths>
+#include <QTimer>
 #include <QDebug>
 
 namespace ClipBridge {
@@ -60,6 +61,9 @@ void ActionManager::clipboardImagePath(const AppConfig::Behavior &behavior)
         return;
     }
 
+    // Save original clipboard before overwriting with text
+    QMimeData *savedClipboard = ClipboardHelper::saveClipboard();
+
     QString outputText = getOutputFormat("clipboard_image_path");
     outputText.replace("{path}", fullPath);
     ClipboardHelper::setText(outputText);
@@ -71,6 +75,12 @@ void ActionManager::clipboardImagePath(const AppConfig::Behavior &behavior)
     if (behavior.autoSubmit) {
         Simulator::simulateEnter();
     }
+
+    // Restore original clipboard after a short delay so paste target has time to read
+    int delay = behavior.autoSubmit ? 400 : 200;
+    QTimer::singleShot(delay, [savedClipboard]() {
+        ClipboardHelper::restoreClipboard(savedClipboard);
+    });
 
     qDebug() << "Image saved to:" << fullPath;
 }
@@ -87,6 +97,9 @@ void ActionManager::stripNewlines(const AppConfig::Behavior &behavior)
     result.remove('\n');
     result.remove('\r');
 
+    // Save original clipboard before overwriting with stripped text
+    QMimeData *savedClipboard = ClipboardHelper::saveClipboard();
+
     ClipboardHelper::setText(result);
 
     if (behavior.autoPaste) {
@@ -96,6 +109,12 @@ void ActionManager::stripNewlines(const AppConfig::Behavior &behavior)
     if (behavior.autoSubmit) {
         Simulator::simulateEnter();
     }
+
+    // Restore original clipboard after a short delay so paste target has time to read
+    int delay = behavior.autoSubmit ? 400 : 200;
+    QTimer::singleShot(delay, [savedClipboard]() {
+        ClipboardHelper::restoreClipboard(savedClipboard);
+    });
 
     qDebug() << "Strip newlines done!";
 }
@@ -117,6 +136,9 @@ void ActionManager::clipboardFilePath(const AppConfig::Behavior &behavior)
     QString outputText = getOutputFormat("clipboard_file_path");
     outputText.replace("{path}", joinedPaths);
 
+    // Save original clipboard before overwriting with text
+    QMimeData *savedClipboard = ClipboardHelper::saveClipboard();
+
     ClipboardHelper::setText(outputText);
 
     if (behavior.autoPaste) {
@@ -126,6 +148,12 @@ void ActionManager::clipboardFilePath(const AppConfig::Behavior &behavior)
     if (behavior.autoSubmit) {
         Simulator::simulateEnter();
     }
+
+    // Restore original clipboard after a short delay so paste target has time to read
+    int delay = behavior.autoSubmit ? 400 : 200;
+    QTimer::singleShot(delay, [savedClipboard]() {
+        ClipboardHelper::restoreClipboard(savedClipboard);
+    });
 
     qDebug() << "File paths copied:" << joinedPaths;
 }

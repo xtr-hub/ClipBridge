@@ -168,6 +168,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="70"/>
+        <source>此动作不使用输出格式</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../src/ui/SettingsDialog.cpp" line="71"/>
         <source>格式:</source>
         <translation type="unfinished"></translation>
