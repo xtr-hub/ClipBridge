@@ -71,6 +71,13 @@ AppConfig AppConfig::load(const QString &path)
         config.output.format = output["format"].toString("{path}");
         config.output.mode = output["mode"].toString("workspace");
         config.output.dir = output["dir"].toString();
+
+        if (output.contains("formats") && output["formats"].isObject()) {
+            QJsonObject formatsObj = output["formats"].toObject();
+            for (const QString &key : formatsObj.keys()) {
+                config.output.formats[key] = formatsObj[key].toString();
+            }
+        }
     }
 
     if (root.contains("language")) {
@@ -108,6 +115,13 @@ void AppConfig::save(const QString &path) const
     outputObj["format"] = output.format;
     outputObj["mode"] = output.mode;
     outputObj["dir"] = output.dir;
+
+    QJsonObject formatsObj;
+    for (auto it = output.formats.cbegin(); it != output.formats.cend(); ++it) {
+        formatsObj[it.key()] = it.value();
+    }
+    outputObj["formats"] = formatsObj;
+
     root["output"] = outputObj;
 
     root["language"] = language;

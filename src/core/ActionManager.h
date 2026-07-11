@@ -56,6 +56,19 @@ private:
     void stripNewlines(const AppConfig::Behavior &behavior);
 
     /**
+     * @brief 获取剪贴板中的文件路径
+     * @param behavior 行为配置
+     */
+    void clipboardFilePath(const AppConfig::Behavior &behavior);
+
+    /**
+     * @brief 获取指定动作的输出格式模板
+     * @param action 动作名称
+     * @return 输出格式模板
+     */
+    QString getOutputFormat(const QString &action) const;
+
+    /**
      * @brief 获取图片保存目录
      * @return 目录路径
      */

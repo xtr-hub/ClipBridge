@@ -38,6 +38,7 @@ void HotkeyEditDialog::setupUI()
     m_actionCombo->setMinimumHeight(28);
     m_actionCombo->addItem(tr("复制图片路径 (clipboard_image_path)"), "clipboard_image_path");
     m_actionCombo->addItem(tr("去除换行符 (strip_newlines)"), "strip_newlines");
+    m_actionCombo->addItem(tr("复制文件路径 (clipboard_file_path)"), "clipboard_file_path");
     formLayout->addRow(tr("动作:"), m_actionCombo);
 
     m_keySequenceEdit = new QKeySequenceEdit(this);

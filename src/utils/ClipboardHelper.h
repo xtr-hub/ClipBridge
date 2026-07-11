@@ -50,7 +50,19 @@ public:
      * @param text 文本内容
      */
     static void setText(const QString &text);
-    
+
+    /**
+     * @brief 检查剪贴板是否有 URL（文件路径）
+     * @return true 如果有 URL
+     */
+    static bool hasUrls();
+
+    /**
+     * @brief 获取剪贴板中的本地文件路径列表
+     * @return 文件路径列表
+     */
+    static QStringList getFilePaths();
+
 };
 
 } // namespace ClipBridge

@@ -14,8 +14,8 @@ SettingsDialog::SettingsDialog(const AppConfig &config, QWidget *parent)
 {
     setWindowTitle(tr("ClipBridge 设置"));
     setWindowIcon(QIcon(":/resources/icon.png"));
-    setMinimumSize(520, 620);
-    resize(560, 640);
+    setMinimumSize(540, 680);
+    resize(580, 720);
 
     setupUI();
     loadConfigToUI();
@@ -53,17 +53,32 @@ void SettingsDialog::setupUI()
     // 输出设置组
     QGroupBox *outputGroup = new QGroupBox(tr("输出设置"), this);
     QFormLayout *outputLayout = new QFormLayout(outputGroup);
-    outputLayout->setSpacing(12);
-    outputLayout->setContentsMargins(12, 18, 12, 15);
+    outputLayout->setSpacing(15);
+    outputLayout->setContentsMargins(15, 22, 15, 18);
     outputLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
+    m_actionFormatCombo = new QComboBox(this);
+    m_actionFormatCombo->setMinimumHeight(30);
+    m_actionFormatCombo->addItem(tr("复制图片路径 (clipboard_image_path)"), "clipboard_image_path");
+    m_actionFormatCombo->addItem(tr("去除换行符 (strip_newlines)"), "strip_newlines");
+    m_actionFormatCombo->addItem(tr("复制文件路径 (clipboard_file_path)"), "clipboard_file_path");
+    outputLayout->addRow(tr("动作:"), m_actionFormatCombo);
+
     m_formatEdit = new QLineEdit(this);
-    m_formatEdit->setMinimumHeight(28);
+    m_formatEdit->setMinimumHeight(30);
     m_formatEdit->setPlaceholderText(tr("例如: 请查看这张图片 {path}"));
-    outputLayout->addRow(tr("格式:"), m_formatEdit);
+
+    m_useSpecificFormatCheck = new QCheckBox(tr("专属格式"), this);
+    m_useSpecificFormatCheck->setToolTip(tr("为当前动作使用独立的输出格式，否则使用全局默认格式"));
+
+    QHBoxLayout *formatLayout = new QHBoxLayout();
+    formatLayout->setSpacing(10);
+    formatLayout->addWidget(m_formatEdit, 1);
+    formatLayout->addWidget(m_useSpecificFormatCheck);
+    outputLayout->addRow(tr("格式:"), formatLayout);
 
     m_pathModeCombo = new QComboBox(this);
-    m_pathModeCombo->setMinimumHeight(28);
+    m_pathModeCombo->setMinimumHeight(30);
     m_pathModeCombo->addItem(tr("工作区默认路径"), "workspace");
     m_pathModeCombo->addItem(tr("自定义路径"), "custom_path");
     outputLayout->addRow(tr("保存模式:"), m_pathModeCombo);
@@ -71,7 +86,7 @@ void SettingsDialog::setupUI()
     QHBoxLayout *pathLayout = new QHBoxLayout();
     pathLayout->setSpacing(10);
     m_customPathEdit = new QLineEdit(this);
-    m_customPathEdit->setMinimumHeight(28);
+    m_customPathEdit->setMinimumHeight(30);
     m_customPathEdit->setPlaceholderText(tr("选择自定义图片保存路径"));
     m_browseBtn = new QPushButton(tr("浏览..."), this);
     m_browseBtn->setMaximumWidth(100);
@@ -136,6 +151,12 @@ void SettingsDialog::setupUI()
     connect(m_browseBtn, &QPushButton::clicked, this, &SettingsDialog::browsePath);
     connect(m_pathModeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &SettingsDialog::onPathModeChanged);
+    connect(m_actionFormatCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &SettingsDialog::onActionFormatChanged);
+    connect(m_useSpecificFormatCheck, &QCheckBox::clicked,
+            this, &SettingsDialog::onUseSpecificFormatChanged);
+    connect(m_formatEdit, &QLineEdit::textChanged,
+            this, &SettingsDialog::onFormatTextChanged);
 }
 
 void SettingsDialog::loadConfigToUI()
@@ -162,8 +183,6 @@ void SettingsDialog::loadConfigToUI()
         m_hotkeyList->addItem(itemText);
     }
 
-    m_formatEdit->setText(m_config.output.format);
-
     int modeIndex = m_pathModeCombo->findData(m_config.output.mode);
     if (modeIndex >= 0) {
         m_pathModeCombo->setCurrentIndex(modeIndex);
@@ -179,6 +198,13 @@ void SettingsDialog::loadConfigToUI()
     }
 
     updatePathInputState();
+
+    // Initialize action format UI without triggering save side effects
+    QString action = m_actionFormatCombo->currentData().toString();
+    bool hasSpecificFormat = m_config.output.formats.contains(action);
+    m_useSpecificFormatCheck->setChecked(hasSpecificFormat);
+    m_formatEdit->setText(hasSpecificFormat ? m_config.output.formats[action] : m_config.output.format);
+    updateFormatEditState();
 }
 
 void SettingsDialog::updatePathInputState()
@@ -261,7 +287,8 @@ void SettingsDialog::saveConfig()
 {
     QString oldLanguage = m_config.language;
 
-    m_config.output.format = m_formatEdit->text();
+    saveCurrentActionFormat();
+
     m_config.output.mode = m_pathModeCombo->currentData().toString();
     m_config.output.dir = m_customPathEdit->text();
     m_config.defaultBehavior.autoPaste = m_defaultAutoPasteCheck->isChecked();
@@ -271,6 +298,85 @@ void SettingsDialog::saveConfig()
     m_config.save(QDir(QCoreApplication::applicationDirPath()).filePath("config.json"));
 
     accept();
+}
+
+void SettingsDialog::saveCurrentActionFormat()
+{
+    QString action = m_actionFormatCombo->currentData().toString();
+    if (m_useSpecificFormatCheck->isChecked()) {
+        m_config.output.formats[action] = m_formatEdit->text();
+    } else {
+        m_config.output.format = m_formatEdit->text();
+        // Removing the specific format here ensures the saved config only
+        // contains formats that are currently enabled. A session backup is
+        // kept so re-checking restores the value.
+        if (m_config.output.formats.contains(action)) {
+            m_actionFormatBackups[action] = m_config.output.formats.take(action);
+        }
+    }
+}
+
+void SettingsDialog::onActionFormatChanged(int index)
+{
+    Q_UNUSED(index);
+
+    saveCurrentActionFormat();
+
+    QString action = m_actionFormatCombo->currentData().toString();
+    bool hasSpecificFormat = m_config.output.formats.contains(action);
+
+    m_useSpecificFormatCheck->setChecked(hasSpecificFormat);
+    if (hasSpecificFormat) {
+        m_formatEdit->setText(m_config.output.formats[action]);
+    } else {
+        m_formatEdit->setText(m_config.output.format);
+    }
+
+    updateFormatEditState();
+}
+
+void SettingsDialog::onUseSpecificFormatChanged(bool checked)
+{
+    QString action = m_actionFormatCombo->currentData().toString();
+    if (checked) {
+        if (m_actionFormatBackups.contains(action)) {
+            // Restore the format that was active before it was unchecked.
+            m_config.output.formats[action] = m_actionFormatBackups.take(action);
+            m_formatEdit->setText(m_config.output.formats[action]);
+        } else if (m_config.output.formats.contains(action)) {
+            // Config already has a specific format for this action.
+            m_formatEdit->setText(m_config.output.formats[action]);
+        } else {
+            // No previous specific format; seed it from the current text.
+            m_config.output.formats[action] = m_formatEdit->text();
+        }
+    } else {
+        // Switch to global format while backing up the specific format.
+        if (m_config.output.formats.contains(action)) {
+            m_actionFormatBackups[action] = m_config.output.formats.take(action);
+        }
+        m_formatEdit->setText(m_config.output.format);
+    }
+    updateFormatEditState();
+}
+
+void SettingsDialog::onFormatTextChanged(const QString &text)
+{
+    QString action = m_actionFormatCombo->currentData().toString();
+    if (m_useSpecificFormatCheck->isChecked()) {
+        m_config.output.formats[action] = text;
+    } else {
+        m_config.output.format = text;
+    }
+}
+
+void SettingsDialog::updateFormatEditState()
+{
+    if (m_useSpecificFormatCheck->isChecked()) {
+        m_formatEdit->setPlaceholderText(tr("例如: 请查看这张图片 {path}"));
+    } else {
+        m_formatEdit->setPlaceholderText(tr("例如: {path}"));
+    }
 }
 
 } // namespace ClipBridge

@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="resources/icon.svg" alt="logo" width="200" height="200">
+  <img src="resources/icon.png" alt="logo" width="200" height="200">
 
   # ClipBridge
 
@@ -17,8 +17,9 @@ English | [中文](README.md)
 ## What It Does
 
 - **Image-to-TUI magic**: take a screenshot → press a hotkey → image is auto-saved → its path is auto-pasted → send instantly
+- **One-click file path copy**: copy files → press a hotkey → file paths are auto-pasted
 - **One-click newline removal**: copy a multi-line command from the terminal, newlines are stripped automatically, ready to use
-- **Custom output format**: supports `{path}` placeholders, configure the exact text you want pasted
+- **Custom output format**: supports `{path}` placeholders, each action can have its own pasted text
 - **GUI hotkey manager**: add/edit/delete hotkeys, each with independent auto-paste and auto-submit settings
 - **Auto hot-reload**: changes take effect immediately after saving config, no restart needed
 - **Cross-platform**: Windows / macOS / Linux
@@ -34,7 +35,8 @@ English | [中文](README.md)
 ### Basic Usage
 
 1. Take a screenshot → press `Ctrl+Alt+I` → the image path is pasted into the current input field
-2. Copy a multi-line command → press `Ctrl+Alt+J` → newlines are stripped and it's ready to execute
+2. Copy files → press `Ctrl+Alt+F` → the file paths are pasted into the current input field
+3. Copy a multi-line command → press `Ctrl+Alt+J` → newlines are stripped and it's ready to execute
 
 ### GUI Settings
 
@@ -49,7 +51,8 @@ English | [中文](README.md)
    - Delete hotkeys
 
 2. **Output settings**
-   - Customize output format (supports `{path}` placeholder)
+   - Configure the global default output format (supports `{path}` placeholder)
+   - Configure a per-action output format; unconfigured actions fall back to the global format
    - Choose save mode: desktop default path / custom path
    - Graphically select a custom save directory
 
@@ -85,6 +88,14 @@ The configuration file `config.json` is located in the same directory as the pro
         "auto_paste": true,
         "auto_submit": false
       }
+    },
+    {
+      "action": "clipboard_file_path",
+      "key": "ctrl+Alt+F",
+      "behavior": {
+        "auto_paste": true,
+        "auto_submit": false
+      }
     }
   ],
   "default_behavior": {
@@ -93,6 +104,10 @@ The configuration file `config.json` is located in the same directory as the pro
   },
   "output": {
     "format": "{path}",
+    "formats": {
+      "clipboard_image_path": "Check this clipboard image {path}",
+      "clipboard_file_path": "Check this file {path}"
+    },
     "mode": "workspace",
     "dir": ""
   }
@@ -104,13 +119,14 @@ The configuration file `config.json` is located in the same directory as the pro
 | Field | Type | Description |
 |-------|------|-------------|
 | `hotkeys` | array | List of hotkey bindings |
-| `hotkeys[].action` | string | Action: `clipboard_image_path` or `strip_newlines` |
+| `hotkeys[].action` | string | Action: `clipboard_image_path`, `clipboard_file_path`, or `strip_newlines` |
 | `hotkeys[].key` | string | Hotkey, separated by `+` (e.g. `ctrl+alt+i`) |
 | `hotkeys[].behavior` | object | Optional per-hotkey behavior |
 | `default_behavior` | object | Default behavior config |
 | `default_behavior.auto_paste` | bool | Whether to auto-paste after the action |
 | `default_behavior.auto_submit` | bool | Whether to auto-submit (use with caution) |
-| `output.format` | string | Pasted text format; `{path}` is replaced with the image path |
+| `output.format` | string | Global default output format; `{path}` is replaced with the path |
+| `output.formats` | object | Per-action output formats; falls back to `output.format` when not set |
 | `output.mode` | string | `workspace` (desktop) or `custom_path` (custom directory) |
 | `output.dir` | string | Save directory when `custom_path` mode is used |
 

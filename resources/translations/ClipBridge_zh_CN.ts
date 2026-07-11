@@ -25,6 +25,11 @@
     </message>
     <message>
         <location filename="../../src/ui/HotkeyEditDialog.cpp" line="41"/>
+        <source>复制文件路径 (clipboard_file_path)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/HotkeyEditDialog.cpp" line="42"/>
         <source>动作:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -124,11 +129,46 @@
     </message>
     <message>
         <location filename="../../src/ui/SettingsDialog.cpp" line="62"/>
-        <source>例如: 请查看这张图片 {path}</source>
+        <source>复制图片路径 (clipboard_image_path)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/ui/SettingsDialog.cpp" line="63"/>
+        <source>去除换行符 (strip_newlines)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="64"/>
+        <source>复制文件路径 (clipboard_file_path)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="65"/>
+        <source>动作:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="67"/>
+        <source>专属格式</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="68"/>
+        <source>为当前动作使用独立的输出格式，否则使用全局默认格式</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="70"/>
+        <source>例如: 请查看这张图片 {path}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="70"/>
+        <source>例如: {path}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="71"/>
         <source>格式:</source>
         <translation type="unfinished"></translation>
     </message>

@@ -10,6 +10,7 @@
 #include <QString>
 #include <QVector>
 #include <QKeySequence>
+#include <QHash>
 
 namespace ClipBridge {
 
@@ -42,9 +43,10 @@ struct AppConfig
      */
     struct Output
     {
-        QString format = "{path}";  ///< 输出格式模板
-        QString mode = "workspace"; ///< 路径模式: workspace/custom_path
-        QString dir;                ///< 自定义目录
+        QString format = "{path}";                  ///< 输出格式模板
+        QHash<QString, QString> formats;           ///< 按动作的输出格式模板
+        QString mode = "workspace";                 ///< 路径模式: workspace/custom_path
+        QString dir;                                ///< 自定义目录
     };
 
     QVector<HotKeyBinding> hotkeys;  ///< 热键列表

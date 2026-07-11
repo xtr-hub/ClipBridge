@@ -13,6 +13,7 @@ ActionManager::ActionManager(const AppConfig &config)
 {
     m_handlers["clipboard_image_path"] = [this](const AppConfig::Behavior &behavior) { clipboardImagePath(behavior); };
     m_handlers["strip_newlines"] = [this](const AppConfig::Behavior &behavior) { stripNewlines(behavior); };
+    m_handlers["clipboard_file_path"] = [this](const AppConfig::Behavior &behavior) { clipboardFilePath(behavior); };
 }
 
 void ActionManager::run(const QString &action, const AppConfig::Behavior &behavior)
@@ -27,6 +28,14 @@ void ActionManager::run(const QString &action, const AppConfig::Behavior &behavi
 void ActionManager::updateConfig(const AppConfig &config)
 {
     m_config = config;
+}
+
+QString ActionManager::getOutputFormat(const QString &action) const
+{
+    if (m_config.output.formats.contains(action)) {
+        return m_config.output.formats[action];
+    }
+    return m_config.output.format;
 }
 
 void ActionManager::clipboardImagePath(const AppConfig::Behavior &behavior)
@@ -51,7 +60,7 @@ void ActionManager::clipboardImagePath(const AppConfig::Behavior &behavior)
         return;
     }
 
-    QString outputText = m_config.output.format;
+    QString outputText = getOutputFormat("clipboard_image_path");
     outputText.replace("{path}", fullPath);
     ClipboardHelper::setText(outputText);
 
@@ -89,6 +98,36 @@ void ActionManager::stripNewlines(const AppConfig::Behavior &behavior)
     }
 
     qDebug() << "Strip newlines done!";
+}
+
+void ActionManager::clipboardFilePath(const AppConfig::Behavior &behavior)
+{
+    if (!ClipboardHelper::hasUrls()) {
+        qDebug() << "No file URLs in clipboard";
+        return;
+    }
+
+    QStringList paths = ClipboardHelper::getFilePaths();
+    if (paths.isEmpty()) {
+        qDebug() << "No valid file paths in clipboard";
+        return;
+    }
+
+    QString joinedPaths = paths.join('\n');
+    QString outputText = getOutputFormat("clipboard_file_path");
+    outputText.replace("{path}", joinedPaths);
+
+    ClipboardHelper::setText(outputText);
+
+    if (behavior.autoPaste) {
+        Simulator::simulatePaste();
+    }
+
+    if (behavior.autoSubmit) {
+        Simulator::simulateEnter();
+    }
+
+    qDebug() << "File paths copied:" << joinedPaths;
 }
 
 QString ActionManager::getImageSaveDir() const

@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QMimeData>
+#include <QUrl>
 #include <QDir>
 #include <QStandardPaths>
 
@@ -45,6 +46,31 @@ QString ClipboardHelper::getText()
 void ClipboardHelper::setText(const QString &text)
 {
     QApplication::clipboard()->setText(text);
+}
+
+bool ClipboardHelper::hasUrls()
+{
+    const QMimeData *mimeData = QApplication::clipboard()->mimeData();
+    return mimeData && mimeData->hasUrls();
+}
+
+QStringList ClipboardHelper::getFilePaths()
+{
+    const QMimeData *mimeData = QApplication::clipboard()->mimeData();
+    if (!mimeData || !mimeData->hasUrls()) {
+        return QStringList();
+    }
+
+    QStringList paths;
+    for (const QUrl &url : mimeData->urls()) {
+        if (url.isLocalFile()) {
+            QString path = url.toLocalFile();
+            if (!path.isEmpty()) {
+                paths.append(path);
+            }
+        }
+    }
+    return paths;
 }
 
 } // namespace ClipBridge

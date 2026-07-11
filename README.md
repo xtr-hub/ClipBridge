@@ -17,8 +17,9 @@
 ## 能干什么
 
 - TUI 发图神器：截图 → 按快捷键 → 自动保存图片 → 自动粘贴路径 → 直接发送
+- 一键复制文件路径：复制文件 → 按快捷键 → 自动粘贴文件路径列表
 - 一键去除换行符：从终端复制多行命令，自动清理换行，即贴即用
-- 自定义输出格式：支持 `{path}` 占位符，配置你想要的文案
+- 自定义输出格式：支持 `{path}` 占位符，每个动作可配置不同文案
 - 图形化热键管理：添加/编辑/删除热键，每个热键独立配置自动粘贴和自动提交
 - 自动热重载：保存配置后立即生效，无需重启
 - 跨平台支持：Windows / macOS / Linux
@@ -34,7 +35,8 @@
 ### 基本使用
 
 1. 截图 → 按 `Ctrl+Alt+I` → 图片路径自动粘贴到当前输入框
-2. 复制多行命令 → 按 `Ctrl+Alt+J` → 换行符已清理，可以直接执行
+2. 复制文件 → 按 `Ctrl+Alt+F` → 文件路径自动粘贴到当前输入框
+3. 复制多行命令 → 按 `Ctrl+Alt+J` → 换行符已清理，可以直接执行
 
 ### 图形界面设置
 
@@ -49,7 +51,8 @@
    - 删除热键
 
 2. **输出设置**
-   - 自定义输出格式（支持 `{path}` 占位符）
+   - 配置全局默认输出格式（支持 `{path}` 占位符）
+   - 为每个动作配置专属输出格式，未配置时自动回退到全局格式
    - 选择保存模式：桌面默认路径 / 自定义路径
    - 图形化选择自定义保存目录
 
@@ -85,6 +88,14 @@
         "auto_paste": true,
         "auto_submit": false
       }
+    },
+    {
+      "action": "clipboard_file_path",
+      "key": "ctrl+Alt+F",
+      "behavior": {
+        "auto_paste": true,
+        "auto_submit": false
+      }
     }
   ],
   "default_behavior": {
@@ -93,6 +104,10 @@
   },
   "output": {
     "format": "{path}",
+    "formats": {
+      "clipboard_image_path": "请查看这张剪贴板图片分析内容\n{path}",
+      "clipboard_file_path": "请查看这个文件\n{path}"
+    },
     "mode": "workspace",
     "dir": ""
   }
@@ -104,13 +119,14 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `hotkeys` | array | 快捷键绑定列表 |
-| `hotkeys[].action` | string | 动作：`clipboard_image_path` 或 `strip_newlines` |
+| `hotkeys[].action` | string | 动作：`clipboard_image_path`、`clipboard_file_path` 或 `strip_newlines` |
 | `hotkeys[].key` | string | 快捷键，用 `+` 分隔（如 `ctrl+alt+i`） |
 | `hotkeys[].behavior` | object | 可选，该热键的独立行为 |
 | `default_behavior` | object | 默认行为配置 |
 | `default_behavior.auto_paste` | bool | 执行动作后是否自动粘贴 |
 | `default_behavior.auto_submit` | bool | 是否自动提交（慎用） |
-| `output.format` | string | 粘贴文本格式，`{path}` 会被替换为图片路径 |
+| `output.format` | string | 全局默认输出格式，`{path}` 会被替换为路径 |
+| `output.formats` | object | 按动作的专属输出格式，未配置时回退到 `output.format` |
 | `output.mode` | string | `workspace`（桌面）或 `custom_path`（自定义） |
 | `output.dir` | string | `custom_path` 模式下的保存目录 |
 
