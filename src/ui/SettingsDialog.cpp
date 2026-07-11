@@ -224,12 +224,23 @@ void SettingsDialog::refreshFormatUIForAction(const QString &action)
         m_formatEdit->setPlaceholderText(hasSpecific ? tr("例如: 请查看这张图片 {path}") : tr("例如: {path}"));
     }
 
+    // Enable save path controls only for actions that create files.
+    bool needsSavePath = isSavePathConfigurableAction(action);
+    m_pathModeCombo->setEnabled(needsSavePath);
+    if (!needsSavePath) {
+        m_customPathEdit->setEnabled(false);
+        m_browseBtn->setEnabled(false);
+    } else {
+        updatePathInputState();
+    }
+
     m_updatingFormatUI = false;
 }
 
 void SettingsDialog::updatePathInputState()
 {
-    bool isCustom = m_pathModeCombo->currentData().toString() == "custom_path";
+    bool isCustom = m_pathModeCombo->currentData().toString() == "custom_path"
+                    && isSavePathConfigurableAction(m_currentAction);
     m_customPathEdit->setEnabled(isCustom);
     m_browseBtn->setEnabled(isCustom);
 }
@@ -406,6 +417,12 @@ void SettingsDialog::updateFormatEditState()
 bool SettingsDialog::isFormatConfigurableAction(const QString &action) const
 {
     return action != "strip_newlines";
+}
+
+bool SettingsDialog::isSavePathConfigurableAction(const QString &action) const
+{
+    // Only clipboard_image_path creates files that need a save directory.
+    return action == "clipboard_image_path";
 }
 
 } // namespace ClipBridge

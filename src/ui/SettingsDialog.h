@@ -52,6 +52,7 @@ private:
 
     void saveCurrentActionFormat();
     bool isFormatConfigurableAction(const QString &action) const;
+    bool isSavePathConfigurableAction(const QString &action) const;
     void refreshFormatUIForAction(const QString &action);
 
     AppConfig m_config;
