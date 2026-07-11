@@ -49,9 +49,14 @@ private:
     void loadConfigToUI();
     void updatePathInputState();
     void updateFormatEditState();
+
     void saveCurrentActionFormat();
+    bool isFormatConfigurableAction(const QString &action) const;
+    void refreshFormatUIForAction(const QString &action);
 
     AppConfig m_config;
+    QString m_currentAction;
+    bool m_updatingFormatUI = false;
 
     QListWidget *m_hotkeyList;
     QComboBox *m_actionFormatCombo;

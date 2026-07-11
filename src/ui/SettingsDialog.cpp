@@ -201,10 +201,30 @@ void SettingsDialog::loadConfigToUI()
 
     // Initialize action format UI without triggering save side effects
     QString action = m_actionFormatCombo->currentData().toString();
-    bool hasSpecificFormat = m_config.output.formats.contains(action);
-    m_useSpecificFormatCheck->setChecked(hasSpecificFormat);
-    m_formatEdit->setText(hasSpecificFormat ? m_config.output.formats[action] : m_config.output.format);
-    updateFormatEditState();
+    m_currentAction = action;
+    refreshFormatUIForAction(action);
+}
+
+void SettingsDialog::refreshFormatUIForAction(const QString &action)
+{
+    m_updatingFormatUI = true;
+
+    bool configurable = isFormatConfigurableAction(action);
+    m_useSpecificFormatCheck->setEnabled(configurable);
+    m_formatEdit->setEnabled(configurable);
+
+    if (!configurable) {
+        m_useSpecificFormatCheck->setChecked(false);
+        m_formatEdit->clear();
+        m_formatEdit->setPlaceholderText(tr("此动作不使用输出格式"));
+    } else {
+        bool hasSpecific = m_config.output.formats.contains(action);
+        m_useSpecificFormatCheck->setChecked(hasSpecific);
+        m_formatEdit->setText(hasSpecific ? m_config.output.formats[action] : m_config.output.format);
+        m_formatEdit->setPlaceholderText(hasSpecific ? tr("例如: 请查看这张图片 {path}") : tr("例如: {path}"));
+    }
+
+    m_updatingFormatUI = false;
 }
 
 void SettingsDialog::updatePathInputState()
@@ -302,16 +322,20 @@ void SettingsDialog::saveConfig()
 
 void SettingsDialog::saveCurrentActionFormat()
 {
-    QString action = m_actionFormatCombo->currentData().toString();
+    if (m_updatingFormatUI) {
+        return;
+    }
+
+    if (!isFormatConfigurableAction(m_currentAction)) {
+        return;
+    }
+
     if (m_useSpecificFormatCheck->isChecked()) {
-        m_config.output.formats[action] = m_formatEdit->text();
+        m_config.output.formats[m_currentAction] = m_formatEdit->text();
     } else {
         m_config.output.format = m_formatEdit->text();
-        // Removing the specific format here ensures the saved config only
-        // contains formats that are currently enabled. A session backup is
-        // kept so re-checking restores the value.
-        if (m_config.output.formats.contains(action)) {
-            m_actionFormatBackups[action] = m_config.output.formats.take(action);
+        if (m_config.output.formats.contains(m_currentAction)) {
+            m_actionFormatBackups[m_currentAction] = m_config.output.formats.take(m_currentAction);
         }
     }
 }
@@ -320,51 +344,55 @@ void SettingsDialog::onActionFormatChanged(int index)
 {
     Q_UNUSED(index);
 
+    // Save using the OLD action (m_currentAction still has the previous value)
     saveCurrentActionFormat();
 
     QString action = m_actionFormatCombo->currentData().toString();
-    bool hasSpecificFormat = m_config.output.formats.contains(action);
-
-    m_useSpecificFormatCheck->setChecked(hasSpecificFormat);
-    if (hasSpecificFormat) {
-        m_formatEdit->setText(m_config.output.formats[action]);
-    } else {
-        m_formatEdit->setText(m_config.output.format);
-    }
-
-    updateFormatEditState();
+    m_currentAction = action;
+    refreshFormatUIForAction(action);
 }
 
 void SettingsDialog::onUseSpecificFormatChanged(bool checked)
 {
-    QString action = m_actionFormatCombo->currentData().toString();
+    if (m_updatingFormatUI || !isFormatConfigurableAction(m_currentAction)) {
+        return;
+    }
+
+    m_updatingFormatUI = true;
+
     if (checked) {
-        if (m_actionFormatBackups.contains(action)) {
-            // Restore the format that was active before it was unchecked.
-            m_config.output.formats[action] = m_actionFormatBackups.take(action);
-            m_formatEdit->setText(m_config.output.formats[action]);
-        } else if (m_config.output.formats.contains(action)) {
-            // Config already has a specific format for this action.
-            m_formatEdit->setText(m_config.output.formats[action]);
+        if (m_actionFormatBackups.contains(m_currentAction)) {
+            m_config.output.formats[m_currentAction] = m_actionFormatBackups.take(m_currentAction);
+            m_formatEdit->setText(m_config.output.formats[m_currentAction]);
+        } else if (m_config.output.formats.contains(m_currentAction)) {
+            m_formatEdit->setText(m_config.output.formats[m_currentAction]);
         } else {
-            // No previous specific format; seed it from the current text.
-            m_config.output.formats[action] = m_formatEdit->text();
+            m_config.output.formats[m_currentAction] = m_formatEdit->text();
         }
+        m_formatEdit->setPlaceholderText(tr("例如: 请查看这张图片 {path}"));
     } else {
-        // Switch to global format while backing up the specific format.
-        if (m_config.output.formats.contains(action)) {
-            m_actionFormatBackups[action] = m_config.output.formats.take(action);
+        if (m_config.output.formats.contains(m_currentAction)) {
+            m_actionFormatBackups[m_currentAction] = m_config.output.formats.take(m_currentAction);
         }
         m_formatEdit->setText(m_config.output.format);
+        m_formatEdit->setPlaceholderText(tr("例如: {path}"));
     }
-    updateFormatEditState();
+
+    m_updatingFormatUI = false;
 }
 
 void SettingsDialog::onFormatTextChanged(const QString &text)
 {
-    QString action = m_actionFormatCombo->currentData().toString();
+    if (m_updatingFormatUI) {
+        return;
+    }
+
+    if (!isFormatConfigurableAction(m_currentAction)) {
+        return;
+    }
+
     if (m_useSpecificFormatCheck->isChecked()) {
-        m_config.output.formats[action] = text;
+        m_config.output.formats[m_currentAction] = text;
     } else {
         m_config.output.format = text;
     }
@@ -372,11 +400,12 @@ void SettingsDialog::onFormatTextChanged(const QString &text)
 
 void SettingsDialog::updateFormatEditState()
 {
-    if (m_useSpecificFormatCheck->isChecked()) {
-        m_formatEdit->setPlaceholderText(tr("例如: 请查看这张图片 {path}"));
-    } else {
-        m_formatEdit->setPlaceholderText(tr("例如: {path}"));
-    }
+    // No longer needed — refreshFormatUIForAction handles all state.
+}
+
+bool SettingsDialog::isFormatConfigurableAction(const QString &action) const
+{
+    return action != "strip_newlines";
 }
 
 } // namespace ClipBridge
