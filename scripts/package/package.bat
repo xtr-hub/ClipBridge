@@ -1,5 +1,9 @@
 @echo off
 chcp 65001 >nul
+
+REM 切换到项目根目录（脚本位于 scripts/package/）
+cd /d "%~dp0\..\.."
+
 echo ========================================
 echo    ClipBridge Qt 版本打包脚本
 echo ========================================

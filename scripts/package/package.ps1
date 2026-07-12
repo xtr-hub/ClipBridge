@@ -1,4 +1,8 @@
 # ClipBridge Qt Packaging Script (PowerShell)
+
+# Switch to project root (script is in scripts/package/)
+Set-Location "$PSScriptRoot\..\.."
+
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "   ClipBridge Qt Packaging Script" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
