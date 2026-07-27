@@ -47,6 +47,8 @@ struct AppConfig
         QHash<QString, QString> formats;           ///< 按动作的输出格式模板
         QString mode = "workspace";                 ///< 路径模式: workspace/custom_path
         QString dir;                                ///< 自定义目录
+        QString pasteKey = "Ctrl+V";               ///< 粘贴快捷键
+        int pasteDelay = 100;                       ///< 粘贴后等待时间 (ms)，确保目标窗口读完剪贴板
     };
 
     QVector<HotKeyBinding> hotkeys;  ///< 热键列表

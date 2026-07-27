@@ -95,6 +95,21 @@ void SettingsDialog::setupUI()
     pathLayout->addWidget(m_browseBtn);
     outputLayout->addRow(tr("保存路径:"), pathLayout);
 
+    m_pasteKeyCombo = new QComboBox(this);
+    m_pasteKeyCombo->setMinimumHeight(30);
+    m_pasteKeyCombo->addItem("Ctrl+V", "Ctrl+V");
+    m_pasteKeyCombo->addItem("Ctrl+Shift+V", "Ctrl+Shift+V");
+    m_pasteKeyCombo->addItem("Shift+Insert", "Shift+Insert");
+    m_pasteKeyCombo->addItem("Cmd+V", "Cmd+V");
+    outputLayout->addRow(tr("粘贴快捷键:"), m_pasteKeyCombo);
+
+    m_pasteDelaySpin = new QSpinBox(this);
+    m_pasteDelaySpin->setMinimumHeight(28);
+    m_pasteDelaySpin->setRange(20, 1000);
+    m_pasteDelaySpin->setSuffix(" ms");
+    m_pasteDelaySpin->setToolTip(tr("粘贴后等待目标窗口读取剪贴板的时间"));
+    outputLayout->addRow(tr("粘贴延迟:"), m_pasteDelaySpin);
+
     mainLayout->addWidget(outputGroup);
 
     // 默认行为配置组
@@ -198,6 +213,12 @@ void SettingsDialog::loadConfigToUI()
     }
 
     updatePathInputState();
+
+    int pasteKeyIdx = m_pasteKeyCombo->findData(m_config.output.pasteKey);
+    if (pasteKeyIdx < 0) pasteKeyIdx = m_pasteKeyCombo->findData("Ctrl+V");
+    m_pasteKeyCombo->setCurrentIndex(pasteKeyIdx >= 0 ? pasteKeyIdx : 0);
+
+    m_pasteDelaySpin->setValue(m_config.output.pasteDelay);
 
     // Initialize action format UI without triggering save side effects
     QString action = m_actionFormatCombo->currentData().toString();
@@ -322,6 +343,8 @@ void SettingsDialog::saveConfig()
 
     m_config.output.mode = m_pathModeCombo->currentData().toString();
     m_config.output.dir = m_customPathEdit->text();
+    m_config.output.pasteKey = m_pasteKeyCombo->currentData().toString();
+    m_config.output.pasteDelay = m_pasteDelaySpin->value();
     m_config.defaultBehavior.autoPaste = m_defaultAutoPasteCheck->isChecked();
     m_config.defaultBehavior.autoSubmit = m_defaultAutoSubmitCheck->isChecked();
     m_config.language = m_languageCombo->currentData().toString();

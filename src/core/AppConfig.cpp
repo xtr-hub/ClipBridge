@@ -78,6 +78,9 @@ AppConfig AppConfig::load(const QString &path)
                 config.output.formats[key] = formatsObj[key].toString();
             }
         }
+
+        config.output.pasteKey = output["paste_key"].toString("Ctrl+V");
+        config.output.pasteDelay = output["paste_delay"].toInt(100);
     }
 
     if (root.contains("language")) {
@@ -121,6 +124,9 @@ void AppConfig::save(const QString &path) const
         formatsObj[it.key()] = it.value();
     }
     outputObj["formats"] = formatsObj;
+
+    outputObj["paste_key"] = output.pasteKey;
+    outputObj["paste_delay"] = output.pasteDelay;
 
     root["output"] = outputObj;
 

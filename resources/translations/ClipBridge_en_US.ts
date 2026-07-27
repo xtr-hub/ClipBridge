@@ -173,6 +173,21 @@
         <translation>This action does not use output format</translation>
     </message>
     <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="70"/>
+        <source>粘贴快捷键:</source>
+        <translation>Paste Shortcut:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="70"/>
+        <source>粘贴延迟:</source>
+        <translation>Paste Delay:</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/SettingsDialog.cpp" line="70"/>
+        <source>粘贴后等待目标窗口读取剪贴板的时间</source>
+        <translation>Time to wait for the target window to read the clipboard after pasting</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/SettingsDialog.cpp" line="71"/>
         <source>格式:</source>
         <translation>Format:</translation>

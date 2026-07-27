@@ -18,6 +18,7 @@
 #include <QListWidget>
 #include <QComboBox>
 #include <QHBoxLayout>
+#include <QSpinBox>
 
 #include "core/AppConfig.h"
 #include "ui/HotkeyEditDialog.h"
@@ -70,6 +71,9 @@ private:
     QCheckBox *m_defaultAutoSubmitCheck;
     QComboBox *m_languageCombo;
     QHash<QString, QString> m_actionFormatBackups;
+
+    QComboBox *m_pasteKeyCombo;
+    QSpinBox *m_pasteDelaySpin;
 };
 
 } // namespace ClipBridge

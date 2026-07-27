@@ -70,16 +70,14 @@ void ActionManager::clipboardImagePath(const AppConfig::Behavior &behavior)
     ClipboardHelper::setText(outputText);
 
     if (behavior.autoPaste) {
-        Simulator::simulatePaste();
+        Simulator::simulatePaste(m_config.output.pasteKey);
     }
 
     if (behavior.autoSubmit) {
         Simulator::simulateEnter();
     }
 
-    // Restore immediately — QTimer::singleShot(0) defers to next event loop
-    // iteration so the paste/simulateEnter keys are processed first.
-    QTimer::singleShot(0, [image]() {
+    QTimer::singleShot(m_config.output.pasteDelay, [image]() {
         QApplication::clipboard()->setImage(image);
     });
 
@@ -101,14 +99,14 @@ void ActionManager::stripNewlines(const AppConfig::Behavior &behavior)
     ClipboardHelper::setText(result);
 
     if (behavior.autoPaste) {
-        Simulator::simulatePaste();
+        Simulator::simulatePaste(m_config.output.pasteKey);
     }
 
     if (behavior.autoSubmit) {
         Simulator::simulateEnter();
     }
 
-    QTimer::singleShot(0, [text]() {
+    QTimer::singleShot(m_config.output.pasteDelay, [text]() {
         QApplication::clipboard()->setText(text);
     });
 
@@ -138,14 +136,14 @@ void ActionManager::clipboardFilePath(const AppConfig::Behavior &behavior)
     ClipboardHelper::setText(outputText);
 
     if (behavior.autoPaste) {
-        Simulator::simulatePaste();
+        Simulator::simulatePaste(m_config.output.pasteKey);
     }
 
     if (behavior.autoSubmit) {
         Simulator::simulateEnter();
     }
 
-    QTimer::singleShot(0, [savedUrls]() {
+    QTimer::singleShot(m_config.output.pasteDelay, [savedUrls]() {
         QMimeData *mime = new QMimeData();
         mime->setUrls(savedUrls);
         QApplication::clipboard()->setMimeData(mime, QClipboard::Clipboard);

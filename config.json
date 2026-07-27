@@ -36,7 +36,9 @@
             "clipboard_file_path": "请查看这个文件\n{path}"
         },
         "mode": "workspace",
-        "dir": ""
+        "dir": "",
+        "paste_key": "Ctrl+V",
+        "paste_delay": 100
     },
     "language": "zh_CN"
 }
