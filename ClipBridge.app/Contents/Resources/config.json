@@ -1,0 +1,42 @@
+{
+    "hotkeys": [
+        {
+            "action": "clipboard_image_path",
+            "key": "Ctrl+Alt+I",
+            "behavior": {
+                "auto_paste": true,
+                "auto_submit": false
+            }
+        },
+        {
+            "action": "strip_newlines",
+            "key": "Ctrl+Alt+K",
+            "behavior": {
+                "auto_paste": true,
+                "auto_submit": false
+            }
+        },
+        {
+            "action": "clipboard_file_path",
+            "key": "Ctrl+Alt+F",
+            "behavior": {
+                "auto_paste": true,
+                "auto_submit": false
+            }
+        }
+    ],
+    "default_behavior": {
+        "auto_paste": true,
+        "auto_submit": false
+    },
+    "output": {
+        "format": "{path}",
+        "formats": {
+            "clipboard_image_path": "请查看这张剪贴板图片分析内容\n{path}",
+            "clipboard_file_path": "请查看这个文件\n{path}"
+        },
+        "mode": "workspace",
+        "dir": ""
+    },
+    "language": "zh_CN"
+}

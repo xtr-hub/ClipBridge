@@ -1,5 +1,9 @@
 @echo off
 chcp 65001 >nul
+
+REM 切换到项目根目录（脚本位于 scripts/package/）
+cd /d "%~dp0\..\.."
+
 echo ========================================
 echo    ClipBridge 构建打包脚本
 echo ========================================
@@ -37,7 +41,7 @@ if %errorlevel% neq 0 (
 REM 打包
 echo.
 echo [4/4] 打包...
-call package.bat
+call "%~dp0package.bat"
 
 echo.
 echo ========================================

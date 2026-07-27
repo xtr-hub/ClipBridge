@@ -1,4 +1,8 @@
 # ClipBridge 构建打包脚本 (PowerShell)
+
+# 切换到项目根目录（脚本位于 scripts/package/）
+Set-Location "$PSScriptRoot\..\.."
+
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "   ClipBridge 构建打包脚本" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
@@ -36,7 +40,7 @@ if ($LASTEXITCODE -ne 0) {
 # 打包
 Write-Host ""
 Write-Host "[4/4] 打包..." -ForegroundColor Yellow
-powershell -ExecutionPolicy Bypass -File package.ps1
+& "$PSScriptRoot\package.ps1"
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green

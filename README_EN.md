@@ -202,10 +202,10 @@ The configuration file `config.json` is located in the same directory as the pro
    The project includes one-click build/package scripts:
    ```cmd
    # Using batch script
-   build_and_package.bat
+   scripts/package/build_and_package.bat
 
    # Or using PowerShell script
-   powershell -ExecutionPolicy Bypass -File build_and_package.ps1
+   powershell -ExecutionPolicy Bypass -File scripts/package/build_and_package.ps1
    ```
 
 5. **Package for release**
@@ -213,10 +213,10 @@ The configuration file `config.json` is located in the same directory as the pro
    If you have already built manually and only want to package:
    ```cmd
    # Using batch script
-   package.bat
+   scripts/package/package.bat
 
    # Or using PowerShell script
-   powershell -ExecutionPolicy Bypass -File package.ps1
+   powershell -ExecutionPolicy Bypass -File scripts/package/package.ps1
    ```
 
    The script creates a `ClipBridge_Qt` folder with all dependencies and a zip archive.
@@ -234,6 +234,14 @@ mkdir build && cd build
 cmake .. -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@5
 cmake --build . --config Release
 ```
+
+**Package**
+
+```bash
+./scripts/package/package_macos.sh
+```
+
+The script creates `ClipBridge.app` and `ClipBridge_macOS_<version>.zip`.
 
 **Note**: on first run, add the program to "System Preferences → Security & Privacy → Accessibility".
 
