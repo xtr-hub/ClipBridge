@@ -1,28 +1,22 @@
-/**
- * @file main.cpp
- * @brief 应用程序入口
- * @author Your Name
- * @date 2026
- */
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
 #include <QApplication>
-#include <QFileInfo>
 #include <QDir>
 #include <QDebug>
 #include <QHash>
 #include <QPointer>
-#include <QThread>
 #include <QTranslator>
 #include <QLibraryInfo>
 #include <QLocale>
 
 #include "core/AppConfig.h"
 #include "core/ActionManager.h"
+#include "core/MonitorService.h"
+#include "core/AutoStart.h"
 #include "ui/TrayIcon.h"
+#include "ui/InputPanel.h"
 #include "utils/Hotkey.h"
 
 using namespace ClipBridge;
@@ -39,134 +33,126 @@ static QString qtTranslationsPath()
 int main(int argc, char *argv[])
 {
 #ifdef _WIN32
-    // 隐藏控制台窗口
     FreeConsole();
 #endif
 
-    // 注册自定义类型，用于信号槽
     qRegisterMetaType<AppConfig::Behavior>("AppConfig::Behavior");
 
     QApplication app(argc, argv);
-
-    // macOS: 防止没有窗口时应用自动退出
     QApplication::setQuitOnLastWindowClosed(false);
-
     QApplication::setApplicationName("ClipBridge");
-    QApplication::setApplicationVersion("1.0.0");
+    QApplication::setApplicationVersion("1.1.0");
     QApplication::setOrganizationName("ClipBridge");
     QApplication::setWindowIcon(QIcon(":/resources/icon.png"));
-
-    // 启用深色模式自适应
     app.setStyle("Fusion");
 
     QString configPath = QDir(QCoreApplication::applicationDirPath()).filePath("config.json");
-
-    // 初始加载配置
     AppConfig config = AppConfig::load(configPath);
 
-    // 安装翻译器（中文为源语言，直接使用 source 文本）
-    QTranslator appTranslator;
-    QTranslator qtTranslator;
+    if (config.autoStart)
+        AutoStart::setEnabled(true);
 
+    // Translations
+    QTranslator appTranslator, qtTranslator;
     QString language = config.language.isEmpty() ? QLocale::system().name() : config.language;
-
     if (language != "zh_CN") {
         QString qmPath = QString(":/resources/translations/ClipBridge_%1.qm").arg(language);
-        if (appTranslator.load(qmPath)) {
+        if (appTranslator.load(qmPath))
             app.installTranslator(&appTranslator);
-            qDebug() << "Loaded app translation:" << language;
-        } else {
-            qDebug() << "No app translation found for:" << language;
-        }
     }
-
-    QString qtQmPath = qtTranslationsPath() + QString("/qt_%1.qm").arg(language);
-    if (qtTranslator.load(qtQmPath)) {
+    QString qtQm = qtTranslationsPath() + QString("/qt_%1.qm").arg(language);
+    if (qtTranslator.load(qtQm))
         app.installTranslator(&qtTranslator);
-    }
 
+    // Core
     ActionManager manager(config);
+    MonitorService monitor(&manager);
+    monitor.updateConfig(config.monitor, config.output.pasteKey);
+    monitor.setEnabled(config.monitor.enabled);
 
-    // 热键管理
+    InputPanel inputPanel(&manager);
+    inputPanel.updateConfig(config);
+
+    // Input panel ↔ monitor exclusion (ref-counted — nesting-safe)
+    QObject::connect(&inputPanel, &InputPanel::panelOpened, [&]() {
+        monitor.enterIgnoreScope();
+    });
+    QObject::connect(&inputPanel, &InputPanel::panelClosed, [&]() {
+        monitor.leaveIgnoreScope();
+    });
+
+    // Hotkeys
     QVector<QPointer<Hotkey>> hotkeys;
-
-    auto registerHotkeys = [&](const AppConfig &newConfig) {
-        // 只 unregister 旧热键，不 delete！防止崩溃！
-        for (auto hotkey : hotkeys) {
-            if (hotkey) {
-                hotkey->unregisterHotkey();
-            }
-        }
+    auto registerHotkeys = [&](const AppConfig &cfg) {
+        for (auto hk : hotkeys) { if (hk) hk->unregisterHotkey(); }
         hotkeys.clear();
 
-        // 注册新热键
-        for (const auto &binding : newConfig.hotkeys) {
-            Hotkey *hotkey = new Hotkey(binding.action, binding.keySequence, binding.behavior, true);
-
-            if (hotkey->isRegistered()) {
-                qDebug() << "Registered hotkey:" << binding.keySequence.toString()
-                         << "for action:" << binding.action
-                         << "(autoPaste:" << binding.behavior.autoPaste
-                         << ", autoSubmit:" << binding.behavior.autoSubmit << ")";
-
-                // 连接热键信号
-                QObject::connect(hotkey, &Hotkey::activated, [&manager](const QString &action, const AppConfig::Behavior &behavior) {
-                    qDebug() << "Hotkey triggered, running action:" << action;
-                    manager.run(action, behavior);
-                });
-
-                hotkeys.append(hotkey);
+        for (const auto &b : cfg.hotkeys) {
+            Hotkey *hk = new Hotkey(b.action, b.keySequence, b.behavior, true);
+            if (hk->isRegistered()) {
+                QObject::connect(hk, &Hotkey::activated,
+                    [&manager](const QString &a, const AppConfig::Behavior &bhv) {
+                        manager.run(a, bhv);
+                    });
+                hotkeys.append(hk);
             } else {
-                qWarning() << "Failed to register hotkey:" << binding.keySequence.toString();
-                delete hotkey;
+                delete hk;
+            }
+        }
+
+        if (!cfg.inputPanelHotkey.isEmpty()) {
+            Hotkey *ph = new Hotkey("__input_panel__", cfg.inputPanelHotkey,
+                                    AppConfig::Behavior(), true);
+            if (ph->isRegistered()) {
+                QObject::connect(ph, &Hotkey::activated,
+                    [&inputPanel](const QString &, const AppConfig::Behavior &) {
+                        inputPanel.showAndRefresh();
+                    });
+                hotkeys.append(ph);
+            } else {
+                delete ph;
             }
         }
     };
-
-    // 初始注册热键
     registerHotkeys(config);
 
+    // Tray
     TrayIcon trayIcon(config);
     trayIcon.show();
 
-    // 连接配置更新信号
-    QObject::connect(&trayIcon, &TrayIcon::configUpdated, [&](const AppConfig &newConfig) {
-        qDebug() << "Config updated, reloading...";
-        config = newConfig;
+    QObject::connect(&trayIcon, &TrayIcon::configUpdated, [&](const AppConfig &cfg) {
+        config = cfg;
         manager.updateConfig(config);
+        monitor.updateConfig(config.monitor, config.output.pasteKey);
+        monitor.setEnabled(config.monitor.enabled);
+        inputPanel.updateConfig(config);
 
-        // 热更新语言
-        QString newLanguage = config.language.isEmpty() ? QLocale::system().name() : config.language;
-        if (newLanguage != language) {
-            language = newLanguage;
+        QString nl = config.language.isEmpty() ? QLocale::system().name() : config.language;
+        if (nl != language) {
+            language = nl;
             app.removeTranslator(&appTranslator);
             app.removeTranslator(&qtTranslator);
-
             if (language != "zh_CN") {
-                QString qmPath = QString(":/resources/translations/ClipBridge_%1.qm").arg(language);
-                if (appTranslator.load(qmPath)) {
-                    app.installTranslator(&appTranslator);
-                    qDebug() << "Reloaded app translation:" << language;
-                } else {
-                    qDebug() << "No app translation found for:" << language;
-                }
+                QString qp = QString(":/resources/translations/ClipBridge_%1.qm").arg(language);
+                if (appTranslator.load(qp)) app.installTranslator(&appTranslator);
             }
-
-            QString qtQmPath = qtTranslationsPath() + QString("/qt_%1.qm").arg(language);
-            if (qtTranslator.load(qtQmPath)) {
-                app.installTranslator(&qtTranslator);
-            }
-
+            QString qq = qtTranslationsPath() + QString("/qt_%1.qm").arg(language);
+            if (qtTranslator.load(qq)) app.installTranslator(&qtTranslator);
             trayIcon.retranslateMenu();
         }
-
         registerHotkeys(config);
-        qDebug() << "Hot reload complete!";
     });
 
+    QObject::connect(&trayIcon, &TrayIcon::monitorToggled, [&](bool on) {
+        monitor.setEnabled(on);
+    });
+    QObject::connect(&trayIcon, &TrayIcon::autoStartToggled, [](bool on) {
+        AutoStart::setEnabled(on);
+    });
+    QObject::connect(&trayIcon, &TrayIcon::inputPanelRequested, [&]() {
+        inputPanel.showAndRefresh();
+    });
     QObject::connect(&trayIcon, &TrayIcon::quitRequested, &app, &QApplication::quit);
-
-    qDebug() << "ClipBridge started successfully!";
 
     return app.exec();
 }

@@ -1,335 +1,194 @@
-<div align="center">
-  <img src="resources/icon.png" alt="logo" width="200" height="200">
+# ClipBridge
 
-  # ClipBridge
-
-  Cross-platform hotkey utility that makes clipboard interactions with Claude TUI / Claude Code smoother
-
-  <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat&logo=github" alt="License"></a>
-    <a href="#platform-support"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat" alt="Platform"></a>
-    <a href="https://github.com/xtr-hub/ClipBridge/releases"><img src="https://img.shields.io/badge/Download-Releases-green.svg?style=flat&logo=github" alt="Releases"></a>
-  </div>
-</div>
+Using Claude in a terminal is great—until you need to send an image or a file. You end up saving it, finding the path, copying, pasting back into the terminal. ClipBridge handles this in one hotkey: screenshot, press, paste the path into Claude.
 
 English | [中文](README.md)
 
-## What It Does
+## Sending Screenshots to Claude
 
-- **Image-to-TUI magic**: take a screenshot → press a hotkey → image is auto-saved → its path is auto-pasted → send instantly
-- **One-click file path copy**: copy files → press a hotkey → file paths are auto-pasted
-- **One-click newline removal**: copy a multi-line command from the terminal, newlines are stripped automatically, ready to use
-- **Custom output format**: supports `{path}` placeholders, each action can have its own pasted text
-- **GUI hotkey manager**: add/edit/delete hotkeys, each with independent auto-paste and auto-submit settings
-- **Auto hot-reload**: changes take effect immediately after saving config, no restart needed
-- **Cross-platform**: Windows / macOS / Linux
+You've taken a screenshot and want Claude to look at it. No file manager, no manual path copying.
 
-## Quick Start
+**Option one: direct hotkey**
 
-### Download and Run
+Press `Ctrl+Alt+I` after taking a screenshot. The image auto-saves as PNG and the file path lands on your clipboard. Switch to Claude, `Ctrl+V`, done.
 
-1. Download a prebuilt binary from [Releases](https://github.com/xtr-hub/ClipBridge/releases)
-2. Or build from source (see below)
-3. Run the program; the ClipBridge icon appears in the system tray
+**Option two: preview and add a prompt**
 
-### Basic Usage
+Press `Ctrl+Alt+Space` to open the Input Panel. If there's an image on the clipboard, the preview bar at the top shows a thumbnail card—thumbnail on the left, dimensions in the middle (e.g. 1920x1080), and an × button on the right to remove it. Type a prompt in the text box below, like "analyze the error in this screenshot", then `Ctrl+Enter`. The prompt and image path are concatenated on your clipboard, ready to paste into Claude.
 
-1. Take a screenshot → press `Ctrl+Alt+I` → the image path is pasted into the current input field
-2. Copy files → press `Ctrl+Alt+F` → the file paths are pasted into the current input field
-3. Copy a multi-line command → press `Ctrl+Alt+J` → newlines are stripped and it's ready to execute
+You can customize the output format in settings. For example, set it to `Check this image: {path}` and `{path}` gets replaced with the actual file path every time.
 
-### GUI Settings
+## Sending Files to Claude
 
-**Left/right click the tray icon** → open the settings window
+Copy files in your file manager, press `Ctrl+Alt+F`, and all file paths land on your clipboard separated by newlines. Paste into Claude—one path per line.
 
-**Settings window features:**
+If you want to review the file list, remove unwanted items, or mix files with screenshots, use the Input Panel:
 
-1. **Hotkey management**
-   - View the existing hotkey list (shows action, key, and behavior config)
-   - Add new hotkeys
-   - Edit existing hotkeys (action, key, behavior config)
-   - Delete hotkeys
+1. Select files in your file manager, `Ctrl+C`
+2. Press `Ctrl+Alt+Space` to open the Input Panel
+3. `Ctrl+V` inside the panel—files appear as compact cards in the preview bar, each showing the system file icon and filename (long names get elided)
+4. Take screenshots, `Ctrl+V` more content—images and files mix freely
+5. Click × on any card you don't want
+6. Type your prompt, `Ctrl+Enter` to send
 
-2. **Output settings**
-   - Configure the global default output format (supports `{path}` placeholder)
-   - Configure a per-action output format; unconfigured actions fall back to the global format
-   - Choose save mode: desktop default path / custom path
-   - Graphically select a custom save directory
+The preview bar scrolls horizontally. Cards are 106 pixels wide, about 5 visible at once. Mouse wheel scrolls left/right. Each card tracks its position by property, so removing the first card re-indexes the rest correctly.
 
-3. **Default behavior config**
-   - Configure default behavior for newly added hotkeys
-   - Auto-paste
-   - Auto-submit
+## Stripping Newlines
 
-4. **Auto hot-reload after saving**
-   - No program restart required; hotkey config takes effect immediately
+Multi-line text copied from a terminal breaks formatting when pasted elsewhere:
 
----
-
-## Configuration
-
-The configuration file `config.json` is located in the same directory as the program:
-
-```json
-{
-  "hotkeys": [
-    {
-      "action": "clipboard_image_path",
-      "key": "ctrl+Alt+I",
-      "behavior": {
-        "auto_paste": true,
-        "auto_submit": false
-      }
-    },
-    {
-      "action": "strip_newlines",
-      "key": "ctrl+Alt+J",
-      "behavior": {
-        "auto_paste": true,
-        "auto_submit": false
-      }
-    },
-    {
-      "action": "clipboard_file_path",
-      "key": "ctrl+Alt+F",
-      "behavior": {
-        "auto_paste": true,
-        "auto_submit": false
-      }
-    }
-  ],
-  "default_behavior": {
-    "auto_paste": true,
-    "auto_submit": false
-  },
-  "output": {
-    "format": "{path}",
-    "formats": {
-      "clipboard_image_path": "Check this clipboard image {path}",
-      "clipboard_file_path": "Check this file {path}"
-    },
-    "mode": "workspace",
-    "dir": ""
-  }
-}
+```
+sudo apt update &&
+sudo apt upgrade -y &&
+sudo apt autoremove
 ```
 
-### Field Reference
+Press `Ctrl+Alt+J` and it becomes:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `hotkeys` | array | List of hotkey bindings |
-| `hotkeys[].action` | string | Action: `clipboard_image_path`, `clipboard_file_path`, or `strip_newlines` |
-| `hotkeys[].key` | string | Hotkey, separated by `+` (e.g. `ctrl+alt+i`) |
-| `hotkeys[].behavior` | object | Optional per-hotkey behavior |
-| `default_behavior` | object | Default behavior config |
-| `default_behavior.auto_paste` | bool | Whether to auto-paste after the action |
-| `default_behavior.auto_submit` | bool | Whether to auto-submit (use with caution) |
-| `output.format` | string | Global default output format; `{path}` is replaced with the path |
-| `output.formats` | object | Per-action output formats; falls back to `output.format` when not set |
-| `output.mode` | string | `workspace` (desktop) or `custom_path` (custom directory) |
-| `output.dir` | string | Save directory when `custom_path` mode is used |
+```
+sudo apt update && sudo apt upgrade -y && sudo apt autoremove
+```
 
----
+Paste it anywhere—no manual editing needed.
 
-## Branches
+You can also do this in the Input Panel. Paste text into the editor, check "Pin" to keep the window open, `Ctrl+Enter` to send, and the panel stays ready for the next batch.
 
-> **Important**: both versions have the same features; they differ only in tech stack
+## Sending Long Text
 
-| Branch | Tech Stack | Description | Recommended When |
-|--------|------------|-------------|------------------|
-| **qt** | Qt 6/5 | Cross-platform version (current) | You need macOS/Linux support |
-| **win32** | Win32 API | Native Windows version | You only need Windows and want something lighter |
+Sometimes you need to send Claude a lot of text—hundreds of lines of logs, a full config file, a large code block. Pasting it directly might overflow the input.
 
----
+Copy the text and press `Ctrl+Alt+L`. If it exceeds the threshold (500 characters by default), it auto-saves as a .txt file and the file path goes to your clipboard. Claude reads the file from the path.
 
-## Build Guide
+Adjust the threshold in settings. If your model supports longer inputs, raise it to 2000 or more. Set it to 0 to disable file-saving entirely—text always outputs directly.
 
-### Prerequisites
+This also works in the Input Panel. Check "Save long text as file", paste your text, type a prompt, and `Ctrl+Enter`. The output is a file path instead of raw text.
 
-- **Qt 5.15.2+** or **Qt 6**
-- **CMake 3.16+**
-- Platform compiler:
-  - Windows: Visual Studio 2019+ or MinGW
-  - macOS: Clang (Xcode Command Line Tools)
-  - Linux: GCC/Clang
+## The Input Panel
 
----
+The Input Panel is your staging area between the clipboard and Claude. Press `Ctrl+Alt+Space` to open a floating dark-themed window.
 
-### Windows Build
+**Preview Area**
 
-1. **Download Qt**
+A 26-pixel bar at the top. Content you paste appears as horizontal cards. Image cards show a thumbnail; file cards use the platform's native file icon. Each card has an × to dismiss.
 
-   Visit <https://www.qt.io/download> to install Qt
+Mouse wheel on the preview area scrolls horizontally—wheel events are explicitly redirected since there's no vertical scrollbar. Powered by Qt's native scrollbar, no custom implementation.
 
-   - **Recommended**: Qt 6.11.1 (LTS)
-   - Choose a version:
-     - `msvc2019_64` / `msvc2022_64` (for Visual Studio)
-     - `mingw_64` (for MinGW compiler)
+**Text Editor**
 
-2. **Configure Qt path**
+The large central text area. Supports IME input. `Ctrl+Enter` to send, `Ctrl+V` to paste into the preview area (images/files) or the editor itself (plain text). Placeholder text shows available shortcuts.
 
-   Edit `CMakeLists.txt` and add your Qt installation path (common paths are already configured by default):
+Typing doesn't clear the preview. Images, files, and your typed prompt coexist—on send, images and files come first, then your prompt.
 
-   ```cmake
-   list(APPEND CMAKE_PREFIX_PATH
-       # Change to your actual path
-       "C:/Qt/6.11.1/msvc2019_64"
-       "D:/tools/qt/6.11.1/mingw_64"
-   )
-   ```
+**Bottom Controls**
 
-3. **Build the project**
+Two checkboxes plus Cancel and Send buttons.
 
-   Option 1: MinGW (recommended)
-   ```bash
-   cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
-   cmake --build build -j8
-   ```
+Pin mode: the window stays open after sending, all inputs are cleared, and focus returns to the editor. Perfect for batch operations—screenshot, send, screenshot, send, without reopening the panel.
 
-   Option 2: Visual Studio
-   ```bash
-   mkdir build && cd build
-   cmake -G "Visual Studio 17 2022" -A x64 ..
-   cmake --build . --config Release
-   ```
+Save long text as file: text in the editor exceeding the threshold gets auto-saved as a .txt file.
 
-   After building, the executable is in `build/` (MinGW) or `build/Release/` (Visual Studio).
-   CMake will automatically run `windeployqt` to copy Qt DLLs to the output directory.
+## Monitor Mode
 
-4. **One-click build and package (recommended)**
+Right-click tray → Monitor Mode. Once enabled, you don't press anything.
 
-   The project includes one-click build/package scripts:
-   ```cmd
-   # Using batch script
-   scripts/package/build_and_package.bat
+Every time something hits the clipboard—a screenshot, copied files, copied text—ClipBridge detects the content type, matches it against the auto-trigger actions you selected in settings, runs them, and writes the result back to the clipboard.
 
-   # Or using PowerShell script
-   powershell -ExecutionPolicy Bypass -File scripts/package/build_and_package.ps1
-   ```
+For example, if you've checked "Copy Image Path" and "Strip Newlines": screenshots auto-generate paths, and multi-line text auto-cleans itself.
 
-5. **Package for release**
+Monitor mode automatically pauses when the Input Panel is open (to avoid processing clipboard changes you're making inside the panel) and resumes when it closes. The pause mechanism uses reference counting, so future components that also need to pause monitoring won't interfere with each other.
 
-   If you have already built manually and only want to package:
-   ```cmd
-   # Using batch script
-   scripts/package/package.bat
+## Settings
 
-   # Or using PowerShell script
-   powershell -ExecutionPolicy Bypass -File scripts/package/package.ps1
-   ```
+Right-click the tray icon → Settings. VSCode dark theme, left navigation, right content. All changes take effect immediately when you close the window.
 
-   The script creates a `ClipBridge_Qt` folder with all dependencies and a zip archive.
+**Shortcuts**
 
----
+Lists all current hotkeys: action name, key combination, auto-paste, auto-submit. Edit and delete buttons on each row. Add button at the bottom.
 
-### macOS Build
+When adding a hotkey, the action dropdown only shows unassigned actions—one action, one hotkey. If all four actions are already bound, pressing Add shows a warning.
+
+The key input uses a QKeySequenceEdit—click it and press your desired combination, no manual typing. Conflicts with existing hotkeys are caught and reported.
+
+The Input Panel shortcut gets its own setting at the bottom, with a reset button to clear it.
+
+**Output Format**
+
+Global default format and per-action overrides. `{path}` is the placeholder for image/file/text save paths, `{text}` for raw clipboard text.
+
+Save mode "workspace" uses the system temp directory (`%TEMP%/ClipBridge Images` or `ClipBridge Texts` on Windows), with auto-created folders. "Custom path" lets you pick any directory.
+
+Paste key supports `Ctrl+V` and `Shift+Insert`. Paste delay controls how many milliseconds to wait before restoring the original clipboard content after an auto-paste.
+
+**Monitor Mode**
+
+Toggle and auto-trigger action checkboxes. Long text threshold via a slider, 0 to 10000 range. At 0 the slider label shows "Disabled".
+
+**General**
+
+Language switch (Chinese/English), takes effect on next settings window open. Auto-start checkbox: writes to Registry on Windows, LaunchAgent on macOS, autostart file on Linux. Window opacity slider, range 50% to 100%—the lower bound prevents making the window invisible.
+
+## Install and Build
+
+Download pre-built binaries from [Releases](https://github.com/xtr-hub/ClipBridge/releases), extract, and run.
+
+To build from source, you need Qt 5.15+ or Qt 6, and CMake 3.16+:
 
 ```bash
-# Install Qt
-brew install qt@5
+# Windows (MinGW)
+cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j8
 
-# Build
+# macOS
+brew install qt@5
 mkdir build && cd build
 cmake .. -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@5
 cmake --build . --config Release
-```
 
-**Package**
-
-```bash
-./scripts/package/package_macos.sh
-```
-
-The script creates `ClipBridge.app` and `ClipBridge_macOS_<version>.zip`.
-
-**Note**: on first run, add the program to "System Preferences → Security & Privacy → Accessibility".
-
----
-
-### Linux Build
-
-```bash
-# Install dependencies
+# Linux
 sudo apt install qtbase5-dev libx11-dev libxtst-dev
-
-# Build
 mkdir build && cd build
-cmake ..
-cmake --build . --config Release
+cmake .. && cmake --build . --config Release
 ```
 
----
+Running tests:
 
-## Platform Support
+```bash
+cmake -B build -DBUILD_TESTS=ON
+cmake --build build -j8
+ctest --test-dir build --output-on-failure
+```
 
-| Platform | Hotkeys | Paste | Notes |
-|----------|---------|-------|-------|
-| Windows | ✅ | ✅ | Full support |
-| Linux X11 | ✅ | ✅ | Requires X11 |
-| macOS | ✅ | ✅ | Requires Accessibility permission |
+## Default Hotkeys
 
----
+| Hotkey | Action | Result |
+|--------|--------|--------|
+| `Ctrl+Alt+I` | Copy Image Path | Clipboard image → saved PNG → path on clipboard |
+| `Ctrl+Alt+F` | Copy File Path | Clipboard files → path list on clipboard |
+| `Ctrl+Alt+J` | Strip Newlines | Multi-line text → single line |
+| `Ctrl+Alt+Space` | Input Panel | Open preview/edit window |
+| unset | Long Text to File | Bind in settings or trigger via Input Panel |
 
-## Project Structure
-
-See [Project Structure](docs/STRUCTURE.md).
-
----
+All hotkeys are customizable. One action per hotkey, no conflicts.
 
 ## FAQ
 
-### Q: How do I find my Qt path?
+**Do the Input Panel and Monitor Mode conflict?**
+No. Monitor pauses when the panel opens, resumes when it closes.
 
-A: Qt is installed by default at:
-- Windows: `C:/Qt/` or `D:/Qt/`
-- macOS: `/usr/local/opt/qt@5`
-- Linux: `/usr/include/qt5`
+**Can one action have multiple hotkeys?**
+No. One-to-one mapping ensures one key does one thing.
 
-You can also check "Tools → Options → Kits" in Qt Creator.
+**What threshold should I use for long text?**
+Default is 500 characters. Raise it for models with larger context windows. Set to 0 to disable file-saving entirely.
 
-### Q: Compilation error "Qt requires a C++17 compiler"
+**Where are images saved?**
+Default is the `ClipBridge Images` folder in your system temp directory. Change it in Settings → Output Format.
 
-A: Add the following to CMakeLists.txt:
+**What if a hotkey conflicts with other software?**
+Change it in Settings. Click the key input and press your new combination.
 
-```cmake
-if(MSVC)
-    add_compile_options(/Zc:__cplusplus)
-endif()
-```
+**Global hotkeys don't work on Linux?**
+X11 is required. Wayland support depends on your compositor—X11 is recommended.
 
-### Q: Compilation warning "The source file contains characters that cannot be represented in the current code page"
-
-A: Add the following to CMakeLists.txt:
-
-```cmake
-if(MSVC)
-    add_compile_options(/utf-8)
-endif()
-```
-
-### Q: Hotkeys don't work on macOS
-
-A: Open "System Preferences → Security & Privacy → Accessibility", add and check ClipBridge.
-
-### Q: How do I customize hotkeys?
-
-A: Two ways:
-1. **Recommended: use the GUI settings window (click tray icon → open settings)**
-2. Manually edit the `config.json` file
-
----
-
-## Contributing
-
-Issues and Pull Requests are welcome!
-
-Please read the [Contributing Guide](docs/CONTRIBUTING_EN.md) before contributing.
-
-Thanks to everyone who has contributed to ClipBridge!
-
----
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
+**What permissions does macOS need?**
+Accessibility permission, prompted on first launch. Grant it in System Settings → Privacy & Security → Accessibility.

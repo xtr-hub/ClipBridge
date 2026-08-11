@@ -91,9 +91,12 @@ set(SOURCES
     src/main.cpp
     src/core/ActionManager.cpp
     src/core/AppConfig.cpp
+    src/core/MonitorService.cpp
+    src/core/AutoStart.cpp
     src/ui/TrayIcon.cpp
     src/ui/SettingsDialog.cpp
     src/ui/HotkeyEditDialog.cpp
+    src/ui/InputPanel.cpp
     src/utils/ClipboardHelper.cpp
     src/utils/Hotkey.cpp
     src/utils/Simulator.cpp
@@ -102,9 +105,12 @@ set(SOURCES
 set(HEADERS
     src/core/ActionManager.h
     src/core/AppConfig.h
+    src/core/MonitorService.h
+    src/core/AutoStart.h
     src/ui/TrayIcon.h
     src/ui/SettingsDialog.h
     src/ui/HotkeyEditDialog.h
+    src/ui/InputPanel.h
     src/utils/ClipboardHelper.h
     src/utils/Hotkey.h
     src/utils/Simulator.h
@@ -179,5 +185,89 @@ if(WIN32)
         )
     else()
         message(WARNING "windeployqt not found - you'll need to manually copy Qt DLLs")
+    endif()
+endif()
+
+# =============================================
+# Tests
+# =============================================
+option(BUILD_TESTS "Build unit tests" ON)
+
+if(BUILD_TESTS)
+    enable_testing()
+
+    if(QT_VERSION_MAJOR EQUAL 6)
+        find_package(Qt6 REQUIRED COMPONENTS Test)
+    else()
+        find_package(Qt5 REQUIRED COMPONENTS Test)
+    endif()
+
+    set(TEST_INC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/core
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/utils
+    )
+
+    # ---- TestAppConfig ----
+    add_executable(TestAppConfig
+        tests/TestAppConfig.cpp
+        src/core/AppConfig.cpp
+    )
+    target_include_directories(TestAppConfig PRIVATE ${TEST_INC})
+    target_link_libraries(TestAppConfig PRIVATE
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Test
+    )
+    add_test(NAME TestAppConfig COMMAND TestAppConfig)
+
+    # ---- TestActionManager ----
+    add_executable(TestActionManager
+        tests/TestActionManager.cpp
+        src/core/ActionManager.cpp
+        src/core/AppConfig.cpp
+        src/utils/ClipboardHelper.cpp
+        src/utils/Simulator.cpp
+    )
+    target_include_directories(TestActionManager PRIVATE ${TEST_INC})
+    target_link_libraries(TestActionManager PRIVATE
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Test
+    )
+    add_test(NAME TestActionManager COMMAND TestActionManager)
+
+    # ---- TestClipboardHelper ----
+    add_executable(TestClipboardHelper
+        tests/TestClipboardHelper.cpp
+        src/utils/ClipboardHelper.cpp
+    )
+    target_include_directories(TestClipboardHelper PRIVATE ${TEST_INC})
+    target_link_libraries(TestClipboardHelper PRIVATE
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Test
+    )
+    add_test(NAME TestClipboardHelper COMMAND TestClipboardHelper)
+
+    # Add Qt bin dir to PATH so test executables find DLLs
+    if(QT_VERSION_MAJOR EQUAL 6)
+        get_target_property(_qt_core_loc Qt6::Core LOCATION)
+    else()
+        get_target_property(_qt_core_loc Qt5::Core LOCATION)
+    endif()
+    get_filename_component(_qt_bin_dir "${_qt_core_loc}" DIRECTORY)
+    if(WIN32)
+        set_property(TEST TestAppConfig TestActionManager TestClipboardHelper
+            APPEND PROPERTY ENVIRONMENT "PATH=${_qt_bin_dir}\;$ENV{PATH}")
+    elseif(APPLE)
+        set_property(TEST TestAppConfig TestActionManager TestClipboardHelper
+            APPEND PROPERTY ENVIRONMENT "DYLD_LIBRARY_PATH=${_qt_bin_dir}")
+    elseif(UNIX)
+        set_property(TEST TestAppConfig TestActionManager TestClipboardHelper
+            APPEND PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${_qt_bin_dir}")
     endif()
 endif()

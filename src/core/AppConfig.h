@@ -11,63 +11,72 @@
 #include <QVector>
 #include <QKeySequence>
 #include <QHash>
+#include <QSet>
+#include <QJsonObject>
+#include <QJsonArray>
 
 namespace ClipBridge {
 
-/**
- * @brief 应用程序配置结构
- */
 struct AppConfig
 {
-    /**
-     * @brief 行为配置
-     */
     struct Behavior
     {
-        bool autoPaste = true;   ///< 是否自动粘贴
-        bool autoSubmit = false; ///< 是否自动提交
+        bool autoPaste = true;
+        bool autoSubmit = false;
     };
 
-    /**
-     * @brief 热键绑定结构
-     */
     struct HotKeyBinding
     {
-        QString action;             ///< 动作名称
-        QKeySequence keySequence;   ///< 按键序列
-        Behavior behavior;          ///< 该热键的行为配置
+        QString action;
+        QKeySequence keySequence;
+        Behavior behavior;
     };
 
-    /**
-     * @brief 输出配置
-     */
     struct Output
     {
-        QString format = "{path}";                  ///< 输出格式模板
-        QHash<QString, QString> formats;           ///< 按动作的输出格式模板
-        QString mode = "workspace";                 ///< 路径模式: workspace/custom_path
-        QString dir;                                ///< 自定义目录
-        QString pasteKey = "Ctrl+V";               ///< 粘贴快捷键
-        int pasteDelay = 100;                       ///< 粘贴后等待时间 (ms)，确保目标窗口读完剪贴板
+        QString format = "{path}";
+        QHash<QString, QString> formats;
+        QString mode = "workspace";
+        QString dir;
+        QString pasteKey = "Ctrl+V";
+        int pasteDelay = 100;
     };
 
-    QVector<HotKeyBinding> hotkeys;  ///< 热键列表
-    Behavior defaultBehavior;        ///< 默认行为配置（用于新添加的热键）
-    Output output;                   ///< 输出配置
-    QString language = "zh_CN";      ///< 界面语言，如 zh_CN, en_US
+    struct MonitorConfig
+    {
+        bool enabled = false;
+        QSet<QString> autoActions;
+        int longTextThreshold = 500;
+        bool showNotification = true;
+    };
 
-    /**
-     * @brief 从文件加载配置
-     * @param path 配置文件路径
-     * @return 配置对象
-     */
+    struct InputPanelConfig
+    {
+        bool alwaysOnTop = true;
+        bool saveLongTextAsFile = false;
+        int windowOpacity = 95;
+    };
+
+    QVector<HotKeyBinding> hotkeys;
+    Behavior defaultBehavior;
+    Output output;
+    MonitorConfig monitor;
+    InputPanelConfig inputPanel;
+    QKeySequence inputPanelHotkey;
+    QString language = "zh_CN";
+    bool autoStart = false;
+
     static AppConfig load(const QString &path);
-
-    /**
-     * @brief 保存配置到文件
-     * @param path 配置文件路径
-     */
     void save(const QString &path) const;
+
+    static QStringList availableActions();
+    static QString actionDisplayName(const QString &action);
+
+private:
+    static QJsonObject saveBehavior(const Behavior &b);
+    static Behavior loadBehavior(const QJsonObject &obj, const Behavior &defaultValue);
+    static QSet<QString> jsonArrayToSet(const QJsonArray &arr);
+    static QJsonArray setToJsonArray(const QSet<QString> &s);
 };
 
 } // namespace ClipBridge

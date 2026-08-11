@@ -1,335 +1,192 @@
-<div align="center">
-  <img src="resources/icon.png" alt="logo" width="200" height="200">
+# ClipBridge
 
-  # ClipBridge
-
-  跨平台快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅
-
-  <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat&logo=github" alt="License"></a>
-    <a href="#平台支持"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat" alt="Platform"></a>
-    <a href="https://github.com/xtr-hub/ClipBridge/releases"><img src="https://img.shields.io/badge/Download-Releases-green.svg?style=flat&logo=github" alt="Releases"></a>
-  </div>
-</div>
+在终端里用 Claude，最烦的就是没法直接发图片和文件——你得手动保存、找路径、复制、再粘贴回终端。ClipBridge 让你截完图按个快捷键，路径就已经在剪贴板了，切回 Claude 粘贴就完事。
 
 [中文](README.md) | [English](README_EN.md)
 
-## 能干什么
+## 发截图给 Claude
 
-- TUI 发图神器：截图 → 按快捷键 → 自动保存图片 → 自动粘贴路径 → 直接发送
-- 一键复制文件路径：复制文件 → 按快捷键 → 自动粘贴文件路径列表
-- 一键去除换行符：从终端复制多行命令，自动清理换行，即贴即用
-- 自定义输出格式：支持 `{path}` 占位符，每个动作可配置不同文案
-- 图形化热键管理：添加/编辑/删除热键，每个热键独立配置自动粘贴和自动提交
-- 自动热重载：保存配置后立即生效，无需重启
-- 跨平台支持：Windows / macOS / Linux
+最常用的场景。你截了一张图想让 Claude 分析，不用打开文件管理器、不用手动复制路径：
 
-## 快速开始
+**方式一：直接用快捷键**
 
-### 下载运行
+截图后按 `Ctrl+Alt+I`，图片自动保存为 PNG，文件路径写入剪贴板。切回 Claude 直接 `Ctrl+V` 粘贴，路径就在输入框里了。
 
-1. 从 [Releases](https://github.com/xtr-hub/ClipBridge/releases) 下载预编译版本
-2. 或者从源码构建（见下方）
-3. 运行程序，系统托盘出现 ClipBridge 图标
+**方式二：用输入面板预览确认**
 
-### 基本使用
+截图后按 `Ctrl+Alt+Space` 打开输入面板。如果剪贴板里有图片，面板上方的预览区会显示缩略图条——左侧是缩略图，中间显示尺寸（比如 1920x1080），右侧有个 × 按钮可以去掉。确认没问题后，在下方输入框补充提示词，比如"分析这张截图里的错误信息"，然后 `Ctrl+Enter`。提示词和图片路径会拼在一起写入剪贴板，切回 Claude 粘贴就行。
 
-1. 截图 → 按 `Ctrl+Alt+I` → 图片路径自动粘贴到当前输入框
-2. 复制文件 → 按 `Ctrl+Alt+F` → 文件路径自动粘贴到当前输入框
-3. 复制多行命令 → 按 `Ctrl+Alt+J` → 换行符已清理，可以直接执行
+输出格式可以在设置里自定义。比如你想让 Claude 知道这是一张需要分析的图，可以把格式配成 `请查看这张图片 {path}`，每次发送时 `{path}` 会被替换成实际路径。
 
-### 图形界面设置
+## 发文件给 Claude
 
-**左键/右键点击托盘图标** → 打开设置界面
+在文件管理器里复制文件后，按 `Ctrl+Alt+F`，所有文件路径以换行分隔写入剪贴板。粘贴到 Claude 里就是一行一个路径。
 
-**设置界面功能：**
+如果想在发送前看看有哪些文件、去掉不需要的，或者同时发图片和文件，用输入面板：
 
-1. **快捷键管理**
-   - 查看现有热键列表（显示动作、按键、行为配置）
-   - 添加新热键
-   - 编辑现有热键（修改动作、按键、行为配置）
-   - 删除热键
+1. 在文件管理器里选中文件，`Ctrl+C` 复制
+2. 按 `Ctrl+Alt+Space` 打开输入面板
+3. 在输入框里 `Ctrl+V`，文件以缩略条形式出现在预览区——每条显示系统文件图标和文件名，文件名太长会自动省略中间部分
+4. 继续截图、继续 `Ctrl+V` 粘贴更多内容，图片和文件可以混搭
+5. 不需要的条目点 × 移除
+6. 输入提示词，`Ctrl+Enter` 发送
 
-2. **输出设置**
-   - 配置全局默认输出格式（支持 `{path}` 占位符）
-   - 为每个动作配置专属输出格式，未配置时自动回退到全局格式
-   - 选择保存模式：桌面默认路径 / 自定义路径
-   - 图形化选择自定义保存目录
+预览区水平排列，一条 106 像素宽，大概能常驻看到 5 条。多了就出水平滚动条，鼠标滚轮直接左右翻。每个条目用属性跟踪索引，关闭时重新编号，不会出现删第一个条目后面全乱的问题。
 
-3. **默认行为配置**
-   - 配置新添加热键的默认行为
-   - 自动粘贴
-   - 自动提交
+## 清理换行符
 
-4. **保存后自动热重载**
-   - 无需重启程序，热键配置立即生效
+在终端里复制多行命令，比如：
 
----
-
-## 配置说明
-
-配置文件 `config.json` 在程序同目录下，格式如下：
-
-```json
-{
-  "hotkeys": [
-    {
-      "action": "clipboard_image_path",
-      "key": "ctrl+Alt+I",
-      "behavior": {
-        "auto_paste": true,
-        "auto_submit": false
-      }
-    },
-    {
-      "action": "strip_newlines",
-      "key": "ctrl+Alt+J",
-      "behavior": {
-        "auto_paste": true,
-        "auto_submit": false
-      }
-    },
-    {
-      "action": "clipboard_file_path",
-      "key": "ctrl+Alt+F",
-      "behavior": {
-        "auto_paste": true,
-        "auto_submit": false
-      }
-    }
-  ],
-  "default_behavior": {
-    "auto_paste": true,
-    "auto_submit": false
-  },
-  "output": {
-    "format": "{path}",
-    "formats": {
-      "clipboard_image_path": "请查看这张剪贴板图片分析内容\n{path}",
-      "clipboard_file_path": "请查看这个文件\n{path}"
-    },
-    "mode": "workspace",
-    "dir": ""
-  }
-}
+```
+sudo apt update &&
+sudo apt upgrade -y &&
+sudo apt autoremove
 ```
 
-### 字段详解
+按 `Ctrl+Alt+J`，换行符全去掉，变成一行：
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `hotkeys` | array | 快捷键绑定列表 |
-| `hotkeys[].action` | string | 动作：`clipboard_image_path`、`clipboard_file_path` 或 `strip_newlines` |
-| `hotkeys[].key` | string | 快捷键，用 `+` 分隔（如 `ctrl+alt+i`） |
-| `hotkeys[].behavior` | object | 可选，该热键的独立行为 |
-| `default_behavior` | object | 默认行为配置 |
-| `default_behavior.auto_paste` | bool | 执行动作后是否自动粘贴 |
-| `default_behavior.auto_submit` | bool | 是否自动提交（慎用） |
-| `output.format` | string | 全局默认输出格式，`{path}` 会被替换为路径 |
-| `output.formats` | object | 按动作的专属输出格式，未配置时回退到 `output.format` |
-| `output.mode` | string | `workspace`（桌面）或 `custom_path`（自定义） |
-| `output.dir` | string | `custom_path` 模式下的保存目录 |
+```
+sudo apt update && sudo apt upgrade -y && sudo apt autoremove
+```
 
----
+直接粘贴到需要的地方，不用手动删换行。
 
-## 分支说明
+你也可以在输入面板里做这件事——把文本贴进输入框，勾上钉住，`Ctrl+Enter` 发送，窗口不关，下一段继续贴。
 
-> **重要**：两个版本功能一致，区别在于技术栈
+## 发长文本
 
-| 分支 | 技术栈 | 描述 | 推荐场景 |
-|------|--------|------|---------|
-| **qt** | Qt 6/5 | 跨平台版本（当前） | 需要 macOS/Linux 支持 |
-| **win32** | Win32 API | Windows 原生版本 | 只需要 Windows，想要更轻量 |
+有时候你需要发给 Claude 的文本很长——几百行的日志、完整的配置文件、大段的代码。直接粘贴会撑爆输入框。这种情况下：
 
----
+复制长文本后按 `Ctrl+Alt+L`。如果文本超过阈值（默认 500 字符），会自动保存为 .txt 文件，把文件路径写入剪贴板。Claude 收到路径后会自己读取文件内容。
 
-## 构建指南
+阈值在设置里调。如果你的对话模型支持较长输入，可以调高到 2000 或更多。设成 0 就禁用这个功能，永远直接输出文本。
 
-### 前置要求
+输入面板里也有这个功能。勾上「长文本存为文件」，在输入框里贴长文本、写提示词、`Ctrl+Enter`，输出会自动变成路径而非原文。
 
-- **Qt 5.15.2+** 或 **Qt 6**
-- **CMake 3.16+**
-- 平台编译器：
-  - Windows: Visual Studio 2019+ 或 MinGW
-  - macOS: Clang (Xcode Command Line Tools)
-  - Linux: GCC/Clang
+## 输入面板
 
----
+输入面板是你和 Claude 之间的中转站。`Ctrl+Alt+Space` 打开，一个深色浮动窗口
 
-### Windows 构建
+**预览区**
 
-1. **下载 Qt**
+在窗口最上方。你粘贴进来的图片和文件会变成缩略卡片，水平排列。图片卡片能看见缩略图，文件卡片用系统原生图标。卡片可以关闭。
 
-   访问 <https://www.qt.io/download> 安装 Qt
+**文本输入区**
 
-   - **推荐**：Qt 6.11.1 (LTS)
-   - 选择版本：
-     - `msvc2019_64` / `msvc2022_64`（配合 Visual Studio）
-     - `mingw_64`（配合 MinGW 编译器）
+窗口中间的大框。支持中文输入，`Ctrl+Enter` 发送，`Ctrl+V` 粘贴内容到预览区（图片和文件）或者文本框（纯文本）。有 placeholder 提示告诉你快捷键。
 
-2. **配置 Qt 路径**
+输入框不会因为你打字就清掉预览——图片文件和文字可以共存，拼接时图片和文件在前，你的提示词在后。
 
-   编辑 `CMakeLists.txt`，添加你的 Qt 安装路径（默认已配置常见路径）：
+**底部控制栏**
 
-   ```cmake
-   list(APPEND CMAKE_PREFIX_PATH
-       # 改为你的实际路径
-       "C:/Qt/6.11.1/msvc2019_64"
-       "D:/tools/qt/6.11.1/mingw_64"
-   )
-   ```
+两个复选框 + 取消/发送按钮。
 
-3. **构建项目**
+钉住模式：勾上后点发送，窗口不关，输入框清空，预览区清空，光标自动回到输入框。适合需要连续发好几轮的场景——截一张图发一次，截一个文件发一次，窗口始终在那里。
 
-   方式一：使用 MinGW（推荐）
-   ```bash
-   cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
-   cmake --build build -j8
-   ```
+长文本存文件：勾上后，输入框里的文本如果超过阈值，自动存为文件。不勾的话文本直接输出。
 
-   方式二：使用 Visual Studio
-   ```bash
-   mkdir build && cd build
-   cmake -G "Visual Studio 17 2022" -A x64 ..
-   cmake --build . --config Release
-   ```
+## 监听模式
 
-   构建完成后，可执行文件在 `build/`（MinGW）或 `build/Release/`（Visual Studio）目录。
-   CMake 会自动运行 `windeployqt` 复制 Qt DLL 到输出目录。
+右键托盘 → 监听模式。打开后会有提示，之后你什么都不用按。
 
-4. **一键构建打包（推荐）**
+每当你往剪贴板里放东西——截图也好、复制文件也好、复制文本也好——ClipBridge 会检测类型，匹配你在设置里勾选的自动动作，执行，把结果写回剪贴板。
 
-   项目包含一键构建打包脚本，一行命令搞定：
-   ```cmd
-   # 使用批处理脚本
-   scripts/package/build_and_package.bat
+比如你勾了"复制图片路径"和"去除换行符"：截图后图片路径自动就位，复制多行文本后换行符自动清除。
 
-   # 或使用 PowerShell 脚本
-   powershell -ExecutionPolicy Bypass -File scripts/package/build_and_package.ps1
-   ```
+输入面板打开时监听自动暂停，避免你在面板里操作剪贴板的时候触发不必要的处理。面板关闭后恢复。这个暂停是引用计数的，如果以后有其他组件也需要暂停监听，不会互相干扰。
 
-5. **打包发布**
+## 设置
 
-   如果你已经手动构建过，只想打包，运行：
-   ```cmd
-   # 使用批处理脚本
-   scripts/package/package.bat
+右键托盘图标 → 设置。VSCode 深色风格，左侧导航右侧内容。所有修改即时生效，关闭窗口就保存。
 
-   # 或使用 PowerShell 脚本
-   powershell -ExecutionPolicy Bypass -File scripts/package/package.ps1
-   ```
+**快捷键管理**
 
-   脚本会创建包含所有依赖的 `ClipBridge_Qt` 文件夹和 zip 压缩包。
+列出当前所有热键：动作名称、快捷键组合、是否自动粘贴、是否自动提交。每行右侧有编辑和删除按钮。底部有添加按钮。
 
----
+添加时下拉框只显示还没被绑定的动作——一个动作只对应一个快捷键。如果所有四个动作都已经绑了快捷键，添加按钮按下会提示"所有动作已分配"。
 
-### macOS 构建
+快捷键输入框用的是 QKeySequenceEdit，点击后直接按想要的组合键即可，不用手动输入文字。如果输入的快捷键已经被占用，会提示冲突。
+
+底部还有输入面板的快捷键设置，同样支持点击后按键录入。重置按钮可以清空恢复默认。
+
+**输出格式**
+
+全局默认格式和按动作的专属格式。占位符 `{path}` 代表图片/文件/长文本的存储路径，`{text}` 代表原始文本。
+
+保存模式选"工作区"就用系统临时目录（Windows 上是 `%TEMP%/ClipBridge Images` 或 `ClipBridge Texts`），会自动创建文件夹。选"自定义"可以指定任意目录。
+
+粘贴快捷键支持 `Ctrl+V` 和 `Shift+Insert` 两种选择。粘贴延迟是指自动粘贴后等多少毫秒再恢复原剪贴板内容（避免后续操作覆盖掉）。
+
+**监听模式**
+
+开关和自动触发动作的勾选列表。长文本阈值用滑条选择，0 到 10000 的范围，调到 0 时滑条标签显示"禁用"。
+
+**通用设置**
+
+语言切换（中文/英文），重新打开设置窗口生效。开机自启勾选框，Windows 下写注册表、macOS 下写 LaunchAgent、Linux 下写 autostart 文件。窗口透明度滑条，范围 50% 到 100%，防止设太低看不见。
+
+## 安装和构建
+
+从 [Releases](https://github.com/xtr-hub/ClipBridge/releases) 下载预编译版本，解压运行即可。
+
+如果要自己构建，需要 Qt 5.15+ 或 Qt 6，CMake 3.16+：
 
 ```bash
-# 安装 Qt
-brew install qt@5
+# Windows (MinGW)
+cmake -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j8
 
-# 构建
+# macOS
+brew install qt@5
 mkdir build && cd build
 cmake .. -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@5
 cmake --build . --config Release
-```
 
-**打包**
-
-```bash
-./scripts/package/package_macos.sh
-```
-
-脚本会创建 `ClipBridge.app` 和 `ClipBridge_macOS_<版本>.zip`。
-
-**注意**：首次运行需要在"系统偏好设置 → 安全性与隐私 → 辅助功能"中添加程序。
-
----
-
-### Linux 构建
-
-```bash
-# 安装依赖
+# Linux
 sudo apt install qtbase5-dev libx11-dev libxtst-dev
-
-# 构建
 mkdir build && cd build
-cmake ..
-cmake --build . --config Release
+cmake .. && cmake --build . --config Release
 ```
 
----
+运行测试：
 
-## 平台支持
+```bash
+cmake -B build -DBUILD_TESTS=ON
+cmake --build build -j8
+ctest --test-dir build --output-on-failure
+```
 
-| 平台 | 热键 | 粘贴 | 说明 |
-|------|------|------|------|
-| Windows | ✅ | ✅ | 完整支持 |
-| Linux X11 | ✅ | ✅ | 需要 X11 |
-| macOS | ✅ | ✅ | 需要辅助功能权限 |
+## 默认快捷键一览
 
----
+| 快捷键 | 动作 | 效果 |
+| -------- | ------ | ------ |
+| `Ctrl+Alt+I` | 复制图片路径 | 剪贴板图片保存为 PNG，输出路径 |
+| `Ctrl+Alt+F` | 复制文件路径 | 剪贴板文件输出路径列表 |
+| `Ctrl+Alt+J` | 去除换行符 | 多行文本合并为一行 |
+| `Ctrl+Alt+Space` | 输入面板 | 打开预览编辑窗口 |
+| 无 | 长文本转文件 | 需手动在设置里绑定快捷键或通过输入面板触发 |
 
-## 项目结构
-
-详见 [项目结构](docs/STRUCTURE.md)。
-
----
+所有快捷键在设置里可以改。每个动作只能绑一个键，不冲突。
 
 ## 常见问题
 
-### Q: Qt 路径怎么找？
+**输入面板和监听模式冲突吗？**
+不冲突。面板打开时监听自动暂停，关闭后恢复。
 
-A: Qt 默认安装在：
-- Windows: `C:/Qt/` 或 `D:/Qt/`
-- macOS: `/usr/local/opt/qt@5`
-- Linux: `/usr/include/qt5`
+**一个快捷键能绑多个动作吗？**
+不能，一对一。这样可以确保按一个键只发生一件事。
 
-可以在 Qt Creator 的"工具 → 选项 → Kits"里查看。
+**长文本阈值设多少合适？**
+默认 500 字符。你的对话模型如果上下文窗口大，可以设高一些比如 2000。如果不想自动转文件，设成 0 就行了。
 
-### Q: 编译错误 "Qt requires a C++17 compiler"
+**图片保存在哪里？**
+默认在系统临时目录下的 `ClipBridge Images` 文件夹。可以在设置 → 输出格式 → 保存模式里改成自定义目录。
 
-A: 在 CMakeLists.txt 中添加：
+**快捷键和其他软件冲突怎么办？**
+去设置里改。点击快捷键输入框，直接按新的组合键即可。
 
-```cmake
-if(MSVC)
-    add_compile_options(/Zc:__cplusplus)
-endif()
-```
+**Linux 下全局热键不生效？**
+需要 X11 环境。Wayland 下全局热键支持取决于合成器实现，推荐在 X11 下使用。
 
-### Q: 编译警告 "该文件包含不能在当前代码页中表示的字符"
-
-A: 在 CMakeLists.txt 中添加：
-
-```cmake
-if(MSVC)
-    add_compile_options(/utf-8)
-endif()
-```
-
-### Q: macOS 上热键不工作
-
-A: 打开"系统偏好设置 → 安全性与隐私 → 辅助功能"，添加并勾选 ClipBridge。
-
-### Q: 想要自定义热键？
-
-A: 两种方式：
-1. **推荐：使用图形设置界面（点击托盘图标 → 打开设置）
-2. 手动编辑 `config.json` 文件
-
----
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-贡献前请阅读 [贡献指南](docs/CONTRIBUTING.md)。
-
-感谢所有为 ClipBridge 做出贡献的人！
-
----
-
-## 许可证
-
-本项目采用 MIT 许可证，详见 LICENSE 文件。
+**macOS 下需要什么权限？**
+首次运行会提示需要辅助功能权限，在系统设置 → 隐私与安全性 → 辅助功能里授权即可。

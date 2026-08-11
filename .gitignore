@@ -16,6 +16,7 @@ ARM64/
 [Oo]bj/
 out/
 build/
+build_test/
 
 # Project-local build outputs
 ClipVision/Debug/
