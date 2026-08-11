@@ -1,8 +1,20 @@
-# ClipBridge
+<div align="center">
+  <img src="resources/icon.png" alt="logo" width="200" height="200">
 
-在终端里用 Claude，最烦的就是没法直接发图片和文件——你得手动保存、找路径、复制、再粘贴回终端。ClipBridge 让你截完图按个快捷键，路径就已经在剪贴板了，切回 Claude 粘贴就完事。
+  # ClipBridge
+
+  跨平台快捷键工具，让 Claude TUI / Claude Code 的剪贴板交互更顺畅
+
+  <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat&logo=github" alt="License"></a>
+    <a href="#平台支持"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat" alt="Platform"></a>
+    <a href="https://github.com/xtr-hub/ClipBridge/releases"><img src="https://img.shields.io/badge/Download-Releases-green.svg?style=flat&logo=github" alt="Releases"></a>
+  </div>
+</div>
 
 [中文](README.md) | [English](README_EN.md)
+
+在终端里用 Claude，最烦的就是没法直接发图片和文件——你得手动保存、找路径、复制、再粘贴回终端。ClipBridge 让你截完图按个快捷键，路径就已经在剪贴板了，切回 Claude 粘贴就完事。
 
 ## 发截图给 Claude
 

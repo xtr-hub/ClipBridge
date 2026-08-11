@@ -1,8 +1,20 @@
-# ClipBridge
+<div align="center">
+  <img src="resources/icon.png" alt="logo" width="200" height="200">
 
-Using Claude in a terminal is great—until you need to send an image or a file. You end up saving it, finding the path, copying, pasting back into the terminal. ClipBridge handles this in one hotkey: screenshot, press, paste the path into Claude.
+  # ClipBridge
+
+  Cross-platform hotkey utility for smoother Claude TUI / Claude Code clipboard interactions
+
+  <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat&logo=github" alt="License"></a>
+    <a href="#platform-support"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat" alt="Platform"></a>
+    <a href="https://github.com/xtr-hub/ClipBridge/releases"><img src="https://img.shields.io/badge/Download-Releases-green.svg?style=flat&logo=github" alt="Releases"></a>
+  </div>
+</div>
 
 English | [中文](README.md)
+
+Using Claude in a terminal is great—until you need to send an image or a file. You end up saving it, finding the path, copying, pasting back into the terminal. ClipBridge handles this in one hotkey: screenshot, press, paste the path into Claude.
 
 ## Sending Screenshots to Claude
 
