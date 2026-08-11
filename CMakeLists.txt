@@ -237,6 +237,12 @@ if(BUILD_TESTS)
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Test
     )
+    if(APPLE)
+        find_library(APP_SERVICES ApplicationServices)
+        if(APP_SERVICES)
+            target_link_libraries(TestActionManager PRIVATE ${APP_SERVICES})
+        endif()
+    endif()
     add_test(NAME TestActionManager COMMAND TestActionManager)
 
     # ---- TestClipboardHelper ----
